@@ -1,3 +1,7 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Laboratorio de puesta a tierra</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
@@ -105,6 +109,17 @@ td.dim{color:var(--muted);font-family:var(--mono);text-align:right}
 .next{background:var(--ink);color:var(--bg);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:6px}
 .next h3{color:var(--bg)} .next p{color:var(--bg);opacity:.85;font-size:14px}
 footer{font-size:12px;color:var(--soft);border-top:1px solid var(--line);padding-top:12px}
+.tipo{background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.tipo-top{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.tipo-desc{font-size:14px;max-width:84ch}
+.tipo .formula{font-size:14px}
+.tipo-chip{flex:none;margin-left:auto;font:700 12px var(--sans);padding:6px 12px;border-radius:999px;background:var(--accent);color:var(--on-accent);white-space:nowrap;align-self:center}
+.cfg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px}
+.cfg-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.cfg-head label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.cfg .big{font-size:22px}
+.cfg.off{opacity:.55}
+.sketch{width:100%;max-width:260px;display:block}
 @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
 html{scroll-behavior:smooth}
 .tabpanel{display:flex;flex-direction:column;gap:20px}
@@ -132,13 +147,32 @@ input[type=range]:disabled{opacity:.4}
 <header>
   <p class="eyebrow">PRO001 · Unidad 3 · Mallas de tierra</p>
   <h1>Laboratorio de puesta a tierra</h1>
-  <p class="lead">Del terreno a la malla verificada: mide y modela la resistividad, obtén ρ equivalente y con ese valor dimensiona el conductor, calcula la resistencia de la malla y verifica las tensiones de contacto y de paso.</p>
+  <p class="lead">Del terreno al electrodo verificado: mide y modela la resistividad, obtén ρ equivalente, dimensiona la malla y verifica las tensiones de contacto y de paso. Compara barra, barras en línea, triángulo, malla y malla con barras con el criterio de la tierra que estás calculando.</p>
 </header>
+
+<section class="tipo" aria-label="Tipo de puesta a tierra">
+  <div class="tipo-top">
+    <h2 style="font-size:18px">¿Qué tierra se está calculando?</h2>
+    <div class="seg" role="group" aria-label="Tipo de puesta a tierra">
+      <button id="t-TS" aria-pressed="false">Tierra de servicio (TS)</button><button id="t-TP" aria-pressed="true">Tierra de protección (TP)</button>
+    </div>
+  </div>
+  <p class="tipo-desc" id="tipo-desc"></p>
+  <div class="row" id="tp-fields">
+    <div class="field"><label for="g-Vs">Tensión de seguridad Vs (V)</label><select id="g-Vs" class="sel"><option value="50">50 V · lugar seco</option><option value="24">24 V · lugar húmedo</option></select></div>
+    <div class="field"><label for="g-I0">Corriente de operación de la protección I₀ (A)</label><input type="number" id="g-I0" min="0.001" step="0.01"></div>
+    <p class="note" style="flex:2 1 260px">Con diferencial, I₀ = IΔn (0,03 A para 30 mA). Con termomagnético, I₀ es la corriente de disparo magnético (por ejemplo 10·In en curva C).</p>
+  </div>
+  <div class="formula" id="tipo-formula"></div>
+  <p class="note">Este criterio se aplica en el diseño de malla (módulo C) y en la comparación de configuraciones (módulo D).</p>
+</section>
+
 
 <nav class="tabs" role="tablist" aria-label="Módulos">
   <button class="tab" role="tab" aria-selected="true" aria-controls="panel-fund" id="tab-fund"><b style="color:var(--accent)">A</b> Fundamentos</button>
   <button class="tab" role="tab" aria-selected="false" aria-controls="panel-res" id="tab-res"><b style="color:var(--accent)">B</b> Resistividad del terreno</button>
   <button class="tab" role="tab" aria-selected="false" aria-controls="panel-malla" id="tab-malla"><b style="color:var(--accent)">C</b> Diseño de malla</button>
+  <button class="tab" role="tab" aria-selected="false" aria-controls="panel-conf" id="tab-conf"><b style="color:var(--accent)">D</b> Configuraciones</button>
 </nav>
 
 <!-- =========================================================== -->
@@ -439,6 +473,7 @@ input[type=range]:disabled{opacity:.4}
   <a href="#resistencia"><b>4</b>Resistencia</a>
   <a href="#tolerables"><b>5</b>Tolerables</a>
   <a href="#verificacion"><b>6</b>Verificación</a>
+  <span class="tipo-chip" data-chip></span>
 </nav>
 
 <div class="panel" style="flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px 16px">
@@ -562,17 +597,13 @@ input[type=range]:disabled{opacity:.4}
   </div>
   <div class="grid2">
     <div class="panel">
-      <h3>Exigencias del RIC N°06</h3>
+      <h3>Exigencias generales del RIC N°06</h3>
       <ul class="checks" id="ric-checks"></ul>
     </div>
-    <div class="panel">
-      <h3>Tierra de protección en BT · RIC 7.3</h3>
-      <div class="row">
-        <div class="field"><label for="m-Vs">Tensión de seguridad Vs (V)</label><select id="m-Vs" class="sel"><option value="50">50 V · lugar seco</option><option value="24">24 V · lugar húmedo</option></select></div>
-        <div class="field"><label for="m-I0bt">Operación de la protección I₀ (A)</label><input type="number" id="m-I0bt" data-m="I0bt" min="0.001" step="0.01"></div>
-      </div>
+    <div class="panel" style="border:2px solid var(--accent)">
+      <h3 id="crit-title"></h3>
       <div class="formula" id="bt-formula"></div>
-      <p class="note">Con diferencial, I₀ = IΔn (0,03 A para 30 mA). Con termomagnético, I₀ es la corriente de disparo magnético, y el valor exigido suele ser inviable.</p>
+      <p class="note" id="crit-note"></p>
     </div>
   </div>
 </section>
@@ -623,7 +654,127 @@ input[type=range]:disabled{opacity:.4}
 </section>
 </div>
 
-<footer>Módulo A: dispersión semiesférica V(x) = ρI/(2πx), disco equivalente V = (2/π)·GPR·arcsen(a/x), criterio de Dalziel con Rc = 1.000 Ω y Rf = 3ρs. Módulo B: Wenner ρa = 2πaR; Schlumberger ρa = π(L² − l²)R/(2l); modelo de dos capas por serie de imágenes; ρeq por Burgsdorf-Yakobs; requisitos de medición según RIC N°06, Anexo 6.6. Módulo C: IEEE Std 80 (conductor, Sverak, Em, Es, tolerables), Laurent-Niemann, IEC 60364-5-54 y RIC N°06. Las fórmulas de Em y Es valen para mallas regulares en suelo homogéneo; con suelo de dos capas o geometría irregular se usa software. Los datos de ejemplo son supuestos o sintéticos. Material docente · Mario Miranda Araos · CFT Estatal O'Higgins.</footer>
+<!-- =========================================================== -->
+<!-- ================ D. CONFIGURACIONES DE SPT ================ -->
+<!-- =========================================================== -->
+<div id="panel-conf" role="tabpanel" aria-labelledby="tab-conf" class="tabpanel" hidden>
+<nav class="steps" aria-label="Pasos de configuraciones">
+  <a href="#k-datos"><b>1</b>Datos</a>
+  <a href="#k-config"><b>2</b>Configuraciones</a>
+  <a href="#k-comp"><b>3</b>Comparación</a>
+  <a href="#k-detalle"><b>4</b>Desarrollo</a>
+  <span class="tipo-chip" data-chip></span>
+</nav>
+
+<!-- 1. DATOS -->
+<section class="step" id="k-datos">
+  <div class="step-head"><span class="num">1</span><div><h2>Datos comunes</h2><p class="lead">Mismo terreno, misma corriente y mismas barras para todas las configuraciones: así la comparación es justa y solo cambia la geometría.</p></div></div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Terreno y corriente</h3>
+      <div class="row">
+        <div class="field"><label for="k-rho">ρ de diseño (Ω·m)</label><input type="number" id="k-rho" data-kc="rho" min="1" step="1"></div>
+        <div class="field"><label for="k-I">Corriente por el electrodo I (A)</label><input type="number" id="k-I" data-kc="I" min="0.1" step="10"></div>
+      </div>
+      <div class="tip-row"><button class="btn" id="b-k-rhoC">Usar ρ del módulo C</button><button class="btn" id="b-k-rhoB">Usar ρeq del módulo B</button></div>
+      <p class="note">I se usa solo para calcular la elevación de potencial GPR = I·R de cada configuración.</p>
+    </div>
+    <div class="panel">
+      <h3>Barras y conductor</h3>
+      <div class="row">
+        <div class="field"><label for="k-L">Largo de barra L (m)</label><input type="number" id="k-L" data-kc="L" min="0.5" step="0.5"></div>
+        <div class="field"><label for="k-db">Diámetro de barra</label><select id="k-db" class="sel"><option value="12.7">1/2" · 12,7 mm</option><option value="15.9">5/8" · 15,9 mm</option><option value="19.1">3/4" · 19,1 mm</option><option value="25.4">1" · 25,4 mm</option></select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="k-dc">Conductor de malla</label><select id="k-dc" class="sel"></select></div>
+        <div class="field"><label for="k-h">Profundidad de malla h (m)</label><input type="number" id="k-h" data-kc="h" min="0.1" step="0.1"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. CONFIGURACIONES -->
+<section class="step" id="k-config">
+  <div class="step-head"><span class="num">2</span><div><h2>Configuraciones</h2><p class="lead">Ajusta la geometría de cada una y marca las que quieres comparar. Las plantas son esquemáticas.</p></div></div>
+  <div class="cfg-grid">
+    <div class="panel cfg" id="cfg-u">
+      <div class="cfg-head"><h3>1 · Barra única</h3><label><input type="checkbox" data-use="u"> Comparar</label></div>
+      <svg class="sketch" id="sk-u" role="img" aria-label="Planta de una barra"></svg>
+      <p class="note" style="border:0;padding:0">Un solo electrodo vertical de largo L.</p>
+      <p class="big" id="kr-u"></p>
+    </div>
+    <div class="panel cfg" id="cfg-l">
+      <div class="cfg-head"><h3>2 · Barras en línea</h3><label><input type="checkbox" data-use="l"> Comparar</label></div>
+      <svg class="sketch" id="sk-l" role="img" aria-label="Planta de barras en línea"></svg>
+      <div class="row">
+        <div class="field"><label for="k-nl">N° de barras</label><input type="number" id="k-nl" data-kc="nl" min="2" max="12" step="1"></div>
+        <div class="field"><label for="k-sl">Separación s (m)</label><input type="number" id="k-sl" data-kc="sl" min="0.5" step="0.5"></div>
+      </div>
+      <p class="big" id="kr-l"></p>
+    </div>
+    <div class="panel cfg" id="cfg-t">
+      <div class="cfg-head"><h3>3 · Triángulo</h3><label><input type="checkbox" data-use="t"> Comparar</label></div>
+      <svg class="sketch" id="sk-t" role="img" aria-label="Planta de tres barras en triángulo"></svg>
+      <div class="row">
+        <div class="field"><label for="k-st">Lado s (m)</label><input type="number" id="k-st" data-kc="st" min="0.5" step="0.5"></div>
+      </div>
+      <p class="big" id="kr-t"></p>
+    </div>
+    <div class="panel cfg" id="cfg-g">
+      <div class="cfg-head"><h3>4 · Malla</h3><label><input type="checkbox" data-use="g"> Comparar</label></div>
+      <svg class="sketch" id="sk-g" role="img" aria-label="Planta de malla"></svg>
+      <div class="row">
+        <div class="field"><label for="k-gx">Largo (m)</label><input type="number" id="k-gx" data-kc="gx" min="1" step="1"></div>
+        <div class="field"><label for="k-gy">Ancho (m)</label><input type="number" id="k-gy" data-kc="gy" min="1" step="1"></div>
+        <div class="field"><label for="k-gD">Retícula D (m)</label><input type="number" id="k-gD" data-kc="gD" min="0.5" step="0.5"></div>
+      </div>
+      <p class="big" id="kr-g"></p>
+    </div>
+    <div class="panel cfg" id="cfg-gb">
+      <div class="cfg-head"><h3>5 · Malla con barras</h3><label><input type="checkbox" data-use="gb"> Comparar</label></div>
+      <svg class="sketch" id="sk-gb" role="img" aria-label="Planta de malla con barras en el perímetro"></svg>
+      <div class="row">
+        <div class="field"><label for="k-gn">N° de barras</label><input type="number" id="k-gn" data-kc="gn" min="1" max="60" step="1"></div>
+      </div>
+      <p class="note" style="border:0;padding:0">Misma malla de la configuración 4, con barras de largo L repartidas en el perímetro.</p>
+      <p class="big" id="kr-gb"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 3. COMPARACIÓN -->
+<section class="step" id="k-comp">
+  <div class="step-head"><span class="num">3</span><div><h2>Comparación</h2><p class="lead" id="k-comp-lead"></p></div></div>
+  <div class="panel">
+    <div class="legend"><span><i class="sw-dot" style="background:var(--ok)"></i>Cumple el criterio</span><span><i class="sw-dot" style="background:var(--bad)"></i>No cumple</span><span><i class="sw-line" style="background:var(--ink)"></i>Límite</span></div>
+    <div class="chart-wrap"><svg class="chart" id="k-chart" role="img" aria-label="Resistencia de cada configuración comparada con el límite"></svg></div>
+  </div>
+  <div class="scroll"><table id="k-tbl"></table></div>
+  <p class="note">Las configuraciones de barras no consideran el conductor enterrado que las une, por lo que su resultado es conservador. Barras con el extremo superior a nivel de suelo y suelo homogéneo. En suelo de dos capas, una barra que alcanza una capa más conductiva rinde más de lo calculado, y al revés.</p>
+  <div class="tip-row"><button class="btn primary" id="b-k-toC">Llevar la malla con barras al diseño (módulo C)</button></div>
+  <div class="panel">
+    <h3>Para concluir</h3>
+    <ol class="qs">
+      <li>¿Por qué tres barras no dan un tercio de la resistencia de una barra? Aumenta la separación hasta pasar 2L y observa qué ocurre.</li>
+      <li>En las barras en línea, ¿por qué las barras de los extremos llevan más corriente que las del centro?</li>
+      <li>Compara la malla con y sin barras: ¿cuánto bajó R? ¿En qué tipo de terreno convienen más las barras? Piensa en el modelo de dos capas del módulo B.</li>
+      <li>Para la tierra que estás calculando, ¿cuál es la configuración más simple que cumple? ¿Cambia la respuesta si pasas de TS a TP?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- 4. DESARROLLO -->
+<section class="step" id="k-detalle">
+  <div class="step-head"><span class="num">4</span><div><h2>Desarrollo del cálculo</h2><p class="lead">Elige una configuración para ver sus fórmulas con los valores reemplazados.</p></div></div>
+  <div class="field" style="flex:none;max-width:360px"><label for="k-sel">Configuración</label><select id="k-sel" class="sel"><option value="u">1 · Barra única</option><option value="l">2 · Barras en línea</option><option value="t">3 · Triángulo</option><option value="g">4 · Malla</option><option value="gb">5 · Malla con barras</option></select></div>
+  <div class="grid2">
+    <div class="panel"><div class="formula" id="k-formula"></div></div>
+    <div class="panel"><h3 id="k-det-title"></h3><dl class="kv" id="k-det-kv"></dl><p class="note" id="k-det-note"></p></div>
+  </div>
+</section>
+</div>
+
+<footer>Módulo A: dispersión semiesférica V(x) = ρI/(2πx), disco equivalente V = (2/π)·GPR·arcsen(a/x), criterio de Dalziel con Rc = 1.000 Ω y Rf = 3ρs. Módulo B: Wenner ρa = 2πaR; Schlumberger ρa = π(L² − l²)R/(2l); modelo de dos capas por serie de imágenes; ρeq por Burgsdorf-Yakobs; requisitos de medición según RIC N°06, Anexo 6.6. Módulo C: IEEE Std 80 (conductor, Sverak, Em, Es, tolerables), Laurent-Niemann, IEC 60364-5-54 y RIC N°06. Módulo D: barra según Dwight; grupos de barras por resistencias propias y mutuas con todas las barras al mismo potencial; malla y malla con barras según Schwarz (IEEE 80). Criterios: tierra de servicio R ≤ 20 Ω (RIC N°06, 6.1); tierra de protección R ≤ Vs/I₀ (RIC N°06, 7.3). Las fórmulas de Em y Es valen para mallas regulares en suelo homogéneo; con suelo de dos capas o geometría irregular se usa software. Los datos de ejemplo son supuestos o sintéticos. Material docente · Mario Miranda Araos · CFT Estatal O'Higgins.</footer>
 </div>
 
 <script>
@@ -1000,7 +1151,7 @@ function syncMallaInputs(){
   const m=st.malla;
   document.querySelectorAll('[data-m]').forEach(el=>{ el.value=m[el.dataset.m]; });
   $('m-layer').checked=!!m.layer; $('layer-fields').hidden=!m.layer;
-  $('m-kf').value=m.kf; $('m-kiec').value=m.kiec; $('m-rodPos').value=m.rodPos; $('m-Vs').value=m.Vs;
+  $('m-kf').value=m.kf; $('m-kiec').value=m.kiec; $('m-rodPos').value=m.rodPos;
   $('m-cond').innerHTML=COND.map(c=>`<option value="${c[0]}">${c[0]} · ${nf(c[1],1)} mm² · Ø ${nf(c[2],1)} mm</option>`).join('');
   $('m-cond').value=m.cond;
   $('rod-fields').hidden=m.rodPos==='none';
@@ -1071,14 +1222,12 @@ function renderMalla(){
   const ric=[
     [m.h>=0.5,`Profundidad h ≥ 0,5 m (RIC 8.11): ${nf(m.h,2)} m`],
     [c.cond[1]>=25,`Conductor ≥ 25 mm² (RIC 8.7)`],
-    [c.Rg<=20,`Tierra de servicio Rg ≤ 20 Ω (RIC 6.1): ${nf(c.Rg,2)} Ω`],
     [c.Rg<=5,`Red interna BT desde SE de MT, todas las PT combinadas ≤ 5 Ω (RIC 6.7.3)`,'warn']
   ];
   if(c.perRods) ric.push([c.rodSpacing>=2*m.Lr,`Separación entre barras ≥ 2·Lr (RIC 8.3.2): ${nf(c.rodSpacing,1)} m ≥ ${nf(2*m.Lr,1)} m`]);
   if(m.h<0.25||m.h>2.5) ric.push([false,`Fórmula de Ks válida para 0,25 ≤ h ≤ 2,5 m`]);
   $('ric-checks').innerHTML=checkList(ric);
-  const Rbt=(+m.Vs)/m.I0bt;
-  $('bt-formula').innerHTML=`R_TP ≤ Vs / I₀ = ${m.Vs} / ${nf(m.I0bt,3)}\n<span class="hi">R_TP ≤ ${nf(Rbt,Rbt<10?2:0)} Ω</span>   malla: ${nf(c.Rg,2)} Ω → ${c.Rg<=Rbt?'cumple':'no cumple'}`;
+  renderCrit(c);
   // 5. tolerables
   $('tol-formula').innerHTML=(m.layer?`Cs = 1 − 0,09·(1 − ρ/ρs)/(2·hs + 0,09)\n   = 1 − 0,09·(1 − ${nf(m.rho,0)}/${nf(m.rhos,0)})/(2·${nf(m.hs,2)} + 0,09)\n   = ${nf(c.Cs,3)}\n`:`Sin capa superficial: Cs = 1 y ρs = ρ\n`)+
     `Factor de tiempo ${nf(c.kw,3)}/√ts = ${nf(c.kw,3)}/√${nf(m.ts,2)} = ${nf(c.ft,4)}\nE contacto = (1000 + 1,5·Cs·ρs)·${nf(c.ft,4)}\n<span class="hi">E contacto = ${nf(c.Et,0)} V</span>\nE paso     = (1000 + 6·Cs·ρs)·${nf(c.ft,4)}\n<span class="hi">E paso     = ${nf(c.Ep,0)} V</span>`;
@@ -1089,11 +1238,12 @@ function renderMalla(){
     <tr><td>E paso</td><td class="calc">${nf(c.Ep0,0)} V</td><td class="calc">${m.layer?nf(c.Ep,0)+' V':'—'}</td></tr></tbody>`;
   $('tol-note').textContent=m.layer?`La capa multiplica por ${nf(c.Et/c.Et0,1)} la tensión de contacto tolerable. Debe mantenerse en el tiempo: es parte del diseño.`:'Activa la capa de gravilla en el paso 1 para ver su efecto.';
   // 6. verificación
-  const atajo=c.GPR<=c.Et, okEm=c.Em<=c.Et, okEs=c.Es<=c.Ep, ok=atajo||(okEm&&okEs);
+  const atajo=c.GPR<=c.Et, okEm=c.Em<=c.Et, okEs=c.Es<=c.Ep, okT=atajo||(okEm&&okEs), lim=rLim(), okR=c.Rg<=lim, ok=okT&&okR;
+  const vMsg=ok?`Tensiones tolerables y R ≤ ${fmtL(lim)} Ω`:[!okR?`R supera el límite ${st.tipo} de ${fmtL(lim)} Ω`:'',!okT?'Tensiones de contacto o paso sobre lo tolerable':''].filter(Boolean).join(' · ');
   $('gpr-formula').innerHTML=`GPR = IG · Rg = ${nf(c.IG,0)} · ${nf(c.Rg,2)}\n<span class="hi">GPR = ${nf(c.GPR,0)} V</span>  ${atajo?'≤':'>'} E contacto ${nf(c.Et,0)} V\n${atajo?'El atajo basta: ninguna persona queda expuesta a más que el GPR.':'El atajo no alcanza: se verifican Em y Es.'}`;
   meter($('meter-em'),c.Em,c.Et,'Em'); meter($('meter-es'),c.Es,c.Ep,'Es');
-  $('verdict').innerHTML=`<div class="vcell"><p class="eyebrow">Resultado</p><p class="big" style="color:${ok?'var(--ok)':'var(--bad)'}">${ok?'La malla cumple':'La malla no cumple'}</p></div>
-    <div class="vcell"><p class="eyebrow">Rg</p><p class="big">${nf(c.Rg,2)} <small>Ω</small></p></div>
+  $('verdict').innerHTML=`<div class="vcell"><p class="eyebrow">Resultado</p><p class="big" style="color:${ok?'var(--ok)':'var(--bad)'}">${ok?'La malla cumple como '+st.tipo:'La malla no cumple como '+st.tipo}</p><p style="font-size:13px;color:var(--muted)">${vMsg}</p></div>
+    <div class="vcell"><p class="eyebrow">Rg / límite ${st.tipo}</p><p class="big">${nf(c.Rg,2)} / ${fmtL(lim)} <small>Ω</small></p></div>
     <div class="vcell"><p class="eyebrow">GPR</p><p class="big">${nf(c.GPR,0)} <small>V</small></p></div>
     <div class="vcell"><p class="eyebrow">Em / E contacto</p><p class="big">${nf(c.Em,0)} / ${nf(c.Et,0)} <small>V</small></p></div>
     <div class="vcell"><p class="eyebrow">Es / E paso</p><p class="big">${nf(c.Es,0)} / ${nf(c.Ep,0)} <small>V</small></p></div>`;
@@ -1115,7 +1265,6 @@ $('m-layer').onchange=e=>{st.malla.layer=e.target.checked; $('layer-fields').hid
 $('m-kf').onchange=e=>{st.malla.kf=e.target.value; renderMalla(); save();};
 $('m-kiec').onchange=e=>{st.malla.kiec=e.target.value; renderMalla(); save();};
 $('m-cond').onchange=e=>{st.malla.cond=e.target.value; renderMalla(); save();};
-$('m-Vs').onchange=e=>{st.malla.Vs=e.target.value; renderMalla(); save();};
 $('m-rodPos').onchange=e=>{st.malla.rodPos=e.target.value; if(e.target.value!=='none'&&!(st.malla.nR>0))st.malla.nR=4; onMallaChange();};
 $('w50').onclick=()=>{st.malla.peso=50; onMallaChange();}; $('w70').onclick=()=>{st.malla.peso=70; onMallaChange();};
 $('b-df').onclick=()=>{ const v=+$('df-formula').dataset.df; if(v>0){ st.malla.Df=+v.toFixed(3); onMallaChange(); } };
@@ -1305,28 +1454,242 @@ $('fw50').onclick=()=>{st.fund.peso=50; renderFund(); save();}; $('fw70').onclic
 $('f-grava').onchange=e=>{st.fund.grava=e.target.checked; renderFund(); save();};
 ['f-U0','f-RB','f-RA','f-In','f-Idn','f-UL'].forEach(id=>$(id).addEventListener('input',renderTT));
 
-/* ---------- pestañas ---------- */
-const TAB_OF={'f-importancia':'fund','f-dispersion':'fund','f-tensiones':'fund','f-barra-malla':'fund','f-tt':'fund',arreglo:'res',registro:'res',curva:'res',equivalente:'res',datos:'malla',conductor:'malla',geometria:'malla',resistencia:'malla',tolerables:'malla',verificacion:'malla'};
-function showTab(t){
-  ['fund','res','malla'].forEach(k=>{ $('panel-'+k).hidden=t!==k; $('tab-'+k).setAttribute('aria-selected',t===k); });
-  st.tab=t; save();
-  if(t==='res'){ renderModel(); drawDiagram(); } else if(t==='malla'){ renderMalla(); } else { renderFund(); }
+
+/* =================== TIPO DE TIERRA (TS / TP) =================== */
+if(st.tipo!=='TS'&&st.tipo!=='TP') st.tipo='TP';
+const tipoCorto=()=>st.tipo;
+const tipoLargo=()=>st.tipo==='TS'?'Tierra de servicio':'Tierra de protección';
+const fmtL=x=>!Number.isFinite(x)?'—':x>=10?nf(x,0):nf(x,2);
+function rLim(){ return st.tipo==='TS'?20:(+st.malla.Vs)/st.malla.I0bt; }
+const TIPO_TXT={
+  TS:'<b>Tierra de servicio (TS):</b> une a tierra el <b>neutro</b> del sistema, en el transformador o en el empalme. Fija el potencial del neutro respecto de tierra y entrega el camino de retorno a las corrientes de falla. Criterio aplicado: R<sub>TS</sub> ≤ 20 Ω (RIC N°06, 6.1).',
+  TP:'<b>Tierra de protección (TP):</b> une a tierra las <b>masas</b>: carcasas, tableros y estructuras metálicas que normalmente no tienen tensión. Ante una falla de aislación limita la tensión que queda en la carcasa y permite que la protección despeje. Criterio aplicado: R<sub>TP</sub> ≤ Vs / I₀ (RIC N°06, 7.3).'
+};
+function renderTipo(){
+  const t=st.tipo;
+  $('t-TS').setAttribute('aria-pressed',t==='TS'); $('t-TP').setAttribute('aria-pressed',t==='TP');
+  $('tipo-desc').innerHTML=TIPO_TXT[t]; $('tp-fields').hidden=t!=='TP';
+  $('g-Vs').value=st.malla.Vs; if(document.activeElement!==$('g-I0')) $('g-I0').value=st.malla.I0bt;
+  const lim=rLim();
+  $('tipo-formula').innerHTML=t==='TS'
+    ?`Conexión: neutro → electrodo\n<span class="hi">R_TS ≤ 20 Ω</span>`
+    :`Conexión: masas → electrodo\nR_TP ≤ Vs / I₀ = ${st.malla.Vs} / ${nf(st.malla.I0bt,3)}\n<span class="hi">R_TP ≤ ${fmtL(lim)} Ω</span>`;
+  document.querySelectorAll('[data-chip]').forEach(el=>{ el.textContent='Calculando: '+tipoLargo()+' ('+t+')'; });
 }
-['fund','res','malla'].forEach(k=>$('tab-'+k).onclick=()=>{showTab(k); window.scrollTo({top:0});});
+function rerenderActive(){ if(st.tab==='malla') renderMalla(); else if(st.tab==='conf') renderConf(); }
+function setTipo(t){ st.tipo=t; save(); renderTipo(); rerenderActive(); }
+$('t-TS').onclick=()=>setTipo('TS'); $('t-TP').onclick=()=>setTipo('TP');
+$('g-Vs').onchange=e=>{ st.malla.Vs=e.target.value; save(); renderTipo(); rerenderActive(); };
+$('g-I0').addEventListener('input',e=>{ const x=num(e.target.value); if(x>0){ st.malla.I0bt=x; save(); renderTipo(); rerenderActive(); } });
+
+function renderCrit(c){
+  const lim=rLim(), ok=c.Rg<=lim, m=st.malla;
+  $('crit-title').textContent='Criterio de resistencia · '+tipoLargo()+' ('+st.tipo+')';
+  $('bt-formula').innerHTML=(st.tipo==='TS'
+    ?`R_TS ≤ 20 Ω   (RIC N°06, 6.1)\nRg = ${nf(c.Rg,2)} Ω`
+    :`R_TP ≤ Vs / I₀ = ${m.Vs} / ${nf(m.I0bt,3)}   (RIC N°06, 7.3)\nR_TP ≤ ${fmtL(lim)} Ω\nRg = ${nf(c.Rg,2)} Ω`)
+    +`\n<span class="hi">${ok?'Cumple':'No cumple'}: ${nf(c.Rg,2)} Ω ${ok?'≤':'>'} ${fmtL(lim)} Ω</span>`;
+  $('crit-note').textContent=st.tipo==='TS'
+    ?'La malla se evalúa como tierra de servicio: a ella se conecta el neutro del transformador. Cambia a TP en la parte superior para evaluarla como tierra de protección.'
+    :'La malla se evalúa como tierra de protección: a ella se conectan las masas. Vs e I₀ se ajustan en la parte superior. Con termomagnético, el valor exigido suele ser inviable; por eso se usa diferencial.';
+}
+
+/* =================== D. CONFIGURACIONES =================== */
+const confDef=()=>({rho:100,I:100,L:3,db:'15.9',dc:'2/0 AWG',h:0.6,nl:3,sl:6,st:6,gx:10,gy:10,gD:5,gn:4,use:{u:true,l:true,t:true,g:true,gb:true},sel:'t'});
+st.conf=Object.assign(confDef(),st.conf||{}); st.conf.use=Object.assign(confDef().use,st.conf.use||{});
+const CONF_NAMES={u:'Barra única',l:'Barras en línea',t:'Triángulo',g:'Malla',gb:'Malla con barras'};
+
+function rodSelf(rho,L,a){ return rho/(2*Math.PI*L)*(Math.log(4*L/a)-1); }
+// resistencia mutua entre dos barras de largo L separadas s (potencial medio, método de imágenes)
+function rodMut(rho,L,s){ return rho/(4*Math.PI*L*L)*(2*L*Math.asinh(2*L/s)-Math.sqrt(s*s+4*L*L)+s); }
+function solveLin(M,b){
+  const n=b.length, A=M.map((r,i)=>r.concat([b[i]]));
+  for(let c=0;c<n;c++){ let p=c; for(let r=c+1;r<n;r++) if(Math.abs(A[r][c])>Math.abs(A[p][c]))p=r; [A[c],A[p]]=[A[p],A[c]];
+    for(let r=0;r<n;r++){ if(r===c)continue; const f=A[r][c]/A[c][c]; for(let k=c;k<=n;k++) A[r][k]-=f*A[c][k]; } }
+  return A.map((r,i)=>r[n]/r[i]);
+}
+function rodGroup(rho,L,a,pos){
+  const R11=rodSelf(rho,L,a);
+  const M=pos.map((p,i)=>pos.map((q,j)=>i===j?R11:rodMut(rho,L,Math.hypot(p[0]-q[0],p[1]-q[1]))));
+  const I=solveLin(M,pos.map(()=>1)); const S=I.reduce((x,y)=>x+y,0);
+  const dist=[...new Set(pos.flatMap((p,i)=>pos.slice(i+1).map(q=>+Math.hypot(p[0]-q[0],p[1]-q[1]).toFixed(3))))].sort((x,y)=>x-y);
+  return {R:1/S,R11,share:I.map(x=>x/S),dist,minS:dist[0]};
+}
+function kCurves(x,hr){ // IEEE 80, curvas A (h = 0), B (h = √A/10), C (h = √A/6)
+  const k1=[-0.04*x+1.41,-0.05*x+1.20,-0.05*x+1.13], k2=[0.15*x+5.50,0.10*x+4.68,-0.05*x+4.40], H=[0,0.1,1/6];
+  const t=Math.min(Math.max(hr,0),1/6), i=t<=0.1?0:1, f=(t-H[i])/(H[i+1]-H[i]);
+  return {k1:k1[i]+f*(k1[i+1]-k1[i]),k2:k2[i]+f*(k2[i+1]-k2[i])};
+}
+function gridGeom(Lx,Ly,D){
+  const nx=Math.max(2,Math.ceil(Ly/D-1e-9)+1), ny=Math.max(2,Math.ceil(Lx/D-1e-9)+1);
+  return {nx,ny,Dx:Lx/(ny-1),Dy:Ly/(nx-1),LC:nx*Lx+ny*Ly,A:Lx*Ly,Lp:2*(Lx+Ly)};
+}
+function perimPts(Lx,Ly,n){ const P=2*(Lx+Ly), pts=[]; for(let k=0;k<n;k++){ const t=k*P/n; let x,y;
+  if(t<Lx){x=t;y=0;} else if(t<Lx+Ly){x=Lx;y=t-Lx;} else if(t<2*Lx+Ly){x=Lx-(t-Lx-Ly);y=Ly;} else {x=0;y=Ly-(t-2*Lx-Ly);} pts.push([x,y]); } return pts; }
+
+function calcConf(){
+  const k=st.conf, rho=k.rho, L=k.L, a=(+k.db)/2000;
+  const cond=COND.find(c=>c[0]===k.dc)||COND[3], ac=cond[2]/2000;
+  const nl=Math.min(12,Math.max(2,Math.round(k.nl))), gn=Math.max(1,Math.round(k.gn));
+  const o={};
+  const R1=rodSelf(rho,L,a);
+  o.u={R:R1,rods:1,LC:0,space:'Puntual',sep:null,R11:R1};
+  const pl=[]; for(let i=0;i<nl;i++) pl.push([i*k.sl,0]);
+  const gl=rodGroup(rho,L,a,pl);
+  o.l=Object.assign(gl,{rods:nl,LC:(nl-1)*k.sl,space:nf((nl-1)*k.sl,1)+' m de largo',sep:k.sl,pos:pl,n:nl});
+  const pt=[[0,0],[k.st,0],[k.st/2,k.st*Math.sqrt(3)/2]];
+  const gt=rodGroup(rho,L,a,pt);
+  o.t=Object.assign(gt,{rods:3,LC:3*k.st,space:'Triángulo de '+nf(k.st,1)+' m de lado',sep:k.st,pos:pt,n:3,Rm:rodMut(rho,L,k.st)});
+  // mallas: Schwarz (IEEE 80)
+  const G=gridGeom(k.gx,k.gy,k.gD), sA=Math.sqrt(G.A), x=Math.max(k.gx,k.gy)/Math.min(k.gx,k.gy);
+  const kc=kCurves(x,k.h/sA), ap=Math.sqrt(ac*2*k.h);
+  const R1g=rho/(Math.PI*G.LC)*(Math.log(2*G.LC/ap)+kc.k1*G.LC/sA-kc.k2);
+  const sv=rho*(1/G.LC+1/Math.sqrt(20*G.A)*(1+1/(1+k.h*Math.sqrt(20/G.A))));
+  o.g=Object.assign({},G,{R:R1g,rods:0,space:nf(k.gx,0)+' × '+nf(k.gy,0)+' m',sep:null,x,k1:kc.k1,k2:kc.k2,ap,ac,sA,Rsv:sv});
+  const R2=rho/(2*Math.PI*gn*L)*(Math.log(4*L/a)-1+2*kc.k1*L/sA*Math.pow(Math.sqrt(gn)-1,2));
+  const Rm=rho/(Math.PI*G.LC)*(Math.log(2*G.LC/L)+kc.k1*G.LC/sA-kc.k2+1);
+  const Rgb=(R1g*R2-Rm*Rm)/(R1g+R2-2*Rm);
+  o.gb=Object.assign({},G,{R:Rgb,R1:R1g,R2,Rm,rods:gn,space:nf(k.gx,0)+' × '+nf(k.gy,0)+' m',sep:G.Lp/gn,x,k1:kc.k1,k2:kc.k2,ap,sA,pos:perimPts(k.gx,k.gy,gn)});
+  Object.keys(o).forEach(id=>{ const c=o[id]; c.id=id; c.name=CONF_NAMES[id]; c.mat=c.LC+c.rods*L; c.GPR=k.I*c.R; c.vsU=R1/c.R; });
+  return {o,R1,L,a,cond,nl,gn,G};
+}
+
+function sketch(svgId,type,K,o){
+  const v=css(), W=200, H=120, P=18; let s=`<rect x="0" y="0" width="${W}" height="${H}" rx="8" fill="${v('--soil')}" opacity=".5"/>`;
+  const rod=(x,y)=>`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5.5" fill="${v('--blue')}" stroke="${v('--surface')}" stroke-width="2"/>`;
+  const ln=(x1,y1,x2,y2,dash)=>`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${v('--accent')}" stroke-width="2.5" ${dash?'stroke-dasharray="4 4"':''}/>`;
+  const txt=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="${v('--ink')}">${t}</text>`;
+  if(type==='u'){ s+=rod(W/2,H/2)+txt(W/2,H/2+24,'L = '+nf(K.L,1)+' m'); }
+  else if(type==='l'||type==='t'){
+    const pos=o.pos; const xs=pos.map(p=>p[0]), ys=pos.map(p=>p[1]);
+    const w=Math.max(...xs)-Math.min(...xs)||1, h=Math.max(...ys)-Math.min(...ys);
+    const sc=Math.min((W-2*P)/w,h>0?(H-2*P-14)/h:1e9); const ox=(W-w*sc)/2, oy=h>0?(H-14-h*sc)/2+h*sc:H/2-6;
+    const X=p=>ox+(p[0]-Math.min(...xs))*sc, Y=p=>oy-(p[1]-Math.min(...ys))*sc;
+    for(let i=0;i<pos.length;i++){ const j=(i+1)%pos.length; if(type==='l'&&j===0)break; s+=ln(X(pos[i]),Y(pos[i]),X(pos[j]),Y(pos[j]),true); }
+    pos.forEach(p=>{s+=rod(X(p),Y(p));});
+    s+=txt(W/2,H-6,'s = '+nf(o.sep,1)+' m');
+  } else {
+    const sc=Math.min((W-2*P)/K.gx,(H-2*P)/K.gy), ox=(W-K.gx*sc)/2, oy=(H-K.gy*sc)/2, G=o;
+    for(let i=0;i<G.nx;i++){ const y=oy+i*G.Dy*sc; s+=ln(ox,y,ox+K.gx*sc,y); }
+    for(let j=0;j<G.ny;j++){ const x=ox+j*G.Dx*sc; s+=ln(x,oy,x,oy+K.gy*sc); }
+    if(type==='gb') o.pos.forEach(p=>{ s+=rod(ox+p[0]*sc,oy+p[1]*sc); });
+  }
+  const el=$(svgId); el.setAttribute('viewBox',`0 0 ${W} ${H}`); el.innerHTML=s;
+}
+
+function barChart(svg,items,lim){
+  const v=css(); const W=Math.max(300,svg.parentNode.clientWidth||600); const rowH=38, M={l:Math.min(150,W*0.36),r:70,t:22,b:30};
+  const H=M.t+M.b+rowH*Math.max(1,items.length); svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.setAttribute('height',H);
+  const pw=W-M.l-M.r; const rmax=Math.max(...items.map(i=>i.R),0.1);
+  const limIn=lim<=rmax*3; let xmax=(limIn?Math.max(rmax,lim):rmax)*1.12;
+  const X=x=>M.l+pw*x/xmax; const f='font-family="IBM Plex Mono,monospace" font-size="12"', fs='font-family="IBM Plex Sans,Arial,sans-serif" font-size="13"';
+  let s=''; const st_=niceStep(xmax,Math.max(3,Math.floor(pw/90)));
+  for(let t=0;t<=xmax+1e-9;t+=st_){ s+=`<line x1="${X(t)}" y1="${M.t-6}" x2="${X(t)}" y2="${H-M.b}" stroke="${v('--line')}"/><text x="${X(t)}" y="${H-M.b+16}" text-anchor="middle" ${f} fill="${v('--muted')}">${fmtTick(+t.toFixed(6))}</text>`; }
+  s+=`<text x="${M.l+pw/2}" y="${H-2}" text-anchor="middle" ${fs} fill="${v('--muted')}">Resistencia (Ω)</text>`;
+  items.forEach((it,i)=>{ const y=M.t+i*rowH, ok=it.R<=lim;
+    s+=`<text x="${M.l-8}" y="${y+rowH/2}" text-anchor="end" ${fs} font-weight="600" fill="${v('--ink')}">${it.name}</text>`;
+    s+=`<rect x="${M.l}" y="${y+7}" width="${Math.max(2,X(it.R)-M.l)}" height="${rowH-16}" rx="4" fill="${v(ok?'--ok':'--bad')}"/>`;
+    s+=`<text x="${X(it.R)+6}" y="${y+rowH/2+4}" ${f} font-weight="600" fill="${v('--ink')}">${nf(it.R,2)} Ω</text>`; });
+  if(limIn){ s+=`<line x1="${X(lim)}" y1="${M.t-10}" x2="${X(lim)}" y2="${H-M.b}" stroke="${v('--ink')}" stroke-width="2" stroke-dasharray="6 4"/><text x="${X(lim)}" y="${M.t-12}" text-anchor="${X(lim)>W-120?'end':'middle'}" ${f} font-weight="600" fill="${v('--ink')}">Límite ${st.tipo} = ${fmtL(lim)} Ω</text>`; }
+  else s+=`<text x="${W-4}" y="${M.t-8}" text-anchor="end" ${f} fill="${v('--ink')}">Límite ${st.tipo} = ${fmtL(lim)} Ω (fuera de escala)</text>`;
+  svg.innerHTML=s;
+}
+
+function syncConfInputs(){
+  const k=st.conf;
+  document.querySelectorAll('[data-kc]').forEach(el=>{ if(document.activeElement!==el) el.value=k[el.dataset.kc]; });
+  $('k-db').value=k.db;
+  $('k-dc').innerHTML=COND.map(c=>`<option value="${c[0]}">${c[0]} · Ø ${nf(c[2],1)} mm</option>`).join(''); $('k-dc').value=k.dc;
+  document.querySelectorAll('[data-use]').forEach(el=>{ el.checked=!!k.use[el.dataset.use]; });
+  $('k-sel').value=k.sel;
+}
+
+function renderConf(){
+  const K=st.conf, C=calcConf(), o=C.o, lim=rLim(), L=K.L;
+  ['u','l','t','g','gb'].forEach(id=>{
+    const c=o[id], ok=c.R<=lim;
+    $('kr-'+id).innerHTML=`${nf(c.R,2)} <small>Ω</small> <span class="pill ${ok?'ok':'bad'}" style="vertical-align:middle">${ok?'Cumple':'No cumple'} ${st.tipo}</span>`;
+    $('cfg-'+id).classList.toggle('off',!K.use[id]);
+    sketch('sk-'+id,id,K,c);
+  });
+  const items=['u','l','t','g','gb'].filter(id=>K.use[id]).map(id=>o[id]);
+  $('k-comp-lead').innerHTML=`Mismo ρ = ${nf(K.rho,0)} Ω·m y barras de ${nf(L,1)} m. Criterio: <b>${tipoLargo()} (${st.tipo})</b>, R ≤ ${fmtL(lim)} Ω.`;
+  barChart($('k-chart'),items,lim);
+  let h='<thead><tr><th>Configuración</th><th>R (Ω)</th><th>Criterio '+st.tipo+' ≤ '+fmtL(lim)+' Ω</th><th>R barra única / R</th><th>GPR = I·R (V)</th><th>Barras</th><th>Conductor (m)</th><th>Material total (m)</th><th>Espacio</th><th>Separación ≥ 2L</th></tr></thead><tbody>';
+  items.forEach(c=>{ const ok=c.R<=lim; const sepOk=c.sep==null?null:c.sep>=2*L;
+    h+=`<tr><td style="text-align:left;font-weight:600">${c.name}</td><td class="calc">${nf(c.R,2)}</td><td>${pill(ok)}</td><td class="dim">${nf(c.vsU,2)} ×</td><td class="dim">${nf(c.GPR,0)}</td><td class="dim">${c.rods||'—'}</td><td class="dim">${c.LC?nf(c.LC,1):'—'}</td><td class="dim">${nf(c.mat,1)}</td><td class="dim" style="text-align:left">${c.space}</td><td>${sepOk==null?'<span class="dim">—</span>':`<span class="pill ${sepOk?'ok':'warn'}">${nf(c.sep,1)} m ${sepOk?'≥':'<'} ${nf(2*L,1)} m</span>`}</td></tr>`; });
+  if(!items.length) h+='<tr><td colspan="10">Marca al menos una configuración en el paso 2.</td></tr>';
+  $('k-tbl').innerHTML=h+'</tbody>';
+  renderConfDetail(C);
+}
+
+function renderConfDetail(C){
+  const K=st.conf, o=C.o, id=K.sel, c=o[id], lim=rLim(), L=K.L, a=C.a, rho=K.rho;
+  const sel=st.tipo, okTxt=c.R<=lim?'cumple':'no cumple';
+  let f='', kv=[], note='';
+  const self=`R₁ = ρ/(2πL)·[ln(4L/a) − 1]\n   = ${nf(rho,0)}/(2π·${nf(L,2)})·[ln(4·${nf(L,2)}/${nf(a,5)}) − 1]\n   = ${nf(rho/(2*Math.PI*L),3)}·(${nf(Math.log(4*L/a),3)} − 1)\n   = ${nf(C.R1,2)} Ω`;
+  if(id==='u'){
+    f=`a = d/2 = ${nf(+K.db,1)}/2000 = ${nf(a,5)} m\n`+self.replace('= '+nf(C.R1,2)+' Ω','<span class="hi">R = '+nf(C.R1,2)+' Ω</span>');
+    note='Fórmula de Dwight para una barra vertical con el extremo superior a nivel de suelo. La mayor parte de R está en el suelo más cercano a la barra (módulo A, paso 2).';
+  } else if(id==='l'||id==='t'){
+    const mut=c.dist.map(s=>`Rm(${nf(s,1)} m) = ${nf(rodMut(rho,L,s),3)} Ω`).join('\n');
+    f=self+`\n\nRm(s) = ρ/(4πL²)·[2L·asinh(2L/s) − √(s² + 4L²) + s]\n${mut}\n\n`;
+    if(id==='t') f+=`Por simetría, cada barra lleva I/3:\nR = (R₁ + 2·Rm)/3 = (${nf(C.R1,2)} + 2·${nf(c.Rm,3)})/3\n<span class="hi">R = ${nf(c.R,2)} Ω</span>`;
+    else f+=`Todas las barras al mismo potencial V:\nΣⱼ Rᵢⱼ·Iⱼ = V  para cada barra i  →  sistema de ${c.n} ecuaciones\nReparto de I: ${c.share.map(x=>nf(x*100,0)+' %').join(' · ')}\n<span class="hi">R = V / ΣI = ${nf(c.R,2)} Ω</span>`;
+    const eta=C.R1/(c.n*c.R);
+    kv=[['R de una barra',nf(C.R1,2)+' Ω'],['R ideal sin interferencia R₁/n',nf(C.R1/c.n,2)+' Ω'],['R real del grupo',nf(c.R,2)+' Ω'],['Coeficiente de utilización η = R₁/(n·R)',nf(eta*100,0)+' %'],['Separación mínima',nf(c.minS,1)+' m'],['Separación recomendada ≥ 2L (RIC 8.3.2)',nf(2*L,1)+' m']];
+    note='Las barras cercanas comparten el mismo volumen de suelo y se "estorban": Rm es la tensión que la corriente de una barra produce en otra. Con separaciones de 2L o más, η sube y R se acerca a R₁/n.';
+  } else if(id==='g'||id==='gb'){
+    const g=o.g;
+    f=`A = ${nf(K.gx,1)}·${nf(K.gy,1)} = ${nf(g.A,0)} m²   √A = ${nf(g.sA,2)} m   x = largo/ancho = ${nf(g.x,2)}\nLc = ${g.nx}·${nf(K.gx,1)} + ${g.ny}·${nf(K.gy,1)} = ${nf(g.LC,1)} m\nh/√A = ${nf(K.h/g.sA,3)} → k₁ = ${nf(g.k1,3)}   k₂ = ${nf(g.k2,3)}\na' = √(a·2h) = √(${nf(g.ac,5)}·2·${nf(K.h,2)}) = ${nf(g.ap,4)} m\nR₁ = ρ/(π·Lc)·[ln(2Lc/a') + k₁·Lc/√A − k₂]\n   = ${nf(rho/(Math.PI*g.LC),4)}·[${nf(Math.log(2*g.LC/g.ap),3)} + ${nf(g.k1*g.LC/g.sA,3)} − ${nf(g.k2,3)}]\n`;
+    if(id==='g'){ f+=`<span class="hi">R = R₁ = ${nf(g.R,2)} Ω</span>`;
+      kv=[['Schwarz (IEEE 80)',nf(g.R,2)+' Ω'],['Sverak, como referencia',nf(g.Rsv,2)+' Ω'],['Retícula real',nf(g.Dx,2)+' × '+nf(g.Dy,2)+' m'],['Conductor horizontal',nf(g.LC,1)+' m']];
+      note='Se usa Schwarz para que malla y malla con barras se calculen con el mismo método. La diferencia con Sverak (módulo C) es pequeña y muestra el orden de incertidumbre entre fórmulas.'; }
+    else { const nR=c.rods, b=a;
+      f+=`   = ${nf(c.R1,2)} Ω\nR₂ = ρ/(2π·nR·L)·[ln(4L/b) − 1 + 2k₁·L/√A·(√nR − 1)²]\n   = ${nf(rho/(2*Math.PI*nR*L),3)}·[${nf(Math.log(4*L/b)-1,3)} + ${nf(2*g.k1*L/g.sA*Math.pow(Math.sqrt(nR)-1,2),3)}]\n   = ${nf(c.R2,2)} Ω\nRm = ρ/(π·Lc)·[ln(2Lc/L) + k₁·Lc/√A − k₂ + 1] = ${nf(c.Rm,2)} Ω\nRg = (R₁·R₂ − Rm²)/(R₁ + R₂ − 2Rm)\n<span class="hi">Rg = ${nf(c.R,2)} Ω</span>`;
+      kv=[['R₁ malla sola',nf(c.R1,2)+' Ω'],['R₂ barras solas',nf(c.R2,2)+' Ω'],['Rm mutua malla–barras',nf(c.Rm,2)+' Ω'],['Reducción respecto de la malla sola',nf((1-c.R/c.R1)*100,1)+' %'],['Separación entre barras en el perímetro',nf(c.sep,1)+' m']];
+      note='Rm alta significa que malla y barras ocupan el mismo suelo: por eso agregar barras cortas a una malla grande baja poco R. Las barras sirven más cuando alcanzan una capa más conductiva o cuando la malla es pequeña.'; }
+  }
+  f+=`\n\nCriterio ${sel}: R ≤ ${fmtL(lim)} Ω → ${okTxt}\nGPR = I·R = ${nf(K.I,0)}·${nf(c.R,2)} = ${nf(c.GPR,0)} V`;
+  $('k-formula').innerHTML=f;
+  $('k-det-title').textContent=c.name+' · '+tipoLargo();
+  $('k-det-kv').innerHTML=kv.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('');
+  $('k-det-note').textContent=note;
+}
+
+document.querySelectorAll('[data-kc]').forEach(el=>el.addEventListener('input',e=>{ const x=num(e.target.value); if(Number.isFinite(x)&&x>0){ st.conf[e.target.dataset.kc]=x; renderConf(); save(); } }));
+document.querySelectorAll('[data-use]').forEach(el=>el.addEventListener('change',e=>{ st.conf.use[e.target.dataset.use]=e.target.checked; renderConf(); save(); }));
+$('k-db').onchange=e=>{ st.conf.db=e.target.value; renderConf(); save(); };
+$('k-dc').onchange=e=>{ st.conf.dc=e.target.value; renderConf(); save(); };
+$('k-sel').onchange=e=>{ st.conf.sel=e.target.value; renderConfDetail(calcConf()); save(); };
+$('b-k-rhoC').onclick=()=>{ st.conf.rho=st.malla.rho; syncConfInputs(); renderConf(); save(); };
+$('b-k-rhoB').onclick=()=>{ if(st.rhoEq>0){ st.conf.rho=+st.rhoEq.toFixed(1); syncConfInputs(); renderConf(); save(); } };
+$('b-k-toC').onclick=()=>{ const k=st.conf, m=st.malla; m.rho=k.rho; m.Lx=k.gx; m.Ly=k.gy; m.D=k.gD; m.h=k.h; m.cond=k.dc; m.rodPos='per'; m.nR=Math.max(1,Math.round(k.gn)); m.Lr=k.L; undoStack=[]; syncMallaInputs(); showTab('malla'); location.hash='geometria'; };
+
+/* ---------- pestañas ---------- */
+const TAB_OF={'f-importancia':'fund','f-dispersion':'fund','f-tensiones':'fund','f-barra-malla':'fund','f-tt':'fund',arreglo:'res',registro:'res',curva:'res',equivalente:'res',datos:'malla',conductor:'malla',geometria:'malla',resistencia:'malla',tolerables:'malla',verificacion:'malla','k-datos':'conf','k-config':'conf','k-comp':'conf','k-detalle':'conf'};
+function showTab(t){
+  ['fund','res','malla','conf'].forEach(k=>{ $('panel-'+k).hidden=t!==k; $('tab-'+k).setAttribute('aria-selected',t===k); });
+  st.tab=t; save();
+  if(t==='res'){ renderModel(); drawDiagram(); } else if(t==='malla'){ renderMalla(); } else if(t==='conf'){ renderConf(); } else { renderFund(); }
+}
+['fund','res','malla','conf'].forEach(k=>$('tab-'+k).onclick=()=>{showTab(k); window.scrollTo({top:0});});
 $('b-to-malla').onclick=()=>{ $('b-m-rhoeq').click(); showTab('malla'); window.scrollTo({top:0}); };
 $('b-to-res').onclick=()=>{ showTab('res'); window.scrollTo({top:0}); };
 function routeHash(){ const id=location.hash.slice(1); const t=TAB_OF[id]; if(!t)return; if(st.tab!==t||$('panel-'+t).hidden) showTab(t); const el=$(id); if(el) requestAnimationFrame(()=>el.scrollIntoView()); }
 window.addEventListener('hashchange',routeHash);
 
 /* ---------- inicio ---------- */
-syncMallaInputs();
+syncMallaInputs(); syncConfInputs(); renderTipo();
 syncSliders(); renderCfg(); renderTable(); renderEq();
 if(st.example.w||st.example.s){ fittedFor[st.method]=true; autoFit(); } else renderModel();
 renderMalla();
 const hid=location.hash.slice(1); showTab(TAB_OF[hid]||st.tab||'fund'); if(TAB_OF[hid]) routeHash();
-const redraw=()=>{ if(st.tab==='malla') renderMalla(); else if(st.tab==='fund') renderFund(); else {renderModel();drawDiagram();} };
-let rt; window.addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(()=>{ if(st.tab==='res') renderModel(); else if(st.tab==='fund') renderFund(); },120);});
+const redraw=()=>{ if(st.tab==='malla') renderMalla(); else if(st.tab==='conf') renderConf(); else if(st.tab==='fund') renderFund(); else {renderModel();drawDiagram();} };
+let rt; window.addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(()=>{ if(st.tab==='res') renderModel(); else if(st.tab==='fund') renderFund(); else if(st.tab==='conf') renderConf(); },120);});
 const mq=window.matchMedia('(prefers-color-scheme: dark)'); mq.addEventListener&&mq.addEventListener('change',redraw);
 new MutationObserver(redraw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 })();
 </script>
+
+</html>
