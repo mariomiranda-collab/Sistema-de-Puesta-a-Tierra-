@@ -110,6 +110,8 @@ td.dim{color:var(--muted);font-family:var(--mono);text-align:right}
 .next h3{color:var(--bg)} .next p{color:var(--bg);opacity:.85;font-size:14px}
 footer{font-size:12px;color:var(--soft);border-top:1px solid var(--line);padding-top:12px}
 .tipo{background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.tipo .seg{flex-wrap:wrap}
+[hidden]{display:none!important}
 .tipo-top{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
 .tipo-desc{font-size:14px;max-width:84ch}
 .tipo .formula{font-size:14px}
@@ -154,10 +156,13 @@ input[type=range]:disabled{opacity:.4}
   <div class="tipo-top">
     <h2 style="font-size:18px">¿Qué tierra se está calculando?</h2>
     <div class="seg" role="group" aria-label="Tipo de puesta a tierra">
-      <button id="t-TS" aria-pressed="false">Tierra de servicio (TS)</button><button id="t-TP" aria-pressed="true">Tierra de protección (TP)</button>
+      <button id="t-TS" aria-pressed="false">Tierra de servicio (TS)</button><button id="t-TP" aria-pressed="true">Tierra de protección (TP)</button><button id="t-TN" aria-pressed="false">TS + TP común (TN-S)</button>
     </div>
   </div>
   <p class="tipo-desc" id="tipo-desc"></p>
+  <div class="row" id="tn-fields" hidden>
+    <div class="field" style="flex:none"><label>Alimentación de la instalación</label><div class="seg" role="group" aria-label="Alimentación"><button id="tn-BT" aria-pressed="false">Desde BT (empalme)</button><button id="tn-MT" aria-pressed="true">Subestación MT/BT propia</button></div></div>
+  </div>
   <div class="row" id="tp-fields">
     <div class="field"><label for="g-Vs">Tensión de seguridad Vs (V)</label><select id="g-Vs" class="sel"><option value="50">50 V · lugar seco</option><option value="24">24 V · lugar húmedo</option></select></div>
     <div class="field"><label for="g-I0">Corriente de operación de la protección I₀ (A)</label><input type="number" id="g-I0" min="0.001" step="0.01"></div>
@@ -185,6 +190,7 @@ input[type=range]:disabled{opacity:.4}
   <a href="#f-tensiones"><b>3</b>Contacto y paso</a>
   <a href="#f-barra-malla"><b>4</b>Barra vs malla</a>
   <a href="#f-tt"><b>5</b>Falla en TT</a>
+  <a href="#f-tn"><b>6</b>Falla en TN-S</a>
 </nav>
 
 <!-- 1. IMPORTANCIA -->
@@ -324,6 +330,61 @@ input[type=range]:disabled{opacity:.4}
     <h3>Tensión en la carcasa según R_A</h3>
     <div class="chart-wrap"><svg class="chart" id="f-tt-chart" role="img" aria-label="Tensión de la carcasa versus resistencia de la tierra de protección"></svg></div>
     <p class="note">Ninguna resistencia de tierra realista hace operar un termomagnético en TT. La protección real contra contactos indirectos en BT es el diferencial: R_A ≤ U_L / IΔn.</p>
+  </div>
+</section>
+
+<!-- 6. TN-S -->
+<section class="step" id="f-tn">
+  <div class="step-head"><span class="num">6</span><div><h2>Falla fase–masa en esquema TN-S</h2><p class="lead">Las masas van al conductor de protección PE, unido al neutro solo en el transformador. La corriente de falla vuelve por el PE, que es metálico: lo que decide si la protección despeja es la impedancia del lazo, no la resistencia de la puesta a tierra.</p></div></div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="row">
+        <div class="field"><label for="tn-U0">U₀ fase–neutro (V)</label><input type="number" id="tn-U0" min="1" step="1" value="220"></div>
+        <div class="field"><label for="tn-Zt">Impedancia de la fuente (mΩ)</label><input type="number" id="tn-Zt" min="0" step="5" value="30"></div>
+        <div class="field"><label for="tn-L">Largo del circuito L (m)</label><input type="number" id="tn-L" min="1" step="5" value="40"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="tn-Sf">Sección de fase (mm²)</label><select id="tn-Sf" class="sel"></select></div>
+        <div class="field"><label for="tn-Spe">Sección del PE (mm²)</label><select id="tn-Spe" class="sel"></select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="tn-curve">Curva del termomagnético</label><select id="tn-curve" class="sel"><option value="5">B · Ia = 5·In</option><option value="10" selected>C · Ia = 10·In</option><option value="20">D · Ia = 20·In</option></select></div>
+        <div class="field"><label for="tn-In">In (A)</label><input type="number" id="tn-In" min="1" step="1" value="16"></div>
+        <div class="field"><label for="tn-Idn">Diferencial IΔn (mA)</label><input type="number" id="tn-Idn" min="1" step="1" value="30"></div>
+      </div>
+      <svg class="diagram" id="tn-svg" role="img" aria-label="Circuito de falla en esquema TN-S"></svg>
+    </div>
+    <div class="panel">
+      <div class="formula" id="tn-formula"></div>
+      <ul class="checks" id="tn-checks"></ul>
+      <p class="note">Resistividad del cobre en caliente 0,0225 Ω·mm²/m. Impedancias sumadas en forma aritmética, lo que deja el resultado del lado seguro.</p>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Corriente de falla según el largo del circuito</h3>
+    <div class="chart-wrap"><svg class="chart" id="tn-chart" role="img" aria-label="Corriente de falla versus largo del circuito, con la corriente de disparo magnético"></svg></div>
+    <p class="note" id="tn-chart-note"></p>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Falla directa de una fase a tierra</h3>
+      <p class="note">Si un conductor de fase toca el suelo y no una masa, la corriente vuelve por la tierra de servicio R_B. El PE y todas las masas suben de potencial.</p>
+      <div class="row">
+        <div class="field"><label for="tn-RB">R_B tierra de servicio (Ω)</label><input type="number" id="tn-RB" min="0.1" step="0.5" value="5"></div>
+        <div class="field"><label for="tn-RE">R_E contacto de la fase con el suelo (Ω)</label><input type="number" id="tn-RE" min="0.1" step="1" value="20"></div>
+      </div>
+      <div class="formula" id="tn-rb-formula"></div>
+      <ul class="checks" id="tn-rb-checks"></ul>
+    </div>
+    <div class="panel">
+      <h3>Para concluir</h3>
+      <ol class="qs">
+        <li>¿Por qué en TN-S el termomagnético sí puede despejar una falla a masa y en TT no?</li>
+        <li>Alarga el circuito hasta que deje de cumplir. ¿Qué tres cosas puedes cambiar para recuperar el disparo?</li>
+        <li>Durante la falla, la carcasa queda a casi la mitad de U₀. ¿Por qué igual se considera segura?</li>
+        <li>¿Por qué en TN la tierra de servicio debe ser baja aunque no intervenga en la falla a masa?</li>
+      </ol>
+    </div>
   </div>
   <div class="next"><h3>Siguiente: medir el terreno</h3><p>Todo lo anterior depende de ρ. El módulo B muestra cómo se mide y cómo se obtiene la resistividad equivalente para diseñar.</p><div class="tip-row"><button class="btn primary" id="b-to-res">Ir a resistividad del terreno</button></div></div>
 </section>
@@ -774,7 +835,7 @@ input[type=range]:disabled{opacity:.4}
 </section>
 </div>
 
-<footer>Módulo A: dispersión semiesférica V(x) = ρI/(2πx), disco equivalente V = (2/π)·GPR·arcsen(a/x), criterio de Dalziel con Rc = 1.000 Ω y Rf = 3ρs. Módulo B: Wenner ρa = 2πaR; Schlumberger ρa = π(L² − l²)R/(2l); modelo de dos capas por serie de imágenes; ρeq por Burgsdorf-Yakobs; requisitos de medición según RIC N°06, Anexo 6.6. Módulo C: IEEE Std 80 (conductor, Sverak, Em, Es, tolerables), Laurent-Niemann, IEC 60364-5-54 y RIC N°06. Módulo D: barra según Dwight; grupos de barras por resistencias propias y mutuas con todas las barras al mismo potencial; malla y malla con barras según Schwarz (IEEE 80). Criterios: tierra de servicio R ≤ 20 Ω (RIC N°06, 6.1); tierra de protección R ≤ Vs/I₀ (RIC N°06, 7.3). Las fórmulas de Em y Es valen para mallas regulares en suelo homogéneo; con suelo de dos capas o geometría irregular se usa software. Los datos de ejemplo son supuestos o sintéticos. Material docente · Mario Miranda Araos · CFT Estatal O'Higgins.</footer>
+<footer>Módulo A: dispersión semiesférica V(x) = ρI/(2πx), disco equivalente V = (2/π)·GPR·arcsen(a/x), criterio de Dalziel con Rc = 1.000 Ω y Rf = 3ρs. Módulo B: Wenner ρa = 2πaR; Schlumberger ρa = π(L² − l²)R/(2l); modelo de dos capas por serie de imágenes; ρeq por Burgsdorf-Yakobs; requisitos de medición según RIC N°06, Anexo 6.6. Módulo C: IEEE Std 80 (conductor, Sverak, Em, Es, tolerables), Laurent-Niemann, IEC 60364-5-54 y RIC N°06. Módulo D: barra según Dwight; grupos de barras por resistencias propias y mutuas con todas las barras al mismo potencial; malla y malla con barras según Schwarz (IEEE 80). Criterios: tierra de servicio R ≤ 20 Ω (RIC N°06, 6.1); tierra de protección R ≤ Vs/I₀ (RIC N°06, 7.3); TS + TP común en TN-S: R ≤ 20 Ω desde BT y ≤ 5 Ω con subestación (RIC 6.7.3), interconexión MT–BT R < Vca/Id con Vca = 72/t (0,1–0,9 s), 78/t^0,18 (0,9–3 s), 64 V (3–5 s), 50 V (> 5 s) (RIC 10.2). TN-S: Zs·Ia ≤ U₀ y R_B/R_E ≤ 50/(U₀ − 50) según IEC 60364-4-41. Las fórmulas de Em y Es valen para mallas regulares en suelo homogéneo; con suelo de dos capas o geometría irregular se usa software. Los datos de ejemplo son supuestos o sintéticos. Material docente · Mario Miranda Araos · CFT Estatal O'Higgins.</footer>
 </div>
 
 <script>
@@ -1238,12 +1299,12 @@ function renderMalla(){
     <tr><td>E paso</td><td class="calc">${nf(c.Ep0,0)} V</td><td class="calc">${m.layer?nf(c.Ep,0)+' V':'—'}</td></tr></tbody>`;
   $('tol-note').textContent=m.layer?`La capa multiplica por ${nf(c.Et/c.Et0,1)} la tensión de contacto tolerable. Debe mantenerse en el tiempo: es parte del diseño.`:'Activa la capa de gravilla en el paso 1 para ver su efecto.';
   // 6. verificación
-  const atajo=c.GPR<=c.Et, okEm=c.Em<=c.Et, okEs=c.Es<=c.Ep, okT=atajo||(okEm&&okEs), lim=rLim(), okR=c.Rg<=lim, ok=okT&&okR;
-  const vMsg=ok?`Tensiones tolerables y R ≤ ${fmtL(lim)} Ω`:[!okR?`R supera el límite ${st.tipo} de ${fmtL(lim)} Ω`:'',!okT?'Tensiones de contacto o paso sobre lo tolerable':''].filter(Boolean).join(' · ');
+  const atajo=c.GPR<=c.Et, okEm=c.Em<=c.Et, okEs=c.Es<=c.Ep, okT=atajo||(okEm&&okEs), lim=rLim(), okR=c.Rg<=lim, okI=!(st.tipo==='TN'&&st.tnFeed==='MT')||interCheck(c).ok, ok=okT&&okR&&okI;
+  const vMsg=ok?`Tensiones tolerables y R ≤ ${fmtL(lim)} Ω`:[!okR?`R supera el límite ${tipoCorto()} de ${fmtL(lim)} Ω`:'',!okT?'Tensiones de contacto o paso sobre lo tolerable':'',!okI?'No cumple la interconexión MT–BT: separar tierras':''].filter(Boolean).join(' · ');
   $('gpr-formula').innerHTML=`GPR = IG · Rg = ${nf(c.IG,0)} · ${nf(c.Rg,2)}\n<span class="hi">GPR = ${nf(c.GPR,0)} V</span>  ${atajo?'≤':'>'} E contacto ${nf(c.Et,0)} V\n${atajo?'El atajo basta: ninguna persona queda expuesta a más que el GPR.':'El atajo no alcanza: se verifican Em y Es.'}`;
   meter($('meter-em'),c.Em,c.Et,'Em'); meter($('meter-es'),c.Es,c.Ep,'Es');
-  $('verdict').innerHTML=`<div class="vcell"><p class="eyebrow">Resultado</p><p class="big" style="color:${ok?'var(--ok)':'var(--bad)'}">${ok?'La malla cumple como '+st.tipo:'La malla no cumple como '+st.tipo}</p><p style="font-size:13px;color:var(--muted)">${vMsg}</p></div>
-    <div class="vcell"><p class="eyebrow">Rg / límite ${st.tipo}</p><p class="big">${nf(c.Rg,2)} / ${fmtL(lim)} <small>Ω</small></p></div>
+  $('verdict').innerHTML=`<div class="vcell"><p class="eyebrow">Resultado</p><p class="big" style="color:${ok?'var(--ok)':'var(--bad)'}">${ok?'La malla cumple como '+tipoCorto():'La malla no cumple como '+tipoCorto()}</p><p style="font-size:13px;color:var(--muted)">${vMsg}</p></div>
+    <div class="vcell"><p class="eyebrow">Rg / límite ${tipoCorto()}</p><p class="big">${nf(c.Rg,2)} / ${fmtL(lim)} <small>Ω</small></p></div>
     <div class="vcell"><p class="eyebrow">GPR</p><p class="big">${nf(c.GPR,0)} <small>V</small></p></div>
     <div class="vcell"><p class="eyebrow">Em / E contacto</p><p class="big">${nf(c.Em,0)} / ${nf(c.Et,0)} <small>V</small></p></div>
     <div class="vcell"><p class="eyebrow">Es / E paso</p><p class="big">${nf(c.Es,0)} / ${nf(c.Ep,0)} <small>V</small></p></div>`;
@@ -1395,7 +1456,7 @@ function renderFund(){
     ['Paso a 5 m del borde',nf(c.V(f.r0+5)-c.V(f.r0+6),0)+' V',nf(Vd(a+5)-Vd(a+6),0)+' V']];
   $('f-tbl-bm').innerHTML='<thead><tr><th></th><th>Semiesfera r₀ = '+nf(f.r0,2)+' m</th><th>Malla '+nf(f.lado,0)+' × '+nf(f.lado,0)+' m</th></tr></thead><tbody>'+rows.map(r=>`<tr><td style="text-align:left">${r[0]}</td><td class="calc">${r[1]}</td><td class="calc">${r[2]}</td></tr>`).join('')+'</tbody>';
   $('f-bm-formula').innerHTML=`a   = lado/√π = ${nf(a,2)} m\nR   = ρ/(4a) = ${nf(f.rho,0)}/(4·${nf(a,2)}) = ${nf(Rd,2)} Ω\nV(x) = (2/π)·GPR·arcsen(a/x), x > a\n<span class="hi">Dentro del área, V = GPR: el suelo sube junto con la estructura</span>`;
-  renderTT();
+  renderTT(); renderTN();
 }
 function drawPersona(m,ok){
   const v=css(); const W=320,H=170,g=140; let s=`<rect x="0" y="${g}" width="${W}" height="${H-g}" fill="${v('--soil')}"/><line x1="0" y1="${g}" x2="${W}" y2="${g}" stroke="${v('--ink')}" stroke-width="2"/>`;
@@ -1456,35 +1517,55 @@ $('f-grava').onchange=e=>{st.fund.grava=e.target.checked; renderFund(); save();}
 
 
 /* =================== TIPO DE TIERRA (TS / TP) =================== */
-if(st.tipo!=='TS'&&st.tipo!=='TP') st.tipo='TP';
-const tipoCorto=()=>st.tipo;
-const tipoLargo=()=>st.tipo==='TS'?'Tierra de servicio':'Tierra de protección';
+if(!['TS','TP','TN'].includes(st.tipo)) st.tipo='TP';
+if(st.tnFeed!=='BT'&&st.tnFeed!=='MT') st.tnFeed='MT';
+const tipoCorto=()=>st.tipo==='TN'?'TN-S':st.tipo;
+const tipoLargo=()=>st.tipo==='TS'?'Tierra de servicio':st.tipo==='TP'?'Tierra de protección':'TS + TP común (TN-S, '+(st.tnFeed==='MT'?'subestación MT/BT':'alimentación BT')+')';
 const fmtL=x=>!Number.isFinite(x)?'—':x>=10?nf(x,0):nf(x,2);
-function rLim(){ return st.tipo==='TS'?20:(+st.malla.Vs)/st.malla.I0bt; }
+function rLim(){ return st.tipo==='TS'?20:st.tipo==='TN'?(st.tnFeed==='MT'?5:20):(+st.malla.Vs)/st.malla.I0bt; }
+function vca(t){ if(t<=0.9) return 72/Math.max(t,0.1); if(t<=3) return 78/Math.pow(t,0.18); if(t<=5) return 64; return 50; }
+function interCheck(c){ const m=st.malla, t=m.tf, V=vca(t), Rmax=V/c.IG, D=m.rho*c.IG/(2*Math.PI*250); return {t,V,Rmax,ok:c.Rg<Rmax,D}; }
 const TIPO_TXT={
   TS:'<b>Tierra de servicio (TS):</b> une a tierra el <b>neutro</b> del sistema, en el transformador o en el empalme. Fija el potencial del neutro respecto de tierra y entrega el camino de retorno a las corrientes de falla. Criterio aplicado: R<sub>TS</sub> ≤ 20 Ω (RIC N°06, 6.1).',
-  TP:'<b>Tierra de protección (TP):</b> une a tierra las <b>masas</b>: carcasas, tableros y estructuras metálicas que normalmente no tienen tensión. Ante una falla de aislación limita la tensión que queda en la carcasa y permite que la protección despeje. Criterio aplicado: R<sub>TP</sub> ≤ Vs / I₀ (RIC N°06, 7.3).'
+  TP:'<b>Tierra de protección (TP):</b> une a tierra las <b>masas</b>: carcasas, tableros y estructuras metálicas que normalmente no tienen tensión. Ante una falla de aislación limita la tensión que queda en la carcasa y permite que la protección despeje. Criterio aplicado: R<sub>TP</sub> ≤ Vs / I₀ (RIC N°06, 7.3).',
+  TN:'<b>TS + TP común en esquema TN-S:</b> un solo electrodo para el <b>neutro</b> del transformador y las <b>masas</b>. Neutro (N) y protección (PE) salen separados desde ese punto y no se vuelven a unir. Las masas se protegen por el lazo de falla (Zs·Ia ≤ U₀) o con diferencial, no por la R del electrodo: ver el paso 6 del módulo A.'
 };
 function renderTipo(){
   const t=st.tipo;
-  $('t-TS').setAttribute('aria-pressed',t==='TS'); $('t-TP').setAttribute('aria-pressed',t==='TP');
+  $('t-TS').setAttribute('aria-pressed',t==='TS'); $('t-TP').setAttribute('aria-pressed',t==='TP'); $('t-TN').setAttribute('aria-pressed',t==='TN');
+  $('tn-fields').hidden=t!=='TN'; $('tn-BT').setAttribute('aria-pressed',st.tnFeed==='BT'); $('tn-MT').setAttribute('aria-pressed',st.tnFeed==='MT');
   $('tipo-desc').innerHTML=TIPO_TXT[t]; $('tp-fields').hidden=t!=='TP';
   $('g-Vs').value=st.malla.Vs; if(document.activeElement!==$('g-I0')) $('g-I0').value=st.malla.I0bt;
   const lim=rLim();
-  $('tipo-formula').innerHTML=t==='TS'
+  $('tipo-formula').innerHTML=t==='TN'
+    ?(st.tnFeed==='MT'
+      ?`Conexión: neutro + masas → un electrodo (malla de la subestación)\n<span class="hi">R ≤ mín(20 Ω; 5 Ω) = 5 Ω</span>   (RIC 6.1 y 6.7.3)\nEm ≤ E contacto y Es ≤ E paso   (módulo C)\nInterconexión MT–BT: R < Vca/Id   (RIC 10.2)\nMasas: Zs·Ia ≤ U₀ o diferencial   (módulo A, paso 6)`
+      :`Conexión: neutro + masas → un electrodo\n<span class="hi">R ≤ 20 Ω</span>   (RIC 6.1)\nMasas: Zs·Ia ≤ U₀ o diferencial   (módulo A, paso 6)\nFalla directa a tierra: R_B/R_E ≤ 50/(U₀ − 50)`)
+    :t==='TS'
     ?`Conexión: neutro → electrodo\n<span class="hi">R_TS ≤ 20 Ω</span>`
     :`Conexión: masas → electrodo\nR_TP ≤ Vs / I₀ = ${st.malla.Vs} / ${nf(st.malla.I0bt,3)}\n<span class="hi">R_TP ≤ ${fmtL(lim)} Ω</span>`;
-  document.querySelectorAll('[data-chip]').forEach(el=>{ el.textContent='Calculando: '+tipoLargo()+' ('+t+')'; });
+  document.querySelectorAll('[data-chip]').forEach(el=>{ el.textContent='Calculando: '+tipoLargo()+(t==='TN'?'':' ('+t+')'); });
 }
 function rerenderActive(){ if(st.tab==='malla') renderMalla(); else if(st.tab==='conf') renderConf(); }
 function setTipo(t){ st.tipo=t; save(); renderTipo(); rerenderActive(); }
-$('t-TS').onclick=()=>setTipo('TS'); $('t-TP').onclick=()=>setTipo('TP');
+$('t-TS').onclick=()=>setTipo('TS'); $('t-TP').onclick=()=>setTipo('TP'); $('t-TN').onclick=()=>setTipo('TN');
+['BT','MT'].forEach(f=>$('tn-'+f).onclick=()=>{ st.tnFeed=f; save(); renderTipo(); rerenderActive(); });
 $('g-Vs').onchange=e=>{ st.malla.Vs=e.target.value; save(); renderTipo(); rerenderActive(); };
 $('g-I0').addEventListener('input',e=>{ const x=num(e.target.value); if(x>0){ st.malla.I0bt=x; save(); renderTipo(); rerenderActive(); } });
 
 function renderCrit(c){
   const lim=rLim(), ok=c.Rg<=lim, m=st.malla;
-  $('crit-title').textContent='Criterio de resistencia · '+tipoLargo()+' ('+st.tipo+')';
+  $('crit-title').textContent='Criterio de resistencia · '+tipoLargo();
+  if(st.tipo==='TN'){
+    const ic=interCheck(c), mt=st.tnFeed==='MT';
+    $('bt-formula').innerHTML=mt
+      ?`R ≤ mín(20 Ω; 5 Ω) = 5 Ω   (RIC 6.1 y 6.7.3)\nRg = ${nf(c.Rg,2)} Ω → ${ok?'cumple':'no cumple'}\n\nInterconexión MT–BT (RIC 10.2), despeje tf = ${nf(ic.t,2)} s:\nVca = ${ic.t<=0.9?'72/t':ic.t<=3?'78/t^0,18':'valor fijo'} = ${nf(ic.V,0)} V\nR < Vca/Id = ${nf(ic.V,0)}/${nf(c.IG,0)} = ${nf(ic.Rmax,3)} Ω\n<span class="hi">${ic.ok?'Se puede usar una tierra común':'No se puede usar tierra común'}: Rg ${ic.ok?'<':'≥'} ${nf(ic.Rmax,3)} Ω</span>${ic.ok?'':`\nTierras independientes a D ≥ ρ·Id/(2π·250) = ${nf(ic.D,0)} m`}`
+      :`R ≤ 20 Ω   (RIC 6.1)\n<span class="hi">${ok?'Cumple':'No cumple'}: ${nf(c.Rg,2)} Ω ${ok?'≤':'>'} 20 Ω</span>\nMasas: Zs·Ia ≤ U₀ o diferencial (módulo A, paso 6)`;
+    $('crit-note').textContent=mt
+      ?'Con subestación propia, la falla a tierra de MT eleva la malla, el neutro de BT y las masas. Por eso, además de R, deben cumplirse Em y Es y la condición de interconexión. Id es la corriente IG del paso 1 y tf la duración de la falla (en "Calcular Df").'
+      :'Alimentada desde BT, la malla es la tierra de servicio y de protección a la vez. La protección de las personas depende del lazo de falla o del diferencial, no de este valor.';
+    return;
+  }
   $('bt-formula').innerHTML=(st.tipo==='TS'
     ?`R_TS ≤ 20 Ω   (RIC N°06, 6.1)\nRg = ${nf(c.Rg,2)} Ω`
     :`R_TP ≤ Vs / I₀ = ${m.Vs} / ${nf(m.I0bt,3)}   (RIC N°06, 7.3)\nR_TP ≤ ${fmtL(lim)} Ω\nRg = ${nf(c.Rg,2)} Ω`)
@@ -1590,8 +1671,8 @@ function barChart(svg,items,lim){
     s+=`<text x="${M.l-8}" y="${y+rowH/2}" text-anchor="end" ${fs} font-weight="600" fill="${v('--ink')}">${it.name}</text>`;
     s+=`<rect x="${M.l}" y="${y+7}" width="${Math.max(2,X(it.R)-M.l)}" height="${rowH-16}" rx="4" fill="${v(ok?'--ok':'--bad')}"/>`;
     s+=`<text x="${X(it.R)+6}" y="${y+rowH/2+4}" ${f} font-weight="600" fill="${v('--ink')}">${nf(it.R,2)} Ω</text>`; });
-  if(limIn){ s+=`<line x1="${X(lim)}" y1="${M.t-10}" x2="${X(lim)}" y2="${H-M.b}" stroke="${v('--ink')}" stroke-width="2" stroke-dasharray="6 4"/><text x="${X(lim)}" y="${M.t-12}" text-anchor="${X(lim)>W-120?'end':'middle'}" ${f} font-weight="600" fill="${v('--ink')}">Límite ${st.tipo} = ${fmtL(lim)} Ω</text>`; }
-  else s+=`<text x="${W-4}" y="${M.t-8}" text-anchor="end" ${f} fill="${v('--ink')}">Límite ${st.tipo} = ${fmtL(lim)} Ω (fuera de escala)</text>`;
+  if(limIn){ s+=`<line x1="${X(lim)}" y1="${M.t-10}" x2="${X(lim)}" y2="${H-M.b}" stroke="${v('--ink')}" stroke-width="2" stroke-dasharray="6 4"/><text x="${X(lim)}" y="${M.t-12}" text-anchor="${X(lim)>W-120?'end':'middle'}" ${f} font-weight="600" fill="${v('--ink')}">Límite ${tipoCorto()} = ${fmtL(lim)} Ω</text>`; }
+  else s+=`<text x="${W-4}" y="${M.t-8}" text-anchor="end" ${f} fill="${v('--ink')}">Límite ${tipoCorto()} = ${fmtL(lim)} Ω (fuera de escala)</text>`;
   svg.innerHTML=s;
 }
 
@@ -1608,14 +1689,14 @@ function renderConf(){
   const K=st.conf, C=calcConf(), o=C.o, lim=rLim(), L=K.L;
   ['u','l','t','g','gb'].forEach(id=>{
     const c=o[id], ok=c.R<=lim;
-    $('kr-'+id).innerHTML=`${nf(c.R,2)} <small>Ω</small> <span class="pill ${ok?'ok':'bad'}" style="vertical-align:middle">${ok?'Cumple':'No cumple'} ${st.tipo}</span>`;
+    $('kr-'+id).innerHTML=`${nf(c.R,2)} <small>Ω</small> <span class="pill ${ok?'ok':'bad'}" style="vertical-align:middle">${ok?'Cumple':'No cumple'} ${tipoCorto()}</span>`;
     $('cfg-'+id).classList.toggle('off',!K.use[id]);
     sketch('sk-'+id,id,K,c);
   });
   const items=['u','l','t','g','gb'].filter(id=>K.use[id]).map(id=>o[id]);
-  $('k-comp-lead').innerHTML=`Mismo ρ = ${nf(K.rho,0)} Ω·m y barras de ${nf(L,1)} m. Criterio: <b>${tipoLargo()} (${st.tipo})</b>, R ≤ ${fmtL(lim)} Ω.`;
+  $('k-comp-lead').innerHTML=`Mismo ρ = ${nf(K.rho,0)} Ω·m y barras de ${nf(L,1)} m. Criterio: <b>${tipoLargo()}</b>, R ≤ ${fmtL(lim)} Ω.${st.tipo==='TN'&&st.tnFeed==='MT'?' Para la malla elegida, verifica además Em, Es y la interconexión MT–BT en el módulo C.':''}`;
   barChart($('k-chart'),items,lim);
-  let h='<thead><tr><th>Configuración</th><th>R (Ω)</th><th>Criterio '+st.tipo+' ≤ '+fmtL(lim)+' Ω</th><th>R barra única / R</th><th>GPR = I·R (V)</th><th>Barras</th><th>Conductor (m)</th><th>Material total (m)</th><th>Espacio</th><th>Separación ≥ 2L</th></tr></thead><tbody>';
+  let h='<thead><tr><th>Configuración</th><th>R (Ω)</th><th>Criterio '+tipoCorto()+' ≤ '+fmtL(lim)+' Ω</th><th>R barra única / R</th><th>GPR = I·R (V)</th><th>Barras</th><th>Conductor (m)</th><th>Material total (m)</th><th>Espacio</th><th>Separación ≥ 2L</th></tr></thead><tbody>';
   items.forEach(c=>{ const ok=c.R<=lim; const sepOk=c.sep==null?null:c.sep>=2*L;
     h+=`<tr><td style="text-align:left;font-weight:600">${c.name}</td><td class="calc">${nf(c.R,2)}</td><td>${pill(ok)}</td><td class="dim">${nf(c.vsU,2)} ×</td><td class="dim">${nf(c.GPR,0)}</td><td class="dim">${c.rods||'—'}</td><td class="dim">${c.LC?nf(c.LC,1):'—'}</td><td class="dim">${nf(c.mat,1)}</td><td class="dim" style="text-align:left">${c.space}</td><td>${sepOk==null?'<span class="dim">—</span>':`<span class="pill ${sepOk?'ok':'warn'}">${nf(c.sep,1)} m ${sepOk?'≥':'<'} ${nf(2*L,1)} m</span>`}</td></tr>`; });
   if(!items.length) h+='<tr><td colspan="10">Marca al menos una configuración en el paso 2.</td></tr>';
@@ -1666,8 +1747,56 @@ $('b-k-rhoC').onclick=()=>{ st.conf.rho=st.malla.rho; syncConfInputs(); renderCo
 $('b-k-rhoB').onclick=()=>{ if(st.rhoEq>0){ st.conf.rho=+st.rhoEq.toFixed(1); syncConfInputs(); renderConf(); save(); } };
 $('b-k-toC').onclick=()=>{ const k=st.conf, m=st.malla; m.rho=k.rho; m.Lx=k.gx; m.Ly=k.gy; m.D=k.gD; m.h=k.h; m.cond=k.dc; m.rodPos='per'; m.nR=Math.max(1,Math.round(k.gn)); m.Lr=k.L; undoStack=[]; syncMallaInputs(); showTab('malla'); location.hash='geometria'; };
 
+
+/* =================== A6. FALLA EN TN-S =================== */
+const SECC=[1.5,2.5,4,6,10,16,25,35,50];
+$('tn-Sf').innerHTML=SECC.map(x=>`<option value="${x}">${nf(x,x%1?1:0)}</option>`).join(''); $('tn-Sf').value='2.5';
+$('tn-Spe').innerHTML=$('tn-Sf').innerHTML; $('tn-Spe').value='2.5';
+function renderTN(){
+  const U0=num($('tn-U0').value), Zt=num($('tn-Zt').value)/1000, L=num($('tn-L').value), Sf=num($('tn-Sf').value), Spe=num($('tn-Spe').value);
+  const k=num($('tn-curve').value), In=num($('tn-In').value), Idn=num($('tn-Idn').value)/1000;
+  if(![U0,L,Sf,Spe,k,In,Idn].every(x=>x>0)||!(Zt>=0)) return;
+  const rc=0.0225, Rf=rc*L/Sf, Rpe=rc*L/Spe, Zs=Zt+Rf+Rpe, Id=U0/Zs, Ia=k*In, Uf=Id*Rpe;
+  const ok=Zs*Ia<=U0, Lmax=(U0/Ia-Zt)/(rc*(1/Sf+1/Spe));
+  const cur={5:'B',10:'C',20:'D'}[k]||'';
+  $('tn-formula').innerHTML=`Zs = Z_fuente + ρ·L/S_fase + ρ·L/S_PE\n   = ${nf(Zt,3)} + ${nf(Rf,3)} + ${nf(Rpe,3)}\n<span class="hi">Zs = ${nf(Zs,3)} Ω</span>\nId = U₀/Zs = ${nf(U0,0)}/${nf(Zs,3)} = <span class="hi">${nf(Id,0)} A</span>\nIa = ${k}·In = ${k}·${nf(In,0)} = ${nf(Ia,0)} A  (disparo magnético ${cur})\nCondición: Zs·Ia ≤ U₀ → ${nf(Zs*Ia,0)} V ${ok?'≤':'>'} ${nf(U0,0)} V\nTensión de falla en la carcasa ≈ Id·R_PE = ${nf(Uf,0)} V\nLargo máximo con esta protección: ${Lmax>0?nf(Lmax,0)+' m':'ninguno'}`;
+  $('tn-checks').innerHTML=checkList([
+    [ok,`Termomagnético ${cur}${nf(In,0)}: Id = ${nf(Id,0)} A ${ok?'≥':'<'} Ia = ${nf(Ia,0)} A, ${ok?'dispara en forma instantánea (< 0,4 s)':'no asegura el disparo en 0,4 s'}`],
+    [Id>=Idn,`Diferencial ${nf(Idn*1000,0)} mA: detecta la falla y despeja en menos de 300 ms`],
+    [Uf<=50||ok,`Carcasa a ${nf(Uf,0)} V durante la falla: ${Uf<=50?'bajo 50 V':ok?'sobre 50 V, pero por muy poco tiempo':'sobre 50 V y sin despeje rápido: peligro'}`],
+    [Spe>=(Sf<=25?Sf:Sf<=50?25:Sf/2),`Sección del PE: ${nf(Spe,1)} mm² frente a ${nf(Sf<=25?Sf:Sf<=50?25:Sf/2,1)} mm² exigidos para fase de ${nf(Sf,1)} mm²`]
+  ]);
+  // esquema
+  const v=css(), ink=v('--ink'), W=640, H=250, g=215;
+  let s=`<rect x="0" y="${g}" width="${W}" height="${H-g}" fill="${v('--soil')}"/><line x1="0" y1="${g}" x2="${W}" y2="${g}" stroke="${ink}" stroke-width="2"/>`;
+  s+=`<circle cx="70" cy="70" r="28" fill="none" stroke="${ink}" stroke-width="3"/><circle cx="96" cy="70" r="28" fill="none" stroke="${ink}" stroke-width="3"/>`;
+  const t=(x,y,txt,c,a='start',w=600)=>`<text x="${x}" y="${y}" text-anchor="${a}" font-family="IBM Plex Sans,Arial,sans-serif" font-size="13" font-weight="${w}" fill="${c||ink}">${txt}</text>`;
+  s+=`<line x1="124" y1="55" x2="470" y2="55" stroke="${ink}" stroke-width="3"/>`+t(135,50,'L1');
+  s+=`<polyline points="83,98 83,120 470,120" fill="none" stroke="${v('--blue')}" stroke-width="3"/>`+t(300,113,'N',v('--blue'),'middle');
+  s+=`<polyline points="83,120 83,160 470,160" fill="none" stroke="${v('--ok')}" stroke-width="3"/>`+t(300,153,'PE',v('--ok'),'middle');
+  s+=`<line x1="83" y1="160" x2="83" y2="185" stroke="${ink}" stroke-width="3"/><rect x="71" y="185" width="24" height="22" fill="${v('--surface')}" stroke="${ink}" stroke-width="3"/><line x1="83" y1="207" x2="83" y2="${g}" stroke="${ink}" stroke-width="3"/>`+t(102,201,'R_B');
+  s+=`<circle cx="83" cy="120" r="5" fill="${ink}"/>`+t(76,114,'unión N–PE','','end',500);
+  s+=`<rect x="470" y="35" width="120" height="140" rx="8" fill="${v('--surface-2')}" stroke="${v('--soft')}" stroke-width="3"/><line x1="470" y1="160" x2="530" y2="160" stroke="${v('--ok')}" stroke-width="3"/>`;
+  s+=`<polyline points="470,55 492,72 478,88 500,105 512,160" fill="none" stroke="${v('--red')}" stroke-width="3"/>`;
+  s+=`<polyline points="150,45 440,45" fill="none" stroke="${v('--accent')}" stroke-width="3" stroke-dasharray="10 7"/><polyline points="440,172 150,172" fill="none" stroke="${v('--accent')}" stroke-width="3" stroke-dasharray="10 7"/>`;
+  s+=t(300,30,'Id = '+nf(Id,0)+' A →',v('--accent'),'middle')+t(300,190,'← retorno por el PE, no por el terreno',v('--accent'),'middle',500)+t(530,25,'Carcasa: '+nf(Uf,0)+' V',ok?v('--ok'):v('--bad'),'middle');
+  $('tn-svg').setAttribute('viewBox',`0 0 ${W} ${H}`); $('tn-svg').innerHTML=s;
+  // gráfico Id vs L
+  const xm=Math.max(50,Math.ceil(Math.max(L,Lmax>0?Lmax:0)*1.6/10)*10); const pts=[];
+  for(let i=1;i<=200;i++){ const x=xm*i/200; pts.push([x,U0/(Zt+rc*x*(1/Sf+1/Spe))]); }
+  lineChart($('tn-chart'),{xmin:0,xmax:xm,ymin:0,ymax:Ia*3,xlab:'Largo del circuito L (m)',ylab:'Corriente de falla Id (A)',series:[{pts,color:'--accent',w:2.5}],hlines:[{y:Ia,color:'--bad',label:'Ia = '+nf(Ia,0)+' A'}],vlines:[{x:L,color:'--ink',label:'L'}].concat(Lmax>0&&Lmax<xm?[{x:Lmax,color:'--bad',label:'L máx'}]:[])});
+  $('tn-chart-note').textContent=Lmax>0?`Hasta ${nf(Lmax,0)} m la corriente de falla supera el disparo magnético. Más allá, hay que aumentar la sección, bajar In, cambiar a curva B o usar diferencial.`:'Con esta fuente y protección no hay largo que asegure el disparo magnético: usa diferencial.';
+  // falla directa a tierra
+  const RB=num($('tn-RB').value), RE=num($('tn-RE').value); if(!(RB>0&&RE>0)) return;
+  const Upe=U0*RB/(RB+RE), lim=50/(U0-50);
+  $('tn-rb-formula').innerHTML=`Ifalla = U₀/(R_B + R_E) = ${nf(U0/(RB+RE),2)} A\nU_PE = U₀·R_B/(R_B + R_E) = <span class="hi">${nf(Upe,0)} V</span>\nCondición: R_B/R_E ≤ 50/(U₀ − 50) = ${nf(lim,3)}\nR_B/R_E = ${nf(RB/RE,3)} → R_B máx = ${nf(lim*RE,2)} Ω`;
+  $('tn-rb-checks').innerHTML=checkList([[Upe<=50,`PE y masas a ${nf(Upe,0)} V respecto de tierra lejana (≤ 50 V)`],[RB<=20,`Tierra de servicio R_B ≤ 20 Ω (RIC N°06, 6.1): ${nf(RB,1)} Ω`]]);
+}
+['tn-U0','tn-Zt','tn-L','tn-In','tn-Idn','tn-RB','tn-RE'].forEach(id=>$(id).addEventListener('input',renderTN));
+['tn-Sf','tn-Spe','tn-curve'].forEach(id=>$(id).addEventListener('change',renderTN));
+
 /* ---------- pestañas ---------- */
-const TAB_OF={'f-importancia':'fund','f-dispersion':'fund','f-tensiones':'fund','f-barra-malla':'fund','f-tt':'fund',arreglo:'res',registro:'res',curva:'res',equivalente:'res',datos:'malla',conductor:'malla',geometria:'malla',resistencia:'malla',tolerables:'malla',verificacion:'malla','k-datos':'conf','k-config':'conf','k-comp':'conf','k-detalle':'conf'};
+const TAB_OF={'f-importancia':'fund','f-dispersion':'fund','f-tensiones':'fund','f-barra-malla':'fund','f-tt':'fund','f-tn':'fund',arreglo:'res',registro:'res',curva:'res',equivalente:'res',datos:'malla',conductor:'malla',geometria:'malla',resistencia:'malla',tolerables:'malla',verificacion:'malla','k-datos':'conf','k-config':'conf','k-comp':'conf','k-detalle':'conf'};
 function showTab(t){
   ['fund','res','malla','conf'].forEach(k=>{ $('panel-'+k).hidden=t!==k; $('tab-'+k).setAttribute('aria-selected',t===k); });
   st.tab=t; save();
