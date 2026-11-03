@@ -1,0 +1,1332 @@
+<title>Laboratorio de puesta a tierra</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: banco de trabajo en una columna; pestañas por tema (resistividad / malla), pasos numerados porque el orden es el del procedimiento de terreno */
+:root{
+  --bg:#F6F4EE; --surface:#FDFCF9; --surface-2:#EFECE3; --line:#DDD8CC;
+  --ink:#14213D; --fg:#1B2433; --muted:#5A6476; --soft:#6B7585;
+  --accent:#A9531B; --accent-2:#C9773A; --on-accent:#FBF3EA;
+  --blue:#2F6B8A; --red:#A3341E; --soil:#E6D3B8; --soil-2:#CDB08A;
+  --code-bg:#14213D; --code-fg:#F6F4EE; --code-hi:#E8A56E;
+  --ok:#1B7F5A; --ok-bg:#E5F5EE; --bad:#B3261E; --bad-bg:#FCEBEA; --warn:#8A5A00; --warn-bg:#FFF4E0;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'Courier New',monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1524; --surface:#161F33; --surface-2:#1D2840; --line:#2C3956;
+  --ink:#EDE9DF; --fg:#DCD8CE; --muted:#A3ACBC; --soft:#8D97A8;
+  --accent:#E8A56E; --accent-2:#D88A4C; --on-accent:#1A1209;
+  --blue:#7FB3CF; --red:#E07B66; --soil:#5A4A36; --soil-2:#46392A;
+  --code-bg:#0A101C; --code-fg:#EDE9DF; --code-hi:#E8A56E;
+  --ok:#6FCB9F; --ok-bg:#16372A; --bad:#F09A90; --bad-bg:#3C1A18; --warn:#F2C26B; --warn-bg:#3A2C10;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1524; --surface:#161F33; --surface-2:#1D2840; --line:#2C3956;
+  --ink:#EDE9DF; --fg:#DCD8CE; --muted:#A3ACBC; --soft:#8D97A8;
+  --accent:#E8A56E; --accent-2:#D88A4C; --on-accent:#1A1209;
+  --blue:#7FB3CF; --red:#E07B66; --soil:#5A4A36; --soil-2:#46392A;
+  --code-bg:#0A101C; --code-fg:#EDE9DF; --code-hi:#E8A56E;
+  --ok:#6FCB9F; --ok-bg:#16372A; --bad:#F09A90; --bad-bg:#3C1A18; --warn:#F2C26B; --warn-bg:#3A2C10;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{color:var(--ink);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(26px,5vw,38px);font-weight:700}
+h2{font-size:22px;font-weight:700}
+h3{font-size:16px;font-weight:600}
+p{margin:0}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.lead{color:var(--muted);max-width:68ch}
+header{display:flex;flex-direction:column;gap:8px}
+.tabs{display:flex;gap:6px;border-bottom:2px solid var(--line);overflow-x:auto}
+.tab{appearance:none;border:0;background:none;font:600 15px var(--sans);color:var(--muted);padding:10px 14px;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;white-space:nowrap;display:flex;gap:8px;align-items:center}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab:disabled{cursor:not-allowed;opacity:.7}
+.tag{font:500 11px var(--sans);letter-spacing:.04em;padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--muted)}
+.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:6px;overflow-x:auto;padding-block:8px;border-bottom:1px solid var(--line)}
+.steps a{flex:none;text-decoration:none;color:var(--fg);font-size:13px;font-weight:500;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+.steps a b{color:var(--accent);margin-right:4px}
+.steps a:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,.tab:focus-visible,.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section.step{display:flex;flex-direction:column;gap:14px;scroll-margin-top:64px}
+.step-head{display:flex;gap:12px;align-items:baseline}
+.num{font:700 28px var(--mono);color:var(--accent);line-height:1}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1 1 110px}
+.field label{font-size:12px;color:var(--muted);font-weight:500}
+input[type=number],input[type=text],input[type=date]{font:500 15px var(--mono);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0;font-variant-numeric:tabular-nums}
+input[type=text],input[type=date]{font-family:var(--sans)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{appearance:none;border:0;background:none;font:600 14px var(--sans);color:var(--muted);padding:9px 16px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.btn{appearance:none;font:600 14px var(--sans);border-radius:8px;padding:8px 14px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.btn:hover{border-color:var(--accent-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.ghost{background:none}
+.formula{font:500 15px/1.7 var(--mono);background:var(--code-bg);color:var(--code-fg);border-radius:10px;padding:12px 16px;overflow-x:auto;white-space:pre}
+.formula .hi{color:var(--code-hi);font-weight:600}
+.big{font:700 30px var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
+.big small{font-size:15px;color:var(--muted);font-weight:500}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.checks{display:flex;flex-direction:column;gap:6px;list-style:none;margin:0;padding:0}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px}
+.pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.bad{background:var(--bad-bg);color:var(--bad)} .pill.warn{background:var(--warn-bg);color:var(--warn)}
+.checks li{display:flex;gap:10px;align-items:baseline;font-size:14px}
+.checks li .pill{flex:none;min-width:84px;justify-content:center}
+.note{font-size:13px;color:var(--muted);border-left:3px solid var(--accent-2);padding:2px 0 2px 12px;max-width:72ch}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th{background:var(--ink);color:var(--bg);font-weight:600;text-align:center;padding:8px 10px;white-space:nowrap;font-size:13px}
+td{padding:5px 8px;border-top:1px solid var(--line);text-align:center;white-space:nowrap}
+tbody tr:nth-child(even) td{background:var(--surface-2)}
+td input[type=number]{width:96px;padding:5px 8px;text-align:right}
+td.calc{font-family:var(--mono);font-weight:600;color:var(--ink);text-align:right}
+td.dim{color:var(--muted);font-family:var(--mono);text-align:right}
+.x{appearance:none;border:0;background:none;color:var(--soft);font-size:18px;cursor:pointer;padding:2px 6px;line-height:1}
+.x:hover{color:var(--bad)}
+.diagram,.chart{width:100%;display:block}
+.chart-wrap{position:relative}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font:500 12px/1.4 var(--mono);padding:6px 9px;border-radius:6px;white-space:nowrap;transform:translate(-50%,calc(-100% - 10px))}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--surface)}
+.sw-line{width:20px;height:2px;background:var(--blue)}
+.slider{display:grid;grid-template-columns:72px 1fr 92px;gap:10px;align-items:center}
+.slider label{font:600 14px var(--mono);color:var(--ink)}
+.result{display:flex;flex-wrap:wrap;gap:18px 32px;align-items:end}
+.copybox{width:100%;height:110px;font:12px var(--mono);background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px}
+.tip-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.next{background:var(--ink);color:var(--bg);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.next h3{color:var(--bg)} .next p{color:var(--bg);opacity:.85;font-size:14px}
+footer{font-size:12px;color:var(--soft);border-top:1px solid var(--line);padding-top:12px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+.tabpanel{display:flex;flex-direction:column;gap:20px}
+.tabpanel[hidden]{display:none!important}
+.sel{font:500 14px var(--sans);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;max-width:100%}
+details{border-top:1px solid var(--line);padding-top:10px}
+.meter{display:flex;flex-direction:column;gap:6px}
+.track{position:relative;height:28px;background:var(--surface-2);border-radius:6px;overflow:hidden}
+.fill{position:absolute;left:0;top:0;bottom:0;border-radius:6px 0 0 6px}
+.fill.ok{background:var(--ok)} .fill.bad{background:var(--bad)}
+.lim{position:absolute;top:-4px;bottom:-4px;width:3px;background:var(--ink)}
+.meter-lab{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font:500 13px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.meter-lab b{color:var(--ink)}
+#verdict{flex-direction:row;flex-wrap:wrap;align-items:center;gap:12px 24px}
+#verdict .big{font-size:24px}
+.vcell{display:flex;flex-direction:column;gap:4px;min-width:140px}
+.slider .val{font:600 13px var(--mono);color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+.qs{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14px;max-width:72ch}
+table.left td{text-align:left;white-space:normal;min-width:200px;vertical-align:top}
+.chart-wrap{min-width:0}
+input[type=range]:disabled{opacity:.4}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">PRO001 · Unidad 3 · Mallas de tierra</p>
+  <h1>Laboratorio de puesta a tierra</h1>
+  <p class="lead">Del terreno a la malla verificada: mide y modela la resistividad, obtén ρ equivalente y con ese valor dimensiona el conductor, calcula la resistencia de la malla y verifica las tensiones de contacto y de paso.</p>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Módulos">
+  <button class="tab" role="tab" aria-selected="true" aria-controls="panel-fund" id="tab-fund"><b style="color:var(--accent)">A</b> Fundamentos</button>
+  <button class="tab" role="tab" aria-selected="false" aria-controls="panel-res" id="tab-res"><b style="color:var(--accent)">B</b> Resistividad del terreno</button>
+  <button class="tab" role="tab" aria-selected="false" aria-controls="panel-malla" id="tab-malla"><b style="color:var(--accent)">C</b> Diseño de malla</button>
+</nav>
+
+<!-- =========================================================== -->
+<!-- ===================== A. FUNDAMENTOS ====================== -->
+<!-- =========================================================== -->
+<div id="panel-fund" role="tabpanel" aria-labelledby="tab-fund" class="tabpanel">
+<nav class="steps" aria-label="Pasos de fundamentos">
+  <a href="#f-importancia"><b>1</b>Importancia</a>
+  <a href="#f-dispersion"><b>2</b>Dispersión</a>
+  <a href="#f-tensiones"><b>3</b>Contacto y paso</a>
+  <a href="#f-barra-malla"><b>4</b>Barra vs malla</a>
+  <a href="#f-tt"><b>5</b>Falla en TT</a>
+</nav>
+
+<!-- 1. IMPORTANCIA -->
+<section class="step" id="f-importancia">
+  <div class="step-head"><span class="num">1</span><div><h2>Por qué importa el SPT</h2><p class="lead">Es invisible en operación normal y decisivo en una falla. Cuando falta o está mal hecho, la tensión peligrosa aparece justo donde hay personas.</p></div></div>
+  <div class="scroll"><table class="left">
+    <thead><tr><th>Situación</th><th>Consecuencia</th></tr></thead>
+    <tbody>
+      <tr><td>Falla fase–carcasa sin tierra de protección</td><td>La carcasa queda a 220 V indefinidamente. Nada opera hasta que una persona cierra el circuito.</td></tr>
+      <tr><td>Tierra de protección de alta resistencia</td><td>La corriente de falla es pequeña, el termomagnético no dispara y la tensión peligrosa persiste.</td></tr>
+      <tr><td>Tierra de servicio deficiente o neutro cortado</td><td>El neutro se desplaza: con carga desbalanceada, algunas fases suben hacia 380 V.</td></tr>
+      <tr><td>Falla en MT con tierras mal coordinadas</td><td>Se transfieren cientos o miles de volts a la instalación de BT.</td></tr>
+      <tr><td>Rayo sin SPT adecuado</td><td>Arcos, incendio, daño a electrónica y tensiones de paso letales.</td></tr>
+    </tbody></table></div>
+  <div class="next"><h3>Idea central del módulo</h3><p>Lo que daña a una persona no es el valor de R: es la pendiente del potencial en la superficie. Los pasos siguientes lo muestran con números.</p></div>
+</section>
+
+<!-- 2. DISPERSIÓN -->
+<section class="step" id="f-dispersion">
+  <div class="step-head"><span class="num">2</span><div><h2>Dispersión de la corriente y embudo de potencial</h2><p class="lead">Electrodo semiesférico de radio r₀ en suelo homogéneo. La corriente se reparte en semiesferas cada vez más grandes, y el potencial cae como 1/x.</p></div></div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Datos</h3>
+      <div class="slider"><label for="f-rho">ρ</label><input type="range" id="f-rho" min="10" max="2000" step="10"><span class="val" id="f-rho-v"></span></div>
+      <div class="slider"><label for="f-I">I</label><input type="range" id="f-I" min="10" max="2000" step="10"><span class="val" id="f-I-v"></span></div>
+      <div class="slider"><label for="f-r0">r₀</label><input type="range" id="f-r0" min="0.1" max="2" step="0.05"><span class="val" id="f-r0-v"></span></div>
+      <div class="formula" id="f-disp-formula"></div>
+    </div>
+    <div class="panel">
+      <h3>Corte del terreno</h3>
+      <svg class="diagram" id="f-corte" role="img" aria-label="Corte del terreno con líneas de corriente y superficies equipotenciales"></svg>
+      <p class="note">Las bandas son superficies equipotenciales; cada una indica su tensión respecto de tierra lejana. Las flechas son líneas de corriente.</p>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Embudo de potencial en la superficie</h3>
+    <div class="chart-wrap"><svg class="chart" id="f-embudo" role="img" aria-label="Potencial en la superficie versus distancia al electrodo"></svg></div>
+    <div class="scroll"><table id="f-tbl-v"></table></div>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>¿Dónde está la resistencia?</h3>
+      <div class="slider"><label for="f-k">x/r₀</label><input type="range" id="f-k" min="1" max="40" step="0.5"><span class="val" id="f-k-v"></span></div>
+      <div class="track" style="height:22px"><div class="fill" id="f-k-bar" style="background:var(--accent)"></div></div>
+      <p class="formula" id="f-k-formula"></p>
+    </div>
+    <div class="panel">
+      <h3>Para concluir</h3>
+      <ol class="qs"><li>¿Por qué el suelo, mucho más resistivo que el cobre, puede conducir una corriente de falla?</li><li>Si la mitad de R está entre r₀ y 2r₀, ¿qué medidas en esa zona bajan más la resistencia?</li><li>¿Qué pasa con el GPR si la corriente de falla se duplica? ¿Y con la forma del embudo?</li></ol>
+    </div>
+  </div>
+</section>
+
+<!-- 3. CONTACTO Y PASO -->
+<section class="step" id="f-tensiones">
+  <div class="step-head"><span class="num">3</span><div><h2>Tensión de contacto, de paso y transferida</h2><p class="lead">Ubica a la persona a una distancia x del electrodo. El gráfico muestra qué diferencia de potencial queda aplicada a su cuerpo en cada caso, con los datos del paso 2.</p></div></div>
+  <div class="seg" role="group" aria-label="Tipo de tensión">
+    <button id="fm-c" aria-pressed="true">Contacto</button><button id="fm-p" aria-pressed="false">Paso</button><button id="fm-t" aria-pressed="false">Transferida</button>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="slider"><label for="f-x">x</label><input type="range" id="f-x" min="0" max="20" step="0.1"><span class="val" id="f-x-v"></span></div>
+      <div class="slider"><label for="f-ts">ts</label><input type="range" id="f-ts" min="0.05" max="3" step="0.05"><span class="val" id="f-ts-v"></span></div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="f-grava"> Capa de gravilla 3.000 Ω·m, 10 cm</label>
+      <div class="field" style="flex:none"><label>Peso corporal</label><div class="seg" role="group" aria-label="Peso corporal"><button id="fw50" aria-pressed="true">50 kg</button><button id="fw70" aria-pressed="false">70 kg</button></div></div>
+      <svg class="diagram" id="f-persona" role="img" aria-label="Persona y recorrido de la corriente por el cuerpo"></svg>
+    </div>
+    <div class="panel">
+      <h3 id="f-mode-title"></h3>
+      <div class="formula" id="f-cp-formula"></div>
+      <div class="meter" id="f-cp-meter"></div>
+      <p class="note" id="f-cp-note"></p>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Embudo con la persona ubicada</h3>
+    <div class="chart-wrap"><svg class="chart" id="f-embudo2" role="img" aria-label="Embudo de potencial con la tensión aplicada a la persona"></svg></div>
+  </div>
+  <div class="panel">
+    <h3>Tensión aplicada según la distancia al electrodo</h3>
+    <div class="legend"><span><i class="sw-line" style="background:var(--red)"></i>Contacto</span><span><i class="sw-line" style="background:var(--blue)"></i>Paso (1 m)</span><span><i class="sw-line" style="background:var(--red);opacity:.5"></i>Tolerables (trazo)</span></div>
+    <div class="chart-wrap"><svg class="chart" id="f-cp-dist" role="img" aria-label="Tensiones de contacto y de paso versus distancia, con sus valores tolerables"></svg></div>
+    <p class="note" id="f-cp-dist-note"></p>
+  </div>
+  <div class="panel">
+    <h3>Para concluir</h3>
+    <ol class="qs"><li>¿Por qué la tensión de contacto crece al alejarse de la estructura, mientras la de paso disminuye?</li><li>¿Por qué el contacto es el criterio más exigente si su valor tolerable es menor que el de paso?</li><li>Con la gravilla activada, ¿qué cambió: la tensión aplicada o la tolerable? Explica por qué.</li><li>¿Por qué la tensión transferida puede ser igual a todo el GPR?</li></ol>
+  </div>
+</section>
+
+<!-- 4. BARRA VS MALLA -->
+<section class="step" id="f-barra-malla">
+  <div class="step-head"><span class="num">4</span><div><h2>Barra contra malla: la pendiente decide</h2><p class="lead">Con la misma corriente y el mismo suelo, una malla tiene menor R y además aplana el potencial dentro de su área. La malla se modela como un disco equivalente de igual área en la superficie.</p></div></div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="slider"><label for="f-lado">Lado</label><input type="range" id="f-lado" min="2" max="60" step="1"><span class="val" id="f-lado-v"></span></div>
+      <p class="note">Malla cuadrada de ese lado; disco equivalente de radio a = lado/√π. Electrodo semiesférico, ρ e I del paso 2.</p>
+      <div class="scroll"><table id="f-tbl-bm"></table></div>
+    </div>
+    <div class="panel">
+      <div class="legend"><span><i class="sw-line" style="background:var(--accent)"></i>Electrodo semiesférico</span><span><i class="sw-line" style="background:var(--blue)"></i>Malla (disco equivalente)</span></div>
+      <div class="chart-wrap"><svg class="chart" id="f-bm" role="img" aria-label="Potencial en superficie de una barra y de una malla"></svg></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><div class="formula" id="f-bm-formula"></div><p class="note">En una malla real, entre conductores el suelo queda algo bajo el GPR: esa diferencia es la tensión de malla Em que se calcula en el módulo C. El borde concentra la pendiente: por eso se refuerza con barras en las esquinas y anillo perimetral.</p></div>
+    <div class="panel">
+      <h3>Para concluir</h3>
+      <ol class="qs"><li>¿Por qué la tensión de contacto dentro de la malla es casi nula aunque el GPR sea alto?</li><li>¿Dónde aparece la mayor tensión de paso en una malla y cómo se controla?</li><li>Una barra de 5 Ω y una malla de 10 Ω: ¿cuál puede ser más segura? Justifica con el gráfico.</li></ol>
+    </div>
+  </div>
+</section>
+
+<!-- 5. TT -->
+<section class="step" id="f-tt">
+  <div class="step-head"><span class="num">5</span><div><h2>Falla fase–carcasa en esquema TT</h2><p class="lead">La corriente de falla vuelve por el terreno a través de la tierra de protección R_A y la de servicio R_B. El valor de R decide cuánta corriente circula y qué tensión queda en la carcasa.</p></div></div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="row">
+        <div class="field"><label for="f-U0">U₀ fase–neutro (V)</label><input type="number" id="f-U0" min="1" step="1" value="220"></div>
+        <div class="field"><label for="f-RB">R_B servicio (Ω)</label><input type="number" id="f-RB" min="0.1" step="1" value="10"></div>
+        <div class="field"><label for="f-RA">R_A protección (Ω)</label><input type="number" id="f-RA" min="0.1" step="1" value="20"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="f-In">Termomagnético curva C, In (A)</label><input type="number" id="f-In" min="1" step="1" value="16"></div>
+        <div class="field"><label for="f-Idn">Diferencial IΔn (mA)</label><input type="number" id="f-Idn" min="1" step="1" value="30"></div>
+        <div class="field"><label for="f-UL">Tensión de seguridad (V)</label><input type="number" id="f-UL" min="1" step="1" value="50"></div>
+      </div>
+      <svg class="diagram" id="f-tt-svg" role="img" aria-label="Circuito de falla en esquema TT"></svg>
+    </div>
+    <div class="panel">
+      <div class="formula" id="f-tt-formula"></div>
+      <ul class="checks" id="f-tt-checks"></ul>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Tensión en la carcasa según R_A</h3>
+    <div class="chart-wrap"><svg class="chart" id="f-tt-chart" role="img" aria-label="Tensión de la carcasa versus resistencia de la tierra de protección"></svg></div>
+    <p class="note">Ninguna resistencia de tierra realista hace operar un termomagnético en TT. La protección real contra contactos indirectos en BT es el diferencial: R_A ≤ U_L / IΔn.</p>
+  </div>
+  <div class="next"><h3>Siguiente: medir el terreno</h3><p>Todo lo anterior depende de ρ. El módulo B muestra cómo se mide y cómo se obtiene la resistividad equivalente para diseñar.</p><div class="tip-row"><button class="btn primary" id="b-to-res">Ir a resistividad del terreno</button></div></div>
+</section>
+</div>
+
+<div id="panel-res" role="tabpanel" aria-labelledby="tab-res" class="tabpanel" hidden>
+<nav class="steps" aria-label="Pasos">
+  <a href="#arreglo"><b>1</b>Arreglo</a>
+  <a href="#registro"><b>2</b>Registro</a>
+  <a href="#curva"><b>3</b>Curva y modelo</a>
+  <a href="#equivalente"><b>4</b>ρ equivalente</a>
+</nav>
+
+<!-- ===================== 1. ARREGLO ===================== -->
+<section class="step" id="arreglo">
+  <div class="step-head"><span class="num">1</span><div><h2>Arreglo de electrodos</h2><p class="lead">Elige el método y la geometría. El esquema y el factor geométrico se actualizan con cada valor.</p></div></div>
+  <div class="seg" role="group" aria-label="Método">
+    <button id="m-w" aria-pressed="true">Wenner</button>
+    <button id="m-s" aria-pressed="false">Schlumberger</button>
+  </div>
+  <div class="panel">
+    <svg class="diagram" id="diagram" viewBox="0 0 640 210" role="img" aria-label="Esquema del arreglo de electrodos"></svg>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Geometría y lectura</h3>
+      <div class="row" id="geo-w">
+        <div class="field"><label for="c-a">Separación a (m)</label><input type="number" id="c-a" min="0.1" step="0.5" value="4"></div>
+        <div class="field"><label for="c-bw">Hincado b (m)</label><input type="number" id="c-bw" min="0" step="0.05" value="0.2"></div>
+      </div>
+      <div class="row" id="geo-s" hidden>
+        <div class="field"><label for="c-L">AB/2 = L (m)</label><input type="number" id="c-L" min="0.1" step="0.5" value="10"></div>
+        <div class="field"><label for="c-l">MN/2 = l (m)</label><input type="number" id="c-l" min="0.05" step="0.25" value="0.5"></div>
+        <div class="field"><label for="c-bs">Hincado b (m)</label><input type="number" id="c-bs" min="0" step="0.05" value="0.2"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="c-R">Lectura del telurómetro R (Ω)</label><input type="number" id="c-R" min="0" step="0.01" value="3.98"></div>
+      </div>
+      <div class="formula" id="cfg-formula"></div>
+      <p class="big" id="cfg-rho"></p>
+    </div>
+    <div class="panel">
+      <h3>Verificaciones de terreno</h3>
+      <ul class="checks" id="cfg-checks"></ul>
+      <dl class="kv" id="cfg-kv"></dl>
+      <p class="note" id="cfg-note"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 2. REGISTRO ===================== -->
+<section class="step" id="registro">
+  <div class="step-head"><span class="num">2</span><div><h2>Planilla de registro</h2><p class="lead">Ingresa las lecturas del sondeo. La planilla calcula ρa por fila. En modo estudiante se oculta el cálculo y cada uno ingresa su propio valor para verificarlo.</p></div></div>
+  <div class="panel">
+    <div class="row">
+      <div class="field"><label for="meta-lugar">Lugar / eje</label><input type="text" id="meta-lugar" placeholder="[Sector, dirección del eje]"></div>
+      <div class="field"><label for="meta-fecha">Fecha</label><input type="date" id="meta-fecha"></div>
+      <div class="field"><label for="meta-inst">Instrumento</label><input type="text" id="meta-inst" placeholder="[Telurómetro, N° serie]"></div>
+      <div class="field"><label for="meta-clima">Suelo / clima</label><input type="text" id="meta-clima" placeholder="[Seco, húmedo…]"></div>
+    </div>
+    <div class="tip-row">
+      <button class="btn primary" id="b-ejemplo">Cargar datos de ejemplo</button>
+      <button class="btn" id="b-add">Agregar fila</button>
+      <button class="btn" id="b-copy">Copiar para Excel</button>
+      <button class="btn ghost" id="b-clear">Vaciar planilla</button>
+      <label style="display:flex;gap:6px;align-items:center;font-size:14px;margin-left:auto"><input type="checkbox" id="student"> Modo estudiante</label>
+    </div>
+    <p class="note" id="clear-confirm" hidden>¿Vaciar todas las filas? <button class="btn" id="b-clear-yes">Sí, vaciar</button> <button class="btn ghost" id="b-clear-no">Cancelar</button></p>
+    <p class="note" id="ex-note"></p>
+    <div class="scroll"><table id="tbl"></table></div>
+    <textarea class="copybox" id="copybox" hidden readonly aria-label="Datos para copiar"></textarea>
+  </div>
+</section>
+
+<!-- ===================== 3. CURVA ===================== -->
+<section class="step" id="curva">
+  <div class="step-head"><span class="num">3</span><div><h2>Curva de campo y modelo de dos capas</h2><p class="lead">Mueve ρ₁, ρ₂ y h₁ hasta que la curva teórica pase por los puntos medidos, o usa el ajuste automático. El error indica qué tan bien representa el modelo al terreno.</p></div></div>
+  <div class="panel">
+    <div class="legend"><span><i class="sw-dot"></i>ρa medida</span><span><i class="sw-line"></i>Modelo de dos capas</span><span id="trend" class="pill warn"></span></div>
+    <div class="chart-wrap" id="chart-wrap"><svg class="chart" id="chart" role="img" aria-label="Curva de resistividad aparente versus separación en escala log-log"></svg><div class="tip" id="tip" hidden></div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Parámetros del modelo</h3>
+      <div class="slider"><label for="s-r1">ρ₁</label><input type="range" id="s-r1" min="0" max="1000" step="1"><input type="number" id="n-r1" step="1" aria-label="ρ1 en ohm metro"></div>
+      <div class="slider"><label for="s-r2">ρ₂</label><input type="range" id="s-r2" min="0" max="1000" step="1"><input type="number" id="n-r2" step="1" aria-label="ρ2 en ohm metro"></div>
+      <div class="slider"><label for="s-h">h₁</label><input type="range" id="s-h" min="0" max="1000" step="1"><input type="number" id="n-h" step="0.1" aria-label="h1 en metros"></div>
+      <p class="note">ρ en Ω·m, h₁ en m. Escala logarítmica en los deslizadores.</p>
+      <div class="tip-row"><button class="btn primary" id="b-fit">Ajuste automático</button><button class="btn" id="b-use">Usar en ρ equivalente</button></div>
+    </div>
+    <div class="panel">
+      <h3>Lectura del ajuste</h3>
+      <div class="result"><div><p class="eyebrow">Error RMS</p><p class="big" id="rms"></p></div><div><p class="eyebrow">K de reflexión</p><p class="big" id="kref"></p></div></div>
+      <div class="formula" id="model-formula"></div>
+      <p class="note" id="fit-note"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 4. EQUIVALENTE ===================== -->
+<section class="step" id="equivalente">
+  <div class="step-head"><span class="num">4</span><div><h2>Resistividad equivalente</h2><p class="lead">Método de Burgsdorf-Yakobs: reduce el modelo de estratos a un solo valor ρeq para el área que cubrirá la malla.</p></div></div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Malla y estratos</h3>
+      <div class="row">
+        <div class="field"><label for="e-A">Largo de malla (m)</label><input type="number" id="e-A" min="1" step="1" value="20"></div>
+        <div class="field"><label for="e-B">Ancho de malla (m)</label><input type="number" id="e-B" min="1" step="1" value="20"></div>
+        <div class="field"><label for="e-b">Profundidad b (m)</label><input type="number" id="e-b" min="0" step="0.1" value="0.6"></div>
+      </div>
+      <div class="scroll"><table id="tbl-layers"></table></div>
+      <div class="tip-row"><button class="btn" id="b-layer">Agregar estrato</button></div>
+      <p class="note">El último estrato se considera semi-infinito (F = 1). Para tres o más capas, ingresa el modelo obtenido con IPI2Win.</p>
+    </div>
+    <div class="panel">
+      <h3>Resultado</h3>
+      <div><p class="eyebrow">ρ equivalente</p><p class="big" id="eq-rho"></p></div>
+      <div class="formula" id="eq-formula"></div>
+      <p class="note" id="eq-err" hidden></p>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Desarrollo por estrato</h3>
+    <div class="scroll"><table id="tbl-eq"></table></div>
+  </div>
+  <div class="panel">
+    <h3>Mismo terreno, distinto tamaño de malla</h3>
+    <p class="note">Mallas cuadradas a la misma profundidad. Una malla chica "ve" la capa superficial; una grande, las capas profundas.</p>
+    <div class="scroll"><table id="tbl-size"></table></div>
+  </div>
+  <div class="next">
+    <h3>Siguiente: diseño de malla</h3>
+    <p id="next-text"></p>
+    <div class="tip-row"><button class="btn primary" id="b-to-malla">Llevar ρeq al diseño de malla</button></div>
+  </div>
+</section>
+</div>
+
+<!-- =========================================================== -->
+<!-- ===================== B. DISEÑO DE MALLA ================== -->
+<!-- =========================================================== -->
+<div id="panel-malla" role="tabpanel" aria-labelledby="tab-malla" class="tabpanel" hidden>
+<nav class="steps" aria-label="Pasos del diseño">
+  <a href="#datos"><b>1</b>Datos</a>
+  <a href="#conductor"><b>2</b>Conductor</a>
+  <a href="#geometria"><b>3</b>Geometría</a>
+  <a href="#resistencia"><b>4</b>Resistencia</a>
+  <a href="#tolerables"><b>5</b>Tolerables</a>
+  <a href="#verificacion"><b>6</b>Verificación</a>
+</nav>
+
+<div class="panel" style="flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px 16px">
+  <p style="flex:1 1 280px;font-size:14px;color:var(--muted)">El diseño es iterativo: se ajusta la geometría hasta que las tensiones cumplen. Parte con el ejemplo integrado de la presentación SPT 3 o con el ρeq del módulo B.</p>
+  <button class="btn" id="b-m-ejemplo">Cargar ejemplo SPT 3</button>
+  <button class="btn primary" id="b-m-rhoeq">Usar ρeq del módulo B</button>
+</div>
+
+<!-- 1. DATOS -->
+<section class="step" id="datos">
+  <div class="step-head"><span class="num">1</span><div><h2>Datos de diseño</h2><p class="lead">Resistividad, corriente de falla a tierra y tiempos de despeje. En instalaciones con MT, la corriente de falla a tierra la entrega la distribuidora en la factibilidad.</p></div></div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Terreno y falla</h3>
+      <div class="row">
+        <div class="field"><label for="m-rho">ρ de diseño (Ω·m)</label><input type="number" id="m-rho" data-m="rho" min="1" step="1"></div>
+        <div class="field"><label for="m-I0">Falla a tierra 3I₀ (A)</label><input type="number" id="m-I0" data-m="I0" min="1" step="10"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="m-Sf">Factor de división Sf</label><input type="number" id="m-Sf" data-m="Sf" min="0.05" max="1" step="0.05"></div>
+        <div class="field"><label for="m-Df">Factor de decremento Df</label><input type="number" id="m-Df" data-m="Df" min="1" max="2" step="0.01"></div>
+      </div>
+      <details>
+        <summary style="cursor:pointer;font-size:14px;font-weight:600;color:var(--ink)">Calcular Df a partir de X/R y tf</summary>
+        <div class="row" style="padding-top:10px">
+          <div class="field"><label for="m-xr">Razón X/R en el punto</label><input type="number" id="m-xr" data-m="xr" min="0.1" step="1"></div>
+          <div class="field"><label for="m-tf">Duración de la falla tf (s)</label><input type="number" id="m-tf" data-m="tf" min="0.01" step="0.05"></div>
+          <button class="btn" id="b-df">Aplicar Df</button>
+        </div>
+        <p class="formula" id="df-formula" style="margin-top:10px"></p>
+      </details>
+      <div class="formula" id="ig-formula"></div>
+    </div>
+    <div class="panel">
+      <h3>Tiempos y capa superficial</h3>
+      <div class="row">
+        <div class="field"><label for="m-tc">Despeje para el conductor tc (s)</label><input type="number" id="m-tc" data-m="tc" min="0.05" step="0.05"></div>
+        <div class="field"><label for="m-ts">Duración del choque ts (s)</label><input type="number" id="m-ts" data-m="ts" min="0.03" step="0.05"></div>
+      </div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="m-layer"> Capa superficial de gravilla</label>
+      <div class="row" id="layer-fields">
+        <div class="field"><label for="m-rhos">ρs de la capa (Ω·m)</label><input type="number" id="m-rhos" data-m="rhos" min="1" step="100"></div>
+        <div class="field"><label for="m-hs">Espesor hs (m)</label><input type="number" id="m-hs" data-m="hs" min="0.01" step="0.01"></div>
+      </div>
+      <div class="field" style="flex:none"><label>Peso corporal del criterio</label>
+        <div class="seg" role="group" aria-label="Peso corporal"><button id="w50" aria-pressed="true">50 kg</button><button id="w70" aria-pressed="false">70 kg</button></div>
+      </div>
+      <p class="note">ts no puede superar el tiempo de la protección de respaldo. El criterio de 50 kg es el más exigente y el que se usa en zonas de acceso público.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2. CONDUCTOR -->
+<section class="step" id="conductor">
+  <div class="step-head"><span class="num">2</span><div><h2>Sección del conductor</h2><p class="lead">El conductor debe soportar la falla sin fundirse. La temperatura máxima la limita la unión, no el cobre.</p></div></div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>IEEE Std 80 · forma simplificada</h3>
+      <div class="field"><label for="m-kf">Material y tipo de unión</label>
+        <select id="m-kf" class="sel">
+          <option value="7.00">Cobre blando, soldadura exotérmica · Kf 7,00</option>
+          <option value="7.06">Cobre duro 97 % · Kf 7,06</option>
+          <option value="11.78">Cobre duro, conector apernado · Kf 11,78</option>
+          <option value="10.45">Acero con cobre 40 % · Kf 10,45</option>
+        </select></div>
+      <div class="formula" id="cond-ieee"></div>
+      <h3>IEC 60364-5-54 · adiabática</h3>
+      <div class="field"><label for="m-kiec">Condición del cobre desnudo</label>
+        <select id="m-kiec" class="sel">
+          <option value="228">Visible, zona restringida · k 228</option>
+          <option value="159">Condición normal · k 159</option>
+          <option value="138">Riesgo de incendio · k 138</option>
+        </select></div>
+      <div class="formula" id="cond-iec"></div>
+    </div>
+    <div class="panel">
+      <h3>Conductor adoptado</h3>
+      <div><p class="eyebrow">Sección mínima requerida</p><p class="big" id="cond-req"></p></div>
+      <div class="field"><label for="m-cond">Conductor de cobre desnudo</label><select id="m-cond" class="sel"></select></div>
+      <ul class="checks" id="cond-checks"></ul>
+      <p class="note">Diámetros aproximados de cobre desnudo cableado; para la memoria, usar el dato del fabricante. En subestaciones es habitual 2/0 AWG por resistencia mecánica y margen de corrosión.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3. GEOMETRIA -->
+<section class="step" id="geometria">
+  <div class="step-head"><span class="num">3</span><div><h2>Geometría de la malla</h2><p class="lead">Dimensiones, espaciamiento de la retícula, profundidad y barras. La planta se dibuja a escala.</p></div></div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="row">
+        <div class="field"><label for="m-Lx">Largo Lx (m)</label><input type="number" id="m-Lx" data-m="Lx" min="1" step="1"></div>
+        <div class="field"><label for="m-Ly">Ancho Ly (m)</label><input type="number" id="m-Ly" data-m="Ly" min="1" step="1"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="m-D">Espaciamiento D (m)</label><input type="number" id="m-D" data-m="D" min="0.5" step="0.5"></div>
+        <div class="field"><label for="m-h">Profundidad h (m)</label><input type="number" id="m-h" data-m="h" min="0.1" step="0.1"></div>
+      </div>
+      <div class="field" style="flex:none"><label for="m-rodPos">Barras verticales</label>
+        <select id="m-rodPos" class="sel"><option value="none">Sin barras</option><option value="per">En el perímetro y esquinas</option><option value="int">Distribuidas en el interior</option></select></div>
+      <div class="row" id="rod-fields">
+        <div class="field"><label for="m-nR">N° de barras</label><input type="number" id="m-nR" data-m="nR" min="1" step="1"></div>
+        <div class="field"><label for="m-Lr">Largo de barra Lr (m)</label><input type="number" id="m-Lr" data-m="Lr" min="0.5" step="0.5"></div>
+      </div>
+      <dl class="kv" id="geo-kv"></dl>
+    </div>
+    <div class="panel">
+      <h3>Planta</h3>
+      <svg class="diagram" id="plan" role="img" aria-label="Planta de la malla de tierra a escala"></svg>
+      <div class="legend"><span><i class="sw-line" style="background:var(--accent)"></i>Conductor horizontal</span><span><i class="sw-dot" style="background:var(--blue)"></i>Barra vertical</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. RESISTENCIA -->
+<section class="step" id="resistencia">
+  <div class="step-head"><span class="num">4</span><div><h2>Resistencia de la malla</h2><p class="lead">Laurent-Niemann sirve para pre-dimensionar; Sverak (IEEE 80) considera la profundidad y es el valor que sigue en la verificación.</p></div></div>
+  <div class="grid2">
+    <div class="panel"><h3>Laurent-Niemann</h3><div class="formula" id="r-laurent"></div></div>
+    <div class="panel"><h3>Sverak · IEEE 80</h3><div class="formula" id="r-sverak"></div><p class="big" id="r-big"></p></div>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Exigencias del RIC N°06</h3>
+      <ul class="checks" id="ric-checks"></ul>
+    </div>
+    <div class="panel">
+      <h3>Tierra de protección en BT · RIC 7.3</h3>
+      <div class="row">
+        <div class="field"><label for="m-Vs">Tensión de seguridad Vs (V)</label><select id="m-Vs" class="sel"><option value="50">50 V · lugar seco</option><option value="24">24 V · lugar húmedo</option></select></div>
+        <div class="field"><label for="m-I0bt">Operación de la protección I₀ (A)</label><input type="number" id="m-I0bt" data-m="I0bt" min="0.001" step="0.01"></div>
+      </div>
+      <div class="formula" id="bt-formula"></div>
+      <p class="note">Con diferencial, I₀ = IΔn (0,03 A para 30 mA). Con termomagnético, I₀ es la corriente de disparo magnético, y el valor exigido suele ser inviable.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5. TOLERABLES -->
+<section class="step" id="tolerables">
+  <div class="step-head"><span class="num">5</span><div><h2>Tensiones tolerables</h2><p class="lead">Lo que el cuerpo humano soporta durante ts, según el criterio de peso y la capa superficial (RIC N°06, Anexo 6.1 · IEEE 80).</p></div></div>
+  <div class="grid2">
+    <div class="panel"><div class="formula" id="tol-formula"></div></div>
+    <div class="panel"><div class="scroll"><table id="tbl-tol"></table></div><p class="note" id="tol-note"></p></div>
+  </div>
+</section>
+
+<!-- 6. VERIFICACION -->
+<section class="step" id="verificacion">
+  <div class="step-head"><span class="num">6</span><div><h2>Verificación de contacto y paso</h2><p class="lead">Primero el atajo: si la elevación de potencial de toda la malla es menor que la tensión de contacto tolerable, la malla cumple. Si no, se calculan las tensiones reales Em y Es.</p></div></div>
+  <div class="panel" id="verdict"></div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Elevación de potencial</h3>
+      <div class="formula" id="gpr-formula"></div>
+      <h3>Tensión de malla Em (contacto)</h3>
+      <div class="meter" id="meter-em"></div>
+      <h3>Tensión de paso Es</h3>
+      <div class="meter" id="meter-es"></div>
+    </div>
+    <div class="panel">
+      <h3>Factores de IEEE 80</h3>
+      <div class="scroll"><table id="tbl-fac"></table></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><h3>Desarrollo de Em</h3><div class="formula" id="em-formula"></div></div>
+    <div class="panel"><h3>Desarrollo de Es</h3><div class="formula" id="es-formula"></div></div>
+  </div>
+  <div class="panel">
+    <h3>Medidas correctivas · prueba su efecto</h3>
+    <p class="note">En orden de efectividad. Cada botón cambia el diseño; revisa cómo se mueven Em y Es y vuelve atrás con el botón deshacer.</p>
+    <div class="tip-row">
+      <button class="btn" data-fix="D">Reducir el espaciamiento D</button>
+      <button class="btn" data-fix="rods">Barras en el perímetro</button>
+      <button class="btn" data-fix="grava">Capa de gravilla 10 cm</button>
+      <button class="btn" data-fix="ts">Despeje más rápido</button>
+      <button class="btn ghost" id="b-undo" disabled>Deshacer</button>
+    </div>
+    <p class="note" id="fix-note"></p>
+  </div>
+</section>
+</div>
+
+<footer>Módulo A: dispersión semiesférica V(x) = ρI/(2πx), disco equivalente V = (2/π)·GPR·arcsen(a/x), criterio de Dalziel con Rc = 1.000 Ω y Rf = 3ρs. Módulo B: Wenner ρa = 2πaR; Schlumberger ρa = π(L² − l²)R/(2l); modelo de dos capas por serie de imágenes; ρeq por Burgsdorf-Yakobs; requisitos de medición según RIC N°06, Anexo 6.6. Módulo C: IEEE Std 80 (conductor, Sverak, Em, Es, tolerables), Laurent-Niemann, IEC 60364-5-54 y RIC N°06. Las fórmulas de Em y Es valen para mallas regulares en suelo homogéneo; con suelo de dos capas o geometría irregular se usa software. Los datos de ejemplo son supuestos o sintéticos. Material docente · Mario Miranda Araos · CFT Estatal O'Higgins.</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const nf=(x,d=2)=>Number.isFinite(x)?x.toLocaleString('es-CL',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+const nfa=(x)=>{ if(!Number.isFinite(x))return '—'; const d=x>=100?0:x>=10?1:2; return nf(x,d); };
+const num=v=>{const x=parseFloat(String(v).replace(',','.'));return Number.isFinite(x)?x:NaN;};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- física ---------- */
+function fImg(r,K,h){ // potencial normalizado de una fuente puntual sobre suelo de 2 capas (serie de imágenes)
+  let s=1/r, Kn=K;
+  if(h>0) for(let n=1;n<=4000;n++){ s+=2*Kn/Math.sqrt(r*r+4*n*n*h*h); Kn*=K; if(Math.abs(Kn)<1e-7)break; }
+  return s;
+}
+function rhoModel(method,sep,l,r1,r2,h){
+  const K=(r2-r1)/(r2+r1);
+  if(method==='w'){ const a=sep; return 2*a*r1*(fImg(a,K,h)-fImg(2*a,K,h)); }
+  const L=sep; return r1*(L*L-l*l)/(2*l)*(fImg(L-l,K,h)-fImg(L+l,K,h));
+}
+const Kw=a=>2*Math.PI*a;
+const Ks=(L,l)=>Math.PI*(L*L-l*l)/(2*l);
+
+function burgsdorf(S,b,layers){
+  const r=Math.sqrt(S/Math.PI);
+  const r02=r*r-b*b; const q02=2*r*(r+b);
+  if(!(r02>0)) return {err:'La profundidad b debe ser menor que el radio equivalente r = √(S/π) = '+nf(r,2)+' m.'};
+  let hCum=0, Fprev=0, sum=0; const rows=[];
+  layers.forEach((L,i)=>{
+    const last=i===layers.length-1;
+    let u2=NaN,v2=NaN,F;
+    if(last){F=1;}
+    else{ hCum+=L.e; u2=q02+r02+hCum*hCum; v2=0.5*(u2-Math.sqrt(u2*u2-4*q02*r02)); F=Math.sqrt(Math.max(0,1-v2/r02)); }
+    const dF=F-Fprev; sum+=dF/L.rho;
+    rows.push({i:i+1,rho:L.rho,e:last?NaN:L.e,h:last?NaN:hCum,u2,v2,F,dF});
+    Fprev=F;
+  });
+  return {r,r02,q02,rows,rho:1/sum};
+}
+
+/* ---------- estado ---------- */
+const KEY='spt-lab-v1';
+const defaults=()=>({
+  method:'w', cfg:{a:4,bw:0.2,L:10,l:0.5,bs:0.2,R:3.98},
+  rowsW:[], rowsS:[], student:false, example:{w:false,s:false},
+  model:{r1:150,r2:45,h:2.5},
+  meta:{lugar:'',fecha:'',inst:'',clima:''},
+  eq:{A:20,B:20,b:0.6,layers:[{rho:150,e:2.5},{rho:45,e:0}]}
+});
+let st=defaults();
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s&&s.cfg) st=Object.assign(defaults(),s);}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}};
+
+/* datos de ejemplo sintéticos */
+const NOISE=[0.02,-0.015,0.01,-0.02,0.025,-0.01,0.015,-0.02,0.01,-0.015,0.02,-0.01,0.012,-0.018,0.01,-0.012];
+function exampleW(){
+  const A=[1,2,3,4,6,8,10,15,20,30];
+  return A.map((a,i)=>{const rho=rhoModel('w',a,0,150,45,2.5)*(1+NOISE[i]); return {a,R:+(rho/Kw(a)).toFixed(3),mine:''};});
+}
+function exampleS(){
+  const pts=[[1.5,.5],[2,.5],[3,.5],[4,.5],[6,.5],[8,.5],[10,.5],[15,.5],[20,.5],[20,2.5],[30,2.5],[40,2.5],[60,2.5],[80,2.5],[100,2.5]];
+  return pts.map(([L,l],i)=>{const rho=rhoModel('s',L,l,80,400,4)*(1+NOISE[i]); return {L,l,R:+(rho/Ks(L,l)).toFixed(4),mine:''};});
+}
+if(!st.rowsW.length&&!st.rowsS.length){ st.rowsW=exampleW(); st.rowsS=exampleS(); st.example={w:true,s:true}; }
+
+const rows=()=>st.method==='w'?st.rowsW:st.rowsS;
+function rowRho(r){ if(st.method==='w'){const a=num(r.a),R=num(r.R); return a>0&&R>0?Kw(a)*R:NaN;} const L=num(r.L),l=num(r.l),R=num(r.R); return L>l&&l>0&&R>0?Ks(L,l)*R:NaN; }
+const sepOf=r=>st.method==='w'?num(r.a):num(r.L);
+function points(){ return rows().map(r=>({x:sepOf(r),y:rowRho(r),r})).filter(p=>p.x>0&&p.y>0); }
+
+/* ---------- 1. arreglo ---------- */
+function drawDiagram(){
+  const W=640, g=96, x0=60, x1=580;
+  const c=st.cfg; let xs, labs, dims=[];
+  if(st.method==='w'){
+    const s=(x1-x0)/3; xs=[x0,x0+s,x0+2*s,x1]; labs=['C1','P1','P2','C2'];
+    for(let i=0;i<3;i++) dims.push({xa:xs[i],xb:xs[i+1],t:'a = '+nf(c.a,c.a%1?1:0)+' m',y:28});
+  }else{
+    const L=c.L,l=Math.min(c.l,L*0.95); const mid=(x0+x1)/2, half=(x1-x0)/2; const dl=Math.max(6,half*l/L);
+    xs=[x0,mid-dl,mid+dl,x1]; labs=['A','M','N','B'];
+    dims.push({xa:x0,xb:mid,t:'L = AB/2 = '+nf(L,L%1?1:0)+' m',y:28});
+    dims.push({xa:mid-dl,xb:mid+dl,t:'MN = 2l = '+nf(2*l,2)+' m',y:58,blue:true});
+  }
+  const cs=getComputedStyle(document.documentElement); const v=n=>cs.getPropertyValue(n).trim();
+  let s=`<rect x="0" y="${g}" width="${W}" height="114" fill="${v('--soil')}"/>`;
+  s+=`<rect x="0" y="${g+70}" width="${W}" height="44" fill="${v('--soil-2')}"/>`;
+  s+=`<line x1="0" y1="${g}" x2="${W}" y2="${g}" stroke="${v('--ink')}" stroke-width="2"/>`;
+  // líneas de corriente ilustrativas
+  const cx=(xs[0]+xs[3])/2, rx=(xs[3]-xs[0])/2;
+  [0.55,0.8,1].forEach((k,i)=>{ s+=`<path d="M${cx-rx*k} ${g} A${rx*k} ${Math.min(100,rx*k*0.38)} 0 0 0 ${cx+rx*k} ${g}" fill="none" stroke="${v('--red')}" stroke-width="1.5" stroke-dasharray="5 5" opacity="${0.35+i*0.2}"/>`; });
+  xs.forEach((x,i)=>{
+    const cur=(i===0||i===3); const col=cur?v('--red'):v('--blue');
+    s+=`<rect x="${x-4}" y="${g-22}" width="8" height="${22+Math.min(30,8+c[st.method==='w'?'bw':'bs']*40)}" fill="${col}"/>`;
+    s+=`<text x="${x}" y="${g+48}" text-anchor="middle" font-family="IBM Plex Sans,Arial,sans-serif" font-size="15" font-weight="700" fill="${col}">${labs[i]}</text>`;
+  });
+  dims.forEach(d=>{
+    const col=d.blue?v('--blue'):v('--ink');
+    s+=`<line x1="${d.xa}" y1="${d.y+8}" x2="${d.xb}" y2="${d.y+8}" stroke="${col}" stroke-width="1.5"/><line x1="${d.xa}" y1="${d.y+2}" x2="${d.xa}" y2="${d.y+14}" stroke="${col}"/><line x1="${d.xb}" y1="${d.y+2}" x2="${d.xb}" y2="${d.y+14}" stroke="${col}"/>`;
+    s+=`<text x="${(d.xa+d.xb)/2}" y="${d.y}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="13" fill="${col}">${d.t}</text>`;
+  });
+  s+=`<text x="${W-8}" y="${g+108}" text-anchor="end" font-family="IBM Plex Sans,Arial,sans-serif" font-size="11" fill="${v('--muted')}">Rojo: corriente (inyección) · Azul: potencial (medición) · Profundidad esquemática</text>`;
+  $('diagram').innerHTML=s;
+}
+function renderCfg(){
+  const c=st.cfg, w=st.method==='w';
+  $('m-w').setAttribute('aria-pressed',w); $('m-s').setAttribute('aria-pressed',!w);
+  $('geo-w').hidden=!w; $('geo-s').hidden=w;
+  const checks=[], kv=[]; let K, f;
+  if(w){
+    K=Kw(c.a);
+    f=`ρa = 2·π·a·R\n   = 2·π·${nf(c.a,2)}·${nf(c.R,3)}\n<span class="hi">   = ${nf(K,3)} m × ${nf(c.R,3)} Ω</span>`;
+    checks.push([c.bw<=c.a/20,`Hincado b ≤ a/20 = ${nf(c.a/20,2)} m`,'La fórmula simple asume electrodos puntuales. Si b > a/20, se debe usar la fórmula completa de Wenner.']);
+    checks.push([1.5*c.a<=100,`Ala 1,5·a = ${nf(1.5*c.a,1)} m ≤ 100 m (RIC)`,'']);
+    kv.push(['Factor geométrico K',nf(K,3)+' m'],['Largo total del arreglo 3a',nf(3*c.a,1)+' m'],['Cable por lado (desde el centro)',nf(1.5*c.a,1)+' m']);
+    $('cfg-note').textContent='En Wenner se mueven los cuatro electrodos en cada lectura. La curva se grafica contra a.';
+  }else{
+    K=Ks(c.L,c.l); const n=(c.L-c.l)/(2*c.l);
+    f=`ρa = π·(L² − l²)/(2l)·R\n   = π·(${nf(c.L,2)}² − ${nf(c.l,2)}²)/(2·${nf(c.l,2)})·R\n<span class="hi">   = ${nf(K,3)} m × ${nf(c.R,3)} Ω</span>`;
+    checks.push([c.L>=3*c.l,`L ≥ 3·l = ${nf(3*c.l,2)} m`,'Con MN muy abierto la aproximación pierde exactitud: aumentar L o reducir MN.']);
+    checks.push([c.bs<=2*c.l/20,`Hincado b ≤ MN/20 = ${nf(2*c.l/20,2)} m`,'']);
+    checks.push([c.L<=100,`Ala AB/2 = ${nf(c.L,1)} m ≤ 100 m (RIC)`,'']);
+    kv.push(['Factor geométrico K',nf(K,3)+' m'],['Forma equivalente n = (L − l)/MN',nf(n,2)],['Comprobación π·n(n+1)·MN',nf(Math.PI*n*(n+1)*2*c.l,3)+' m'],['Largo total AB',nf(2*c.L,1)+' m']);
+    $('cfg-note').textContent='En Schlumberger solo se mueven A y B. Si la tensión medida es muy baja, se amplía MN y se repite la última lectura (lectura de empalme).';
+  }
+  const valid=Number.isFinite(K)&&K>0;
+  $('cfg-formula').innerHTML=f;
+  $('cfg-rho').innerHTML=valid?`ρa = ${nf(K*c.R,1)} <small>Ω·m</small>`:'Revisa la geometría';
+  $('cfg-checks').innerHTML=checks.map(([ok,t,hint])=>`<li><span class="pill ${ok?'ok':(hint?'bad':'warn')}">${ok?'Cumple':(hint?'No cumple':'Revisar')}</span><span>${t}${!ok&&hint?'<br><small style="color:var(--muted)">'+hint+'</small>':''}</span></li>`).join('');
+  $('cfg-kv').innerHTML=kv.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('');
+  drawDiagram();
+}
+[['c-a','a'],['c-bw','bw'],['c-L','L'],['c-l','l'],['c-bs','bs'],['c-R','R']].forEach(([id,k])=>{
+  $(id).value=st.cfg[k];
+  $(id).addEventListener('input',e=>{const x=num(e.target.value); if(Number.isFinite(x)){st.cfg[k]=x; renderCfg(); save();}});
+});
+function setMethod(m){ st.method=m; renderCfg(); renderTable(); autoFitIfNew(); renderModel(); save(); }
+$('m-w').onclick=()=>setMethod('w'); $('m-s').onclick=()=>setMethod('s');
+
+/* ---------- 2. registro ---------- */
+function renderTable(){
+  const w=st.method==='w', stu=st.student;
+  let h='<thead><tr>'+(w?'<th>a (m)</th>':'<th>AB/2 = L (m)</th><th>MN/2 = l (m)</th>')+'<th>R (Ω)</th><th>K (m)</th>'+(stu?'<th>Mi ρa (Ω·m)</th><th>Verificación</th>':'<th>ρa (Ω·m)</th>')+'<th aria-label="Quitar"></th></tr></thead><tbody>';
+  rows().forEach((r,i)=>{
+    h+='<tr>'+(w?`<td><input type="number" id="r${i}-a" data-i="${i}" data-k="a" step="0.5" value="${esc(r.a)}" aria-label="a fila ${i+1}"></td>`
+      :`<td><input type="number" id="r${i}-L" data-i="${i}" data-k="L" step="0.5" value="${esc(r.L)}" aria-label="L fila ${i+1}"></td><td><input type="number" id="r${i}-l" data-i="${i}" data-k="l" step="0.25" value="${esc(r.l)}" aria-label="l fila ${i+1}"></td>`)
+      +`<td><input type="number" id="r${i}-R" data-i="${i}" data-k="R" step="0.001" value="${esc(r.R)}" aria-label="R fila ${i+1}"></td><td class="dim" id="k${i}"></td>`
+      +(stu?`<td><input type="number" id="r${i}-mine" data-i="${i}" data-k="mine" step="0.1" value="${esc(r.mine||'')}" aria-label="Mi rho fila ${i+1}"></td><td id="v${i}"></td>`:`<td class="calc" id="p${i}"></td>`)
+      +`<td><button class="x" data-del="${i}" aria-label="Quitar fila ${i+1}">×</button></td></tr>`;
+  });
+  h+='</tbody>';
+  $('tbl').innerHTML=h; updateCalc();
+  const ex=w?st.example.w:st.example.s;
+  $('ex-note').textContent=ex?(w?'Datos de ejemplo sintéticos: terreno de dos capas con capa superficial más resistiva (curva descendente). Reemplázalos por tus lecturas.':'Datos de ejemplo sintéticos: capa superficial conductiva sobre una más resistiva (curva ascendente), con lectura de empalme en AB/2 = 20 m al cambiar MN de 1 m a 5 m.'):'';
+  $('ex-note').hidden=!ex;
+}
+function updateCalc(){
+  const w=st.method==='w';
+  rows().forEach((r,i)=>{
+    const K=w?Kw(num(r.a)):Ks(num(r.L),num(r.l)); const rho=rowRho(r);
+    const k=$('k'+i); if(k) k.textContent=Number.isFinite(K)&&K>0?nf(K,2):'—';
+    const p=$('p'+i); if(p) p.textContent=nfa(rho);
+    const v=$('v'+i); if(v){ const m=num(r.mine); v.innerHTML=!Number.isFinite(m)||!Number.isFinite(rho)?'':Math.abs(m-rho)/rho<=0.01?'<span class="pill ok">Correcto</span>':'<span class="pill bad">Revisar</span>'; }
+  });
+}
+$('tbl').addEventListener('input',e=>{
+  const t=e.target; if(!t.dataset.k)return; const r=rows()[+t.dataset.i]; r[t.dataset.k]=t.value;
+  if(st.method==='w')st.example.w=false; else st.example.s=false;
+  updateCalc(); renderModel(); save();
+});
+$('tbl').addEventListener('click',e=>{const d=e.target.dataset.del; if(d!==undefined){rows().splice(+d,1); renderTable(); renderModel(); save();}});
+$('b-add').onclick=()=>{ const R=rows(); const last=R[R.length-1];
+  if(st.method==='w') R.push({a:last?+(num(last.a)*1.5).toFixed(1):1,R:'',mine:''}); else R.push({L:last?+(num(last.L)*1.5).toFixed(1):1.5,l:last?last.l:0.5,R:'',mine:''});
+  renderTable(); const id=st.method==='w'?'r'+(R.length-1)+'-R':'r'+(R.length-1)+'-R'; $(id)&&$(id).focus(); save(); };
+$('b-ejemplo').onclick=()=>{ if(st.method==='w'){st.rowsW=exampleW();st.example.w=true;} else {st.rowsS=exampleS();st.example.s=true;} renderTable(); autoFit(); save(); };
+$('b-clear').onclick=()=>{$('clear-confirm').hidden=false;};
+$('b-clear-no').onclick=()=>{$('clear-confirm').hidden=true;};
+$('b-clear-yes').onclick=()=>{ if(st.method==='w'){st.rowsW=[];st.example.w=false;}else{st.rowsS=[];st.example.s=false;} $('clear-confirm').hidden=true; renderTable(); renderModel(); save(); };
+$('student').checked=st.student;
+$('student').onchange=e=>{st.student=e.target.checked; renderTable(); save();};
+$('b-copy').onclick=()=>{
+  const w=st.method==='w'; const m=st.meta;
+  let t=`Método\t${w?'Wenner':'Schlumberger'}\nLugar\t${m.lugar}\nFecha\t${m.fecha}\nInstrumento\t${m.inst}\nSuelo/clima\t${m.clima}\n\n`;
+  t+=(w?'a (m)':'AB/2 (m)\tMN/2 (m)')+'\tR (ohm)\tK (m)\trho_a (ohm·m)\n';
+  rows().forEach(r=>{ const K=w?Kw(num(r.a)):Ks(num(r.L),num(r.l)); t+=(w?r.a:r.L+'\t'+r.l)+'\t'+r.R+'\t'+(Number.isFinite(K)?K.toFixed(3):'')+'\t'+(Number.isFinite(rowRho(r))?rowRho(r).toFixed(2):'')+'\n'; });
+  t=t.replace(/(\d)\.(\d)/g,'$1,$2');
+  const box=$('copybox'); box.value=t;
+  const done=()=>{ $('b-copy').textContent='Copiado'; setTimeout(()=>$('b-copy').textContent='Copiar para Excel',1600); };
+  try{ navigator.clipboard.writeText(t).then(()=>{box.hidden=true;done();},()=>{box.hidden=false;box.select();}); }catch(err){ box.hidden=false; box.select(); }
+};
+[['meta-lugar','lugar'],['meta-fecha','fecha'],['meta-inst','inst'],['meta-clima','clima']].forEach(([id,k])=>{ $(id).value=st.meta[k]||''; $(id).addEventListener('input',e=>{st.meta[k]=e.target.value;save();}); });
+
+/* ---------- 3. curva y modelo ---------- */
+const LR={r:[1,10000],h:[0.1,200]};
+const toS=(x,[a,b])=>Math.round(1000*Math.log(x/a)/Math.log(b/a));
+const fromS=(s,[a,b])=>a*Math.pow(b/a,s/1000);
+function syncSliders(){ const m=st.model;
+  $('s-r1').value=toS(m.r1,LR.r); $('s-r2').value=toS(m.r2,LR.r); $('s-h').value=toS(m.h,LR.h);
+  $('n-r1').value=+m.r1.toFixed(1); $('n-r2').value=+m.r2.toFixed(1); $('n-h').value=+m.h.toFixed(2); }
+[['s-r1','r1',LR.r],['s-r2','r2',LR.r],['s-h','h',LR.h]].forEach(([id,k,rg])=>{
+  $(id).addEventListener('input',e=>{st.model[k]=fromS(+e.target.value,rg); $('n-'+id.slice(2)).value=+st.model[k].toFixed(k==='h'?2:1); renderModel(); save();});
+});
+[['n-r1','r1'],['n-r2','r2'],['n-h','h']].forEach(([id,k])=>{
+  $(id).addEventListener('input',e=>{const x=num(e.target.value); if(x>0){st.model[k]=x; $('s-'+id.slice(2)).value=toS(x,k==='h'?LR.h:LR.r); renderModel(); save();}});
+});
+function cost(p,pts){ const r1=Math.exp(p[0]),r2=Math.exp(p[1]),h=Math.exp(p[2]); let s=0;
+  for(const q of pts){ const m=rhoModel(st.method,q.x,num(q.r.l),r1,r2,h); const d=Math.log(q.y)-Math.log(m); s+=d*d; } return s/pts.length; }
+function nelderMead(f,x0,it=400){
+  const n=x0.length; let S=[x0.slice()]; for(let i=0;i<n;i++){const x=x0.slice(); x[i]+=0.5; S.push(x);}
+  let F=S.map(f);
+  for(let k=0;k<it;k++){
+    const idx=F.map((v,i)=>i).sort((a,b)=>F[a]-F[b]); S=idx.map(i=>S[i]); F=idx.map(i=>F[i]);
+    if(Math.abs(F[n]-F[0])<1e-10)break;
+    const c=Array(n).fill(0); for(let i=0;i<n;i++)for(let j=0;j<n;j++)c[j]+=S[i][j]/n;
+    const pt=t=>c.map((v,j)=>v+t*(S[n][j]-v));
+    const xr=pt(-1), fr=f(xr);
+    if(fr<F[0]){ const xe=pt(-2), fe=f(xe); if(fe<fr){S[n]=xe;F[n]=fe;}else{S[n]=xr;F[n]=fr;} }
+    else if(fr<F[n-1]){S[n]=xr;F[n]=fr;}
+    else{ const xc=pt(0.5), fc=f(xc); if(fc<F[n]){S[n]=xc;F[n]=fc;} else { for(let i=1;i<=n;i++){S[i]=S[i].map((v,j)=>S[0][j]+0.5*(v-S[0][j])); F[i]=f(S[i]);} } }
+  }
+  return S[0];
+}
+function autoFit(){
+  const pts=points(); if(pts.length<3){renderModel();return;}
+  const s=pts.slice().sort((a,b)=>a.x-b.x);
+  const guesses=[[s[0].y,s[s.length-1].y,s[Math.floor(s.length/2)].x/2],[s[0].y,s[s.length-1].y,s[1].x],[s[0].y,s[s.length-1].y,s[s.length-2].x/2]];
+  let best=null,bc=Infinity;
+  for(const g of guesses){ const p=nelderMead(x=>cost(x,pts),g.map(Math.log)); const c=cost(p,pts); if(c<bc){bc=c;best=p;} }
+  st.model={r1:Math.exp(best[0]),r2:Math.exp(best[1]),h:Math.exp(best[2])};
+  syncSliders(); renderModel(); save();
+}
+let fittedFor={w:false,s:false};
+function autoFitIfNew(){ if(!fittedFor[st.method]){ fittedFor[st.method]=true; autoFit(); } }
+$('b-fit').onclick=autoFit;
+$('b-use').onclick=()=>{ const m=st.model; st.eq.layers=[{rho:+m.r1.toFixed(1),e:+m.h.toFixed(2)},{rho:+m.r2.toFixed(1),e:0}]; renderEq(); save(); location.hash='equivalente'; };
+
+function ticks(lo,hi){ const t=[]; for(let e=Math.floor(Math.log10(lo));e<=Math.ceil(Math.log10(hi));e++){ [1,2,5].forEach(m=>{const v=m*Math.pow(10,e); if(v>=lo*0.999&&v<=hi*1.001)t.push({v,major:m===1});}); } return t; }
+function renderModel(){
+  const pts=points(), m=st.model, w=st.method==='w';
+  const K=(m.r2-m.r1)/(m.r2+m.r1);
+  let rms=NaN; if(pts.length){ rms=Math.sqrt(cost([Math.log(m.r1),Math.log(m.r2),Math.log(m.h)],pts))*100; }
+  $('rms').innerHTML=Number.isFinite(rms)?nf(rms,1)+' <small>%</small>':'—';
+  $('kref').textContent=nf(K,3);
+  $('model-formula').innerHTML=`ρ₁ = ${nf(m.r1,1)} Ω·m   h₁ = ${nf(m.h,2)} m\nρ₂ = ${nf(m.r2,1)} Ω·m   (semi-infinita)\n<span class="hi">K = (ρ₂ − ρ₁)/(ρ₂ + ρ₁) = ${nf(K,3)}</span>`;
+  $('fit-note').textContent=!pts.length?'Ingresa lecturas en la planilla para ver la curva.':rms<=5?'Ajuste bueno: el modelo de dos capas representa bien la curva medida.':rms<=10?'Ajuste aceptable. Revisa si algún punto se aleja por un mal contacto de electrodo.':'Ajuste pobre: el terreno puede tener tres o más capas, o hay lecturas dudosas. Interpreta con IPI2Win.';
+  // tendencia
+  const s=pts.slice().sort((a,b)=>a.x-b.x); const tr=$('trend');
+  if(s.length>=2){ const q=s[s.length-1].y/s[0].y; tr.hidden=false;
+    tr.textContent=q>1.15?'Curva ascendente: capa profunda más resistiva':q<0.87?'Curva descendente: capa profunda más conductiva':'Curva plana: terreno casi homogéneo'; } else tr.hidden=true;
+  drawChart(pts);
+}
+function drawChart(pts){
+  const wrap=$('chart-wrap'); const W=Math.max(300,wrap.clientWidth||600); const H=Math.round(Math.min(420,Math.max(260,W*0.58)));
+  const cs=getComputedStyle(document.documentElement); const v=n=>cs.getPropertyValue(n).trim();
+  const svg=$('chart'); svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.setAttribute('height',H);
+  const M={l:56,r:14,t:14,b:44}; const pw=W-M.l-M.r, ph=H-M.t-M.b;
+  const m=st.model, w=st.method==='w';
+  let xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
+  if(!xs.length){ xs=[1,100]; ys=[10,1000]; }
+  let xlo=Math.min(...xs)/1.3, xhi=Math.max(...xs)*1.3;
+  // curva del modelo
+  const lcur=pts.length?num(pts[pts.length-1].r.l):0.5;
+  const curve=[]; const N=80;
+  for(let i=0;i<=N;i++){ const x=xlo*Math.pow(xhi/xlo,i/N); let l=lcur; if(!w){ // usa el MN del punto medido más cercano
+      let best=null,bd=Infinity; pts.forEach(p=>{const d=Math.abs(Math.log(p.x/x)); if(d<bd){bd=d;best=p;}}); l=best?num(best.r.l):0.5; if(x<=l*1.05) continue; }
+    curve.push({x,y:rhoModel(st.method,x,l,m.r1,m.r2,m.h)}); }
+  const allY=ys.concat(curve.map(c=>c.y)).filter(y=>y>0);
+  let ylo=Math.pow(10,Math.floor(Math.log10(Math.min(...allY)/1.15))), yhi=Math.pow(10,Math.ceil(Math.log10(Math.max(...allY)*1.15)));
+  if(yhi/ylo<100){ ylo=Math.min(ylo,Math.pow(10,Math.floor(Math.log10(Math.min(...allY)))) ); }
+  const X=x=>M.l+pw*Math.log(x/xlo)/Math.log(xhi/xlo), Y=y=>M.t+ph*(1-Math.log(y/ylo)/Math.log(yhi/ylo));
+  const font='font-family="IBM Plex Mono,monospace" font-size="11"';
+  let s=`<rect x="${M.l}" y="${M.t}" width="${pw}" height="${ph}" fill="${v('--surface')}"/>`;
+  ticks(xlo,xhi).forEach(t=>{ const x=X(t.v); s+=`<line x1="${x}" y1="${M.t}" x2="${x}" y2="${M.t+ph}" stroke="${v('--line')}" stroke-width="${t.major?1:0.6}"/>`; s+=`<text x="${x}" y="${M.t+ph+16}" text-anchor="middle" ${font} fill="${v('--muted')}">${t.v.toLocaleString('es-CL')}</text>`; });
+  ticks(ylo,yhi).forEach(t=>{ const y=Y(t.v); s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+pw}" y2="${y}" stroke="${v('--line')}" stroke-width="${t.major?1:0.6}"/>`; s+=`<text x="${M.l-6}" y="${y+4}" text-anchor="end" ${font} fill="${v('--muted')}">${t.v.toLocaleString('es-CL')}</text>`; });
+  s+=`<line x1="${M.l}" y1="${M.t+ph}" x2="${M.l+pw}" y2="${M.t+ph}" stroke="${v('--soft')}"/>`;
+  s+=`<text x="${M.l+pw/2}" y="${H-6}" text-anchor="middle" font-family="IBM Plex Sans,Arial,sans-serif" font-size="12" fill="${v('--muted')}">${w?'Separación a (m)':'AB/2 = L (m)'} · escala log</text>`;
+  s+=`<text transform="translate(13 ${M.t+ph/2}) rotate(-90)" text-anchor="middle" font-family="IBM Plex Sans,Arial,sans-serif" font-size="12" fill="${v('--muted')}">ρa (Ω·m)</text>`;
+  // referencias ρ1 y ρ2
+  [[m.r1,'ρ₁'],[m.r2,'ρ₂']].forEach(([r,t])=>{ if(r>ylo&&r<yhi){ const y=Y(r); s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+pw}" y2="${y}" stroke="${v('--blue')}" stroke-dasharray="3 5" opacity=".6"/><text x="${M.l+pw-4}" y="${y-4}" text-anchor="end" ${font} fill="${v('--blue')}">${t}</text>`; }});
+  if(curve.length>1) s+=`<path d="${curve.map((c,i)=>(i?'L':'M')+X(c.x).toFixed(1)+' '+Y(c.y).toFixed(1)).join(' ')}" fill="none" stroke="${v('--blue')}" stroke-width="2"/>`;
+  pts.forEach((p,i)=>{ s+=`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="5" fill="${v('--accent')}" stroke="${v('--surface')}" stroke-width="2"/><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="14" fill="transparent" data-pt="${i}" style="cursor:pointer"/>`; });
+  if(!pts.length) s+=`<text x="${M.l+pw/2}" y="${M.t+ph/2}" text-anchor="middle" font-family="IBM Plex Sans,Arial,sans-serif" font-size="14" fill="${v('--muted')}">Sin lecturas. Carga el ejemplo o ingresa datos en el paso 2.</text>`;
+  svg.innerHTML=s;
+  svg.onpointerover=svg.onpointermove=e=>{ const i=e.target.dataset&&e.target.dataset.pt; const tip=$('tip');
+    if(i===undefined){tip.hidden=true;return;} const p=pts[+i]; const sc=svg.getBoundingClientRect().width/W;
+    const mod=rhoModel(st.method,p.x,num(p.r.l),m.r1,m.r2,m.h);
+    tip.innerHTML=`${w?'a':'AB/2'} = ${nf(p.x,1)} m${w?'':' · MN/2 = '+nf(num(p.r.l),2)+' m'}<br>R = ${nf(num(p.r.R),3)} Ω<br>ρa medida = ${nfa(p.y)} Ω·m<br>ρa modelo = ${nfa(mod)} Ω·m`;
+    tip.style.left=(X(p.x)*sc)+'px'; tip.style.top=(Y(p.y)*sc)+'px'; tip.hidden=false; };
+  svg.onpointerleave=()=>{$('tip').hidden=true;};
+}
+
+/* ---------- 4. equivalente ---------- */
+function renderLayers(){
+  const L=st.eq.layers;
+  let h='<thead><tr><th>Estrato</th><th>ρᵢ (Ω·m)</th><th>Espesor eᵢ (m)</th><th aria-label="Quitar"></th></tr></thead><tbody>';
+  L.forEach((y,i)=>{ const last=i===L.length-1;
+    h+=`<tr><td>${i+1}</td><td><input type="number" id="ly${i}-rho" data-li="${i}" data-k="rho" step="1" value="${y.rho}" aria-label="ρ estrato ${i+1}"></td><td>${last?'<span class="dim">semi-infinito</span>':`<input type="number" id="ly${i}-e" data-li="${i}" data-k="e" step="0.1" value="${y.e}" aria-label="espesor estrato ${i+1}">`}</td><td>${L.length>1?`<button class="x" data-ldel="${i}" aria-label="Quitar estrato ${i+1}">×</button>`:''}</td></tr>`; });
+  $('tbl-layers').innerHTML=h+'</tbody>';
+}
+$('tbl-layers').addEventListener('input',e=>{const t=e.target; if(!t.dataset.k)return; const x=num(t.value); if(x>0){st.eq.layers[+t.dataset.li][t.dataset.k]=x; renderEq(true); save();}});
+$('tbl-layers').addEventListener('click',e=>{const d=e.target.dataset.ldel; if(d!==undefined){st.eq.layers.splice(+d,1); renderEq(); save();}});
+$('b-layer').onclick=()=>{ const L=st.eq.layers; const last=L[L.length-1]; if(!last.e)last.e=3; L.push({rho:last.rho,e:0}); renderEq(); save(); };
+[['e-A','A'],['e-B','B'],['e-b','b']].forEach(([id,k])=>{ $(id).value=st.eq[k]; $(id).addEventListener('input',e=>{const x=num(e.target.value); if(Number.isFinite(x)&&x>=0){st.eq[k]=x; renderEq(true); save();}}); });
+function renderEq(keepLayers){
+  if(!keepLayers) renderLayers();
+  const q=st.eq, S=q.A*q.B; const res=burgsdorf(S,q.b,q.layers);
+  if(res.err){ $('eq-err').hidden=false; $('eq-err').textContent=res.err; $('eq-rho').textContent='—'; $('eq-formula').textContent=''; $('tbl-eq').innerHTML=''; return; }
+  $('eq-err').hidden=true;
+  $('eq-rho').innerHTML=`${nf(res.rho,1)} <small>Ω·m</small>`;
+  $('eq-formula').innerHTML=`S   = ${nf(q.A,1)} × ${nf(q.B,1)} = ${nf(S,1)} m²\nr   = √(S/π) = ${nf(res.r,3)} m\nr₀² = r² − b² = ${nf(res.r02,3)} m²\nq₀² = 2·r·(r + b) = ${nf(res.q02,3)} m²\n<span class="hi">ρeq = 1 / Σ[(Fᵢ − Fᵢ₋₁)/ρᵢ] = ${nf(res.rho,1)} Ω·m</span>`;
+  let h='<thead><tr><th>i</th><th>ρᵢ (Ω·m)</th><th>hᵢ acum. (m)</th><th>uᵢ² (m²)</th><th>vᵢ² (m²)</th><th>Fᵢ</th><th>Fᵢ − Fᵢ₋₁</th><th>(Fᵢ − Fᵢ₋₁)/ρᵢ</th></tr></thead><tbody>';
+  res.rows.forEach(r=>{ h+=`<tr><td>${r.i}</td><td class="dim">${nf(r.rho,1)}</td><td class="dim">${Number.isFinite(r.h)?nf(r.h,2):'∞'}</td><td class="dim">${Number.isFinite(r.u2)?nf(r.u2,3):'—'}</td><td class="dim">${Number.isFinite(r.v2)?nf(r.v2,3):'—'}</td><td class="calc">${nf(r.F,4)}</td><td class="calc">${nf(r.dF,4)}</td><td class="dim">${(r.dF/r.rho).toExponential(3).replace('.',',')}</td></tr>`; });
+  $('tbl-eq').innerHTML=h+'</tbody>';
+  const sides=[5,10,20,40,80];
+  let t='<thead><tr><th>Malla cuadrada</th><th>Área S (m²)</th><th>ρeq (Ω·m)</th></tr></thead><tbody>';
+  sides.forEach(sd=>{ const r=burgsdorf(sd*sd,q.b,q.layers); t+=`<tr><td>${sd} × ${sd} m</td><td class="dim">${nf(sd*sd,0)}</td><td class="calc">${r.err?'—':nf(r.rho,1)}</td></tr>`; });
+  $('tbl-size').innerHTML=t+'</tbody>';
+  $('next-text').textContent=`Con ρeq = ${nf(res.rho,1)} Ω·m para una malla de ${nf(q.A,0)} × ${nf(q.B,0)} m enterrada a ${nf(q.b,2)} m, el siguiente módulo calculará la sección del conductor, la resistencia de la malla y las tensiones de paso y contacto.`;
+  st.rhoEq=res.rho;
+}
+
+/* =================== B. DISEÑO DE MALLA =================== */
+const COND=[['4 AWG',21.15,5.89],['2 AWG',33.6,7.42],['1/0 AWG',53.5,9.45],['2/0 AWG',67.4,10.5],['3/0 AWG',85.0,11.9],['4/0 AWG',107.2,13.4],['250 kcmil',126.7,14.6]];
+const mallaEjemplo=()=>({rho:100,I0:1000,Sf:1,Df:1,xr:10,tf:0.5,tc:0.5,ts:0.5,layer:true,rhos:3000,hs:0.1,peso:50,kf:'7.00',kiec:'159',cond:'2/0 AWG',Lx:20,Ly:20,D:5,h:0.6,rodPos:'none',nR:4,Lr:3,Vs:'50',I0bt:0.03});
+st.malla=Object.assign(mallaEjemplo(),st.malla||{});
+let undoStack=[];
+
+function calcMalla(){
+  const m=st.malla, rho=m.rho, h=m.h;
+  const IG=m.Df*m.Sf*m.I0, If=m.Df*m.I0;
+  const kf=+m.kf, kiec=+m.kiec;
+  const Akcmil=(If/1000)*kf*Math.sqrt(m.tc), Amm=Akcmil*0.5067;
+  const Siec=Math.sqrt(If*If*m.tc)/kiec;
+  const Areq=Math.max(Amm,25);
+  const cond=COND.find(c=>c[0]===m.cond)||COND[3]; const d=cond[2]/1000;
+  const nx=Math.max(2,Math.ceil(m.Ly/m.D-1e-9)+1), ny=Math.max(2,Math.ceil(m.Lx/m.D-1e-9)+1);
+  const Dx=m.Lx/(ny-1), Dy=m.Ly/(nx-1), D=Math.max(Dx,Dy);
+  const LC=nx*m.Lx+ny*m.Ly;
+  const nR=m.rodPos==='none'?0:Math.max(0,Math.round(m.nR)); const LR=nR*m.Lr, LT=LC+LR;
+  const A=m.Lx*m.Ly, Lp=2*(m.Lx+m.Ly), r=Math.sqrt(A/Math.PI);
+  const Rl=rho/(4*r)+rho/LT;
+  const sv=1+1/(1+h*Math.sqrt(20/A));
+  const Rg=rho*(1/LT+1/Math.sqrt(20*A)*sv);
+  const kw=m.peso===70?0.157:0.116, ft=kw/Math.sqrt(m.ts);
+  const rhos=m.layer?m.rhos:rho;
+  const Cs=m.layer?1-0.09*(1-rho/m.rhos)/(2*m.hs+0.09):1;
+  const Et=(1000+1.5*Cs*rhos)*ft, Ep=(1000+6*Cs*rhos)*ft;
+  const Et0=(1000+1.5*rho)*ft, Ep0=(1000+6*rho)*ft;
+  const GPR=IG*Rg;
+  const na=2*LC/Lp, nb=Math.sqrt(Lp/(4*Math.sqrt(A))), n=na*nb;
+  const Kh=Math.sqrt(1+h/1);
+  const perRods=nR>0&&m.rodPos==='per';
+  const Kii=perRods?1:1/Math.pow(2*n,2/n);
+  const t1=D*D/(16*h*d), t2=(D+2*h)**2/(8*D*d), t3=h/(4*d);
+  const lnA=Math.log(t1+t2-t3), lnB=Math.log(8/(Math.PI*(2*n-1)));
+  const Km=(lnA+(Kii/Kh)*lnB)/(2*Math.PI);
+  const Ki=0.644+0.148*n;
+  const diag=Math.sqrt(m.Lx**2+m.Ly**2);
+  const LM=perRods?LC+(1.55+1.22*(m.Lr/diag))*LR:LC+LR;
+  const Em=rho*Km*Ki*IG/LM;
+  const s1=1/(2*h), s2=1/(D+h), s3=(1/D)*(1-Math.pow(0.5,n-2));
+  const Ks=(s1+s2+s3)/Math.PI;
+  const LS=0.75*LC+0.85*LR;
+  const Es=rho*Ks*Ki*IG/LS;
+  const rodSpacing=perRods?Lp/nR:NaN;
+  return {IG,If,kf,kiec,Akcmil,Amm,Siec,Areq,cond,d,nx,ny,Dx,Dy,D,LC,nR,LR,LT,A,Lp,r,Rl,sv,Rg,kw,ft,rhos,Cs,Et,Ep,Et0,Ep0,GPR,na,nb,n,Kh,Kii,perRods,t1,t2,t3,lnA,lnB,Km,Ki,diag,LM,Em,s1,s2,s3,Ks,LS,Es,rodSpacing};
+}
+
+const pill=(ok,yes='Cumple',no='No cumple')=>`<span class="pill ${ok?'ok':'bad'}">${ok?yes:no}</span>`;
+const checkList=items=>items.map(([ok,t,cls])=>`<li><span class="pill ${cls||(ok?'ok':'bad')}">${cls==='warn'?'Referencia':(ok?'Cumple':'No cumple')}</span><span>${t}</span></li>`).join('');
+
+function syncMallaInputs(){
+  const m=st.malla;
+  document.querySelectorAll('[data-m]').forEach(el=>{ el.value=m[el.dataset.m]; });
+  $('m-layer').checked=!!m.layer; $('layer-fields').hidden=!m.layer;
+  $('m-kf').value=m.kf; $('m-kiec').value=m.kiec; $('m-rodPos').value=m.rodPos; $('m-Vs').value=m.Vs;
+  $('m-cond').innerHTML=COND.map(c=>`<option value="${c[0]}">${c[0]} · ${nf(c[1],1)} mm² · Ø ${nf(c[2],1)} mm</option>`).join('');
+  $('m-cond').value=m.cond;
+  $('rod-fields').hidden=m.rodPos==='none';
+  $('w50').setAttribute('aria-pressed',m.peso===50); $('w70').setAttribute('aria-pressed',m.peso===70);
+}
+
+function drawPlan(c){
+  const m=st.malla; const cs=getComputedStyle(document.documentElement); const v=n=>cs.getPropertyValue(n).trim();
+  const pad=44, maxPx=460; const sc=maxPx/Math.max(m.Lx,m.Ly);
+  const w=m.Lx*sc, hh=m.Ly*sc, W=w+pad*2, H=hh+pad*2;
+  const X=x=>pad+x*sc, Y=y=>pad+y*sc;
+  let s=`<rect x="${pad-10}" y="${pad-10}" width="${w+20}" height="${hh+20}" fill="${v('--soil')}" opacity=".55" rx="4"/>`;
+  for(let i=0;i<c.nx;i++){ const y=i*c.Dy; s+=`<line x1="${X(0)}" y1="${Y(y)}" x2="${X(m.Lx)}" y2="${Y(y)}" stroke="${v('--accent')}" stroke-width="2.5"/>`; }
+  for(let j=0;j<c.ny;j++){ const x=j*c.Dx; s+=`<line x1="${X(x)}" y1="${Y(0)}" x2="${X(x)}" y2="${Y(m.Ly)}" stroke="${v('--accent')}" stroke-width="2.5"/>`; }
+  // barras
+  const pts=[];
+  if(c.nR>0){
+    if(m.rodPos==='per'){
+      const P=c.Lp; for(let k=0;k<c.nR;k++){ let t=k*P/c.nR; let x,y;
+        if(t<m.Lx){x=t;y=0;} else if(t<m.Lx+m.Ly){x=m.Lx;y=t-m.Lx;} else if(t<2*m.Lx+m.Ly){x=m.Lx-(t-m.Lx-m.Ly);y=m.Ly;} else {x=0;y=m.Ly-(t-2*m.Lx-m.Ly);} pts.push([x,y]); }
+    }else{
+      const inner=[]; for(let i=1;i<c.nx-1;i++)for(let j=1;j<c.ny-1;j++)inner.push([j*c.Dx,i*c.Dy]);
+      const src=inner.length?inner:[[m.Lx/2,m.Ly/2]]; for(let k=0;k<c.nR;k++){ pts.push(src[Math.floor(k*src.length/c.nR)%src.length]); }
+    }
+  }
+  pts.forEach(([x,y])=>{ s+=`<circle cx="${X(x)}" cy="${Y(y)}" r="6" fill="${v('--blue')}" stroke="${v('--surface')}" stroke-width="2"/>`; });
+  const f='font-family="IBM Plex Mono,monospace" font-size="13"';
+  s+=`<line x1="${X(0)}" y1="${pad-26}" x2="${X(m.Lx)}" y2="${pad-26}" stroke="${v('--ink')}"/><text x="${X(m.Lx/2)}" y="${pad-31}" text-anchor="middle" ${f} fill="${v('--ink')}">Lx = ${nf(m.Lx,1)} m</text>`;
+  s+=`<line x1="${pad-26}" y1="${Y(0)}" x2="${pad-26}" y2="${Y(m.Ly)}" stroke="${v('--ink')}"/><text transform="translate(${pad-31} ${Y(m.Ly/2)}) rotate(-90)" text-anchor="middle" ${f} fill="${v('--ink')}">Ly = ${nf(m.Ly,1)} m</text>`;
+  if(c.ny>2){ s+=`<text x="${X(c.Dx/2)}" y="${Y(m.Ly)+26}" text-anchor="middle" ${f} fill="${v('--muted')}">${nf(c.Dx,2)} m</text>`; }
+  $('plan').setAttribute('viewBox',`0 0 ${W} ${H}`); $('plan').innerHTML=s;
+}
+
+function meter(el,val,lim,name){
+  const max=Math.max(val,lim)*1.15; const ok=val<=lim;
+  el.innerHTML=`<div class="track"><div class="fill ${ok?'ok':'bad'}" style="width:${(val/max*100).toFixed(1)}%"></div><div class="lim" style="left:calc(${(lim/max*100).toFixed(1)}% - 1px)"></div></div>
+  <div class="meter-lab"><span>${name} = <b>${nf(val,0)} V</b></span><span>Tolerable = <b>${nf(lim,0)} V</b></span>${pill(ok)}</div>`;
+}
+
+function renderMalla(){
+  const m=st.malla, c=calcMalla();
+  // 1. datos
+  $('ig-formula').innerHTML=`IG = Df · Sf · 3I₀\n   = ${nf(m.Df,2)} · ${nf(m.Sf,2)} · ${nf(m.I0,0)} A\n<span class="hi">IG = ${nf(c.IG,0)} A</span>  (corriente que circula por la malla)`;
+  const Ta=m.xr/(2*Math.PI*50); const Dfc=Math.sqrt(1+(Ta/m.tf)*(1-Math.exp(-2*m.tf/Ta)));
+  $('df-formula').innerHTML=`Ta = (X/R)/(2π·50) = ${nf(Ta,4)} s\nDf = √[1 + (Ta/tf)·(1 − e^(−2tf/Ta))]\n<span class="hi">Df = ${nf(Dfc,3)}</span>`;
+  $('df-formula').dataset.df=Dfc;
+  // 2. conductor
+  $('cond-ieee').innerHTML=`I  = Df · 3I₀ = ${nf(c.If/1000,3)} kA\nA  = I · Kf · √tc = ${nf(c.If/1000,3)} · ${nf(c.kf,2)} · √${nf(m.tc,2)}\n   = ${nf(c.Akcmil,2)} kcmil\n<span class="hi">A  = ${nf(c.Akcmil,2)} · 0,5067 = ${nf(c.Amm,1)} mm²</span>`;
+  $('cond-iec').innerHTML=`S = √(I²·t)/k = √(${nf(c.If,0)}² · ${nf(m.tc,2)}) / ${c.kiec}\n<span class="hi">S = ${nf(c.Siec,1)} mm²</span>`;
+  $('cond-req').innerHTML=`${nf(c.Areq,1)} <small>mm²${c.Amm<25?' · manda el mínimo RIC de 25 mm²':' · manda el cálculo IEEE'}</small>`;
+  $('cond-checks').innerHTML=checkList([
+    [c.cond[1]>=25,`Sección ≥ 25 mm² como electrodo (RIC 8.7): ${nf(c.cond[1],1)} mm²`],
+    [c.cond[1]>=c.Amm,`Soporta la falla (IEEE 80): ${nf(c.cond[1],1)} ≥ ${nf(c.Amm,1)} mm²`],
+    [m.tc<=0.5,`Tiempo de dimensionamiento tc ≤ 0,5 s (RIC 8.8): ${nf(m.tc,2)} s`]
+  ]);
+  // 3. geometría
+  $('geo-kv').innerHTML=[
+    ['Conductores paralelos a Lx',c.nx+' × '+nf(m.Lx,1)+' m'],['Conductores paralelos a Ly',c.ny+' × '+nf(m.Ly,1)+' m'],
+    ['Espaciamiento real Dx · Dy',nf(c.Dx,2)+' · '+nf(c.Dy,2)+' m'],['D de cálculo (el mayor)',nf(c.D,2)+' m'],
+    ['Conductor horizontal LC',nf(c.LC,1)+' m'],['Barras LR',c.nR?c.nR+' × '+nf(m.Lr,1)+' = '+nf(c.LR,1)+' m':'—'],
+    ['Largo total LT',nf(c.LT,1)+' m'],['Área A · perímetro Lp',nf(c.A,0)+' m² · '+nf(c.Lp,0)+' m']
+  ].map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('');
+  drawPlan(c);
+  // 4. resistencia
+  $('r-laurent').innerHTML=`r  = √(A/π) = √(${nf(c.A,0)}/π) = ${nf(c.r,2)} m\nR  = ρ/(4r) + ρ/LT\n   = ${nf(m.rho,0)}/(4·${nf(c.r,2)}) + ${nf(m.rho,0)}/${nf(c.LT,1)}\n   = ${nf(m.rho/(4*c.r),2)} + ${nf(m.rho/c.LT,2)}\n<span class="hi">R  = ${nf(c.Rl,2)} Ω</span>`;
+  $('r-sverak').innerHTML=`Rg = ρ·[1/LT + 1/√(20A)·(1 + 1/(1 + h·√(20/A)))]\n1/LT = ${nf(1/c.LT,4)}   1/√(20A) = ${nf(1/Math.sqrt(20*c.A),4)}\n1 + 1/(1 + ${nf(m.h,2)}·${nf(Math.sqrt(20/c.A),3)}) = ${nf(c.sv,3)}\nRg = ${nf(m.rho,0)}·(${nf(1/c.LT,4)} + ${nf(1/Math.sqrt(20*c.A),4)}·${nf(c.sv,3)})\n<span class="hi">Rg = ${nf(c.Rg,2)} Ω</span>`;
+  $('r-big').innerHTML=`Rg = ${nf(c.Rg,2)} <small>Ω</small>`;
+  const ric=[
+    [m.h>=0.5,`Profundidad h ≥ 0,5 m (RIC 8.11): ${nf(m.h,2)} m`],
+    [c.cond[1]>=25,`Conductor ≥ 25 mm² (RIC 8.7)`],
+    [c.Rg<=20,`Tierra de servicio Rg ≤ 20 Ω (RIC 6.1): ${nf(c.Rg,2)} Ω`],
+    [c.Rg<=5,`Red interna BT desde SE de MT, todas las PT combinadas ≤ 5 Ω (RIC 6.7.3)`,'warn']
+  ];
+  if(c.perRods) ric.push([c.rodSpacing>=2*m.Lr,`Separación entre barras ≥ 2·Lr (RIC 8.3.2): ${nf(c.rodSpacing,1)} m ≥ ${nf(2*m.Lr,1)} m`]);
+  if(m.h<0.25||m.h>2.5) ric.push([false,`Fórmula de Ks válida para 0,25 ≤ h ≤ 2,5 m`]);
+  $('ric-checks').innerHTML=checkList(ric);
+  const Rbt=(+m.Vs)/m.I0bt;
+  $('bt-formula').innerHTML=`R_TP ≤ Vs / I₀ = ${m.Vs} / ${nf(m.I0bt,3)}\n<span class="hi">R_TP ≤ ${nf(Rbt,Rbt<10?2:0)} Ω</span>   malla: ${nf(c.Rg,2)} Ω → ${c.Rg<=Rbt?'cumple':'no cumple'}`;
+  // 5. tolerables
+  $('tol-formula').innerHTML=(m.layer?`Cs = 1 − 0,09·(1 − ρ/ρs)/(2·hs + 0,09)\n   = 1 − 0,09·(1 − ${nf(m.rho,0)}/${nf(m.rhos,0)})/(2·${nf(m.hs,2)} + 0,09)\n   = ${nf(c.Cs,3)}\n`:`Sin capa superficial: Cs = 1 y ρs = ρ\n`)+
+    `Factor de tiempo ${nf(c.kw,3)}/√ts = ${nf(c.kw,3)}/√${nf(m.ts,2)} = ${nf(c.ft,4)}\nE contacto = (1000 + 1,5·Cs·ρs)·${nf(c.ft,4)}\n<span class="hi">E contacto = ${nf(c.Et,0)} V</span>\nE paso     = (1000 + 6·Cs·ρs)·${nf(c.ft,4)}\n<span class="hi">E paso     = ${nf(c.Ep,0)} V</span>`;
+  $('tbl-tol').innerHTML=`<thead><tr><th>${m.peso} kg · ts = ${nf(m.ts,2)} s</th><th>Sin capa</th><th>${m.layer?'Con capa '+nf(m.hs*100,0)+' cm':'Con capa'}</th></tr></thead><tbody>
+    <tr><td>ρs (Ω·m)</td><td class="dim">${nf(m.rho,0)}</td><td class="dim">${m.layer?nf(m.rhos,0):'—'}</td></tr>
+    <tr><td>Cs</td><td class="dim">1,00</td><td class="dim">${m.layer?nf(c.Cs,2):'—'}</td></tr>
+    <tr><td>E contacto</td><td class="calc">${nf(c.Et0,0)} V</td><td class="calc">${m.layer?nf(c.Et,0)+' V':'—'}</td></tr>
+    <tr><td>E paso</td><td class="calc">${nf(c.Ep0,0)} V</td><td class="calc">${m.layer?nf(c.Ep,0)+' V':'—'}</td></tr></tbody>`;
+  $('tol-note').textContent=m.layer?`La capa multiplica por ${nf(c.Et/c.Et0,1)} la tensión de contacto tolerable. Debe mantenerse en el tiempo: es parte del diseño.`:'Activa la capa de gravilla en el paso 1 para ver su efecto.';
+  // 6. verificación
+  const atajo=c.GPR<=c.Et, okEm=c.Em<=c.Et, okEs=c.Es<=c.Ep, ok=atajo||(okEm&&okEs);
+  $('gpr-formula').innerHTML=`GPR = IG · Rg = ${nf(c.IG,0)} · ${nf(c.Rg,2)}\n<span class="hi">GPR = ${nf(c.GPR,0)} V</span>  ${atajo?'≤':'>'} E contacto ${nf(c.Et,0)} V\n${atajo?'El atajo basta: ninguna persona queda expuesta a más que el GPR.':'El atajo no alcanza: se verifican Em y Es.'}`;
+  meter($('meter-em'),c.Em,c.Et,'Em'); meter($('meter-es'),c.Es,c.Ep,'Es');
+  $('verdict').innerHTML=`<div class="vcell"><p class="eyebrow">Resultado</p><p class="big" style="color:${ok?'var(--ok)':'var(--bad)'}">${ok?'La malla cumple':'La malla no cumple'}</p></div>
+    <div class="vcell"><p class="eyebrow">Rg</p><p class="big">${nf(c.Rg,2)} <small>Ω</small></p></div>
+    <div class="vcell"><p class="eyebrow">GPR</p><p class="big">${nf(c.GPR,0)} <small>V</small></p></div>
+    <div class="vcell"><p class="eyebrow">Em / E contacto</p><p class="big">${nf(c.Em,0)} / ${nf(c.Et,0)} <small>V</small></p></div>
+    <div class="vcell"><p class="eyebrow">Es / E paso</p><p class="big">${nf(c.Es,0)} / ${nf(c.Ep,0)} <small>V</small></p></div>`;
+  $('tbl-fac').innerHTML='<thead><tr><th>Factor</th><th>Valor</th><th>Significado</th></tr></thead><tbody>'+[
+    ['na = 2·LC/Lp',nf(c.na,3),'conductores equivalentes'],['nb = √(Lp/(4√A))',nf(c.nb,3),'1 en malla cuadrada'],['n = na·nb',nf(c.n,3),'nc = nd = 1 (rectangular)'],
+    ['Kh = √(1 + h/h₀)',nf(c.Kh,3),'h₀ = 1 m'],['Kii',nf(c.Kii,3),c.perRods?'barras en el perímetro':'1/(2n)^(2/n), sin barras perimetrales'],
+    ['Km',nf(c.Km,3),'geometría de la malla'],['Ki = 0,644 + 0,148·n',nf(c.Ki,3),'irregularidad de la corriente'],
+    ['LM (m)',nf(c.LM,1),c.perRods?'LC + [1,55 + 1,22·Lr/√(Lx²+Ly²)]·LR':'LC + LR'],
+    ['Ks',nf(c.Ks,3),'geometría para el paso'],['LS = 0,75·LC + 0,85·LR (m)',nf(c.LS,1),'largo efectivo para el paso']
+  ].map(r=>`<tr><td style="text-align:left">${r[0]}</td><td class="calc">${r[1]}</td><td style="text-align:left;color:var(--muted);white-space:normal;min-width:180px">${r[2]}</td></tr>`).join('')+'</tbody>';
+  $('em-formula').innerHTML=`D²/(16hd)     = ${nf(c.t1,1)}\n(D+2h)²/(8Dd) = ${nf(c.t2,1)}\nh/(4d)        = ${nf(c.t3,1)}\nln(${nf(c.t1+c.t2-c.t3,1)}) = ${nf(c.lnA,3)}\n(Kii/Kh)·ln(8/(π(2n−1))) = ${nf(c.Kii/c.Kh,3)}·(${nf(c.lnB,3)}) = ${nf(c.Kii/c.Kh*c.lnB,3)}\nKm = (${nf(c.lnA,3)} + ${nf(c.Kii/c.Kh*c.lnB,3)})/2π = ${nf(c.Km,3)}\nEm = ρ·Km·Ki·IG/LM\n   = ${nf(m.rho,0)}·${nf(c.Km,3)}·${nf(c.Ki,3)}·${nf(c.IG,0)}/${nf(c.LM,1)}\n<span class="hi">Em = ${nf(c.Em,0)} V</span>`;
+  $('es-formula').innerHTML=`1/(2h)            = ${nf(c.s1,3)}\n1/(D+h)           = ${nf(c.s2,3)}\n(1/D)·(1−0,5^(n−2)) = ${nf(c.s3,3)}\nKs = (${nf(c.s1,3)} + ${nf(c.s2,3)} + ${nf(c.s3,3)})/π = ${nf(c.Ks,3)}\nEs = ρ·Ks·Ki·IG/LS\n   = ${nf(m.rho,0)}·${nf(c.Ks,3)}·${nf(c.Ki,3)}·${nf(c.IG,0)}/${nf(c.LS,1)}\n<span class="hi">Es = ${nf(c.Es,0)} V</span>`;
+  $('b-undo').disabled=!undoStack.length;
+}
+
+function onMallaChange(){ syncMallaInputs(); renderMalla(); save(); }
+document.querySelectorAll('[data-m]').forEach(el=>el.addEventListener('input',e=>{ const x=num(e.target.value); if(Number.isFinite(x)&&x>0){ st.malla[e.target.dataset.m]=x; renderMalla(); save(); } }));
+$('m-layer').onchange=e=>{st.malla.layer=e.target.checked; $('layer-fields').hidden=!e.target.checked; renderMalla(); save();};
+$('m-kf').onchange=e=>{st.malla.kf=e.target.value; renderMalla(); save();};
+$('m-kiec').onchange=e=>{st.malla.kiec=e.target.value; renderMalla(); save();};
+$('m-cond').onchange=e=>{st.malla.cond=e.target.value; renderMalla(); save();};
+$('m-Vs').onchange=e=>{st.malla.Vs=e.target.value; renderMalla(); save();};
+$('m-rodPos').onchange=e=>{st.malla.rodPos=e.target.value; if(e.target.value!=='none'&&!(st.malla.nR>0))st.malla.nR=4; onMallaChange();};
+$('w50').onclick=()=>{st.malla.peso=50; onMallaChange();}; $('w70').onclick=()=>{st.malla.peso=70; onMallaChange();};
+$('b-df').onclick=()=>{ const v=+$('df-formula').dataset.df; if(v>0){ st.malla.Df=+v.toFixed(3); onMallaChange(); } };
+$('b-m-ejemplo').onclick=()=>{ undoStack=[]; st.malla=mallaEjemplo(); $('fix-note').textContent=''; onMallaChange(); };
+$('b-m-rhoeq').onclick=()=>{ if(st.rhoEq>0){ st.malla.rho=+st.rhoEq.toFixed(1); st.malla.Lx=st.eq.A; st.malla.Ly=st.eq.B; if(st.eq.b>0)st.malla.h=st.eq.b; onMallaChange(); } };
+document.querySelectorAll('[data-fix]').forEach(b=>b.addEventListener('click',()=>{
+  const m=st.malla, before=calcMalla(); undoStack.push(JSON.stringify(m)); let msg='';
+  switch(b.dataset.fix){
+    case 'D': m.D=Math.max(1,+(before.D/2).toFixed(2)); msg=`Espaciamiento reducido a ${nf(m.D,2)} m.`; break;
+    case 'rods': m.rodPos='per'; m.nR=Math.max(4,Math.round(before.Lp/(2*m.Lr))); m.nR=Math.min(m.nR,Math.floor(before.Lp/(2*m.Lr))||4); msg=`${m.nR} barras de ${nf(m.Lr,1)} m en el perímetro.`; break;
+    case 'grava': m.layer=true; m.rhos=Math.max(m.rhos||0,3000); m.hs=Math.max(m.hs||0,0.1); msg='Capa de gravilla de 3.000 Ω·m y 10 cm.'; break;
+    case 'ts': m.ts=Math.max(0.1,+(m.ts*0.6).toFixed(2)); msg=`Duración del choque reducida a ${nf(m.ts,2)} s (requiere mejor coordinación de protecciones).`; break;
+  }
+  onMallaChange(); const after=calcMalla();
+  $('fix-note').textContent=`${msg} Em: ${nf(before.Em,0)} → ${nf(after.Em,0)} V (tolerable ${nf(after.Et,0)} V). Es: ${nf(before.Es,0)} → ${nf(after.Es,0)} V (tolerable ${nf(after.Ep,0)} V).`;
+}));
+$('b-undo').onclick=()=>{ const s=undoStack.pop(); if(s){ st.malla=JSON.parse(s); $('fix-note').textContent='Cambio deshecho.'; onMallaChange(); } };
+
+/* =================== A. FUNDAMENTOS =================== */
+const fundDef=()=>({rho:100,I:100,r0:0.5,k:2,x:1,ts:0.5,grava:false,peso:50,mode:'c',lado:20});
+st.fund=Object.assign(fundDef(),st.fund||{});
+const css=()=>{const cs=getComputedStyle(document.documentElement); return n=>cs.getPropertyValue(n).trim();};
+function niceStep(range,count){ const raw=range/count, p=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/p; return (f<1.5?1:f<3?2:f<7?5:10)*p; }
+function fmtTick(v){ const a=Math.abs(v); return v.toLocaleString('es-CL',{maximumFractionDigits:a<1&&a>0?2:a<10?1:0}); }
+// gráfico lineal genérico
+function lineChart(svg,o){
+  const v=css(); const W=Math.max(300,(svg.parentNode.clientWidth||600)); const H=Math.round(Math.min(o.maxH||340,Math.max(220,W*0.5)));
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.setAttribute('height',H);
+  const M={l:58,r:14,t:16,b:40}; const pw=W-M.l-M.r, ph=H-M.t-M.b;
+  const X=x=>M.l+pw*(x-o.xmin)/(o.xmax-o.xmin), Y=y=>M.t+ph*(1-(Math.min(Math.max(y,o.ymin),o.ymax)-o.ymin)/(o.ymax-o.ymin));
+  const f='font-family="IBM Plex Mono,monospace" font-size="11"', fs='font-family="IBM Plex Sans,Arial,sans-serif" font-size="12"';
+  let s=`<rect x="${M.l}" y="${M.t}" width="${pw}" height="${ph}" fill="${v('--surface')}"/>`;
+  const sx=niceStep(o.xmax-o.xmin,Math.max(3,Math.floor(pw/80)));
+  for(let t=Math.ceil(o.xmin/sx)*sx;t<=o.xmax+1e-9;t+=sx){ s+=`<line x1="${X(t)}" y1="${M.t}" x2="${X(t)}" y2="${M.t+ph}" stroke="${v('--line')}" stroke-width=".8"/><text x="${X(t)}" y="${M.t+ph+15}" text-anchor="middle" ${f} fill="${v('--muted')}">${fmtTick(+t.toFixed(6))}</text>`; }
+  const sy=niceStep(o.ymax-o.ymin,5);
+  for(let t=Math.ceil(o.ymin/sy)*sy;t<=o.ymax+1e-9;t+=sy){ s+=`<line x1="${M.l}" y1="${Y(t)}" x2="${M.l+pw}" y2="${Y(t)}" stroke="${v('--line')}" stroke-width=".8"/><text x="${M.l-6}" y="${Y(t)+4}" text-anchor="end" ${f} fill="${v('--muted')}">${fmtTick(+t.toFixed(6))}</text>`; }
+  s+=`<line x1="${M.l}" y1="${M.t+ph}" x2="${M.l+pw}" y2="${M.t+ph}" stroke="${v('--soft')}"/>`;
+  s+=`<text x="${M.l+pw/2}" y="${H-5}" text-anchor="middle" ${fs} fill="${v('--muted')}">${o.xlab}</text>`;
+  s+=`<text transform="translate(13 ${M.t+ph/2}) rotate(-90)" text-anchor="middle" ${fs} fill="${v('--muted')}">${o.ylab}</text>`;
+  (o.bands||[]).forEach(b=>{ s+=`<rect x="${X(b.x1)}" y="${M.t}" width="${X(b.x2)-X(b.x1)}" height="${ph}" fill="${v(b.color)}" opacity="${b.op||.12}"/>`; if(b.label)s+=`<text x="${(X(b.x1)+X(b.x2))/2}" y="${M.t+14}" text-anchor="middle" ${fs} fill="${v('--muted')}">${b.label}</text>`; });
+  (o.hlines||[]).forEach(h=>{ if(h.y<o.ymin||h.y>o.ymax)return; s+=`<line x1="${M.l}" y1="${Y(h.y)}" x2="${M.l+pw}" y2="${Y(h.y)}" stroke="${v(h.color)}" stroke-width="1.5" stroke-dasharray="6 5" opacity="${h.op||.9}"/>`; if(h.label)s+=`<text x="${M.l+pw-4}" y="${Y(h.y)-5}" text-anchor="end" ${f} fill="${v(h.color)}">${h.label}</text>`; });
+  (o.series||[]).forEach(se=>{ s+=`<path d="${se.pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join(' ')}" fill="none" stroke="${v(se.color)}" stroke-width="${se.w||2}" ${se.dash?`stroke-dasharray="${se.dash}"`:''} stroke-linejoin="round"/>`; });
+  (o.segs||[]).forEach(g=>{ s+=`<line x1="${X(g.x1)}" y1="${Y(g.y1)}" x2="${X(g.x2)}" y2="${Y(g.y2)}" stroke="${v(g.color)}" stroke-width="${g.w||5}" stroke-linecap="round" ${g.dash?`stroke-dasharray="${g.dash}"`:''}/>`; if(g.label){ s+=`<text x="${X(g.lx??g.x2)+(g.dx??8)}" y="${(Y(g.y1)+Y(g.y2))/2+4}" text-anchor="${g.anchor||'start'}" font-family="IBM Plex Mono,monospace" font-size="12" font-weight="600" fill="${v(g.color)}">${g.label}</text>`; } });
+  (o.dots||[]).forEach(d=>{ s+=`<circle cx="${X(d.x)}" cy="${Y(d.y)}" r="${d.r||5}" fill="${v(d.color)}" stroke="${v('--surface')}" stroke-width="2"/>`; });
+  (o.vlines||[]).forEach(l=>{ s+=`<line x1="${X(l.x)}" y1="${M.t}" x2="${X(l.x)}" y2="${M.t+ph}" stroke="${v(l.color)}" stroke-width="1.5" stroke-dasharray="3 4"/>`; if(l.label)s+=`<text x="${X(l.x)+5}" y="${M.t+14}" ${f} fill="${v(l.color)}">${l.label}</text>`; });
+  svg.innerHTML=s;
+}
+const fCalc=()=>{ const f=st.fund; const R=f.rho/(2*Math.PI*f.r0); const GPR=f.I*R; const K=f.rho*f.I/(2*Math.PI);
+  const V=x=>{const a=Math.abs(x); return a<=f.r0?GPR:K/a;}; return {R,GPR,K,V}; };
+function bodyCalc(){
+  const f=st.fund; const rhos=f.grava?3000:f.rho;
+  const Cs=f.grava?1-0.09*(1-f.rho/3000)/(2*0.1+0.09):1;
+  const kw=f.peso===70?0.157:0.116; const Ib=kw/Math.sqrt(f.ts);
+  const Rc=1000+1.5*Cs*rhos, Rp=1000+6*Cs*rhos;
+  return {rhos,Cs,kw,Ib,Rc,Rp,Et:Rc*Ib,Ep:Rp*Ib};
+}
+function sliderBind(id,key,fmt,after){ const el=$(id); el.value=st.fund[key]; const show=()=>{$(id+'-v').textContent=fmt(st.fund[key]);}; show();
+  el.addEventListener('input',e=>{ st.fund[key]=+e.target.value; show(); after(); save(); }); }
+function drawCorte(c){
+  const v=css(), f=st.fund; const W=640,H=300,g=56,cx=320; const xview=Math.max(8*f.r0,5); const sc=300/xview;
+  let s=`<rect x="0" y="0" width="${W}" height="${g}" fill="${v('--surface-2')}"/><rect x="0" y="${g}" width="${W}" height="${H-g}" fill="${v('--soil')}"/>`;
+  const fr=[0.05,0.1,0.15,0.25,0.5];
+  fr.forEach((q,i)=>{ const r=f.r0/q*sc; s+=`<path d="M${cx-r} ${g} A${r} ${r} 0 0 0 ${cx+r} ${g} Z" fill="${v('--accent')}" opacity="${0.1+i*0.12}"/>`; });
+  fr.forEach(q=>{ const r=f.r0/q*sc; if(cx+r<W-4){ s+=`<text x="${cx+r}" y="${g-6}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="${v('--ink')}">${nf(c.GPR*q,0)} V</text><line x1="${cx+r}" y1="${g-3}" x2="${cx+r}" y2="${g}" stroke="${v('--ink')}"/>`; } });
+  const re=f.r0*sc;
+  for(let k=0;k<9;k++){ const a=Math.PI*(k+0.5)/9; const x1=cx+Math.cos(a)*(re+4), y1=g+Math.sin(a)*(re+4), x2=cx+Math.cos(a)*Math.min(280,re+150), y2=g+Math.sin(a)*Math.min(235,re+150);
+    s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${v('--blue')}" stroke-width="2" marker-end="url(#fa)"/>`; }
+  s=`<defs><marker id="fa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${v('--blue')}"/></marker></defs>`+s;
+  s+=`<path d="M${cx-re} ${g} A${re} ${re} 0 0 0 ${cx+re} ${g} Z" fill="${v('--ink')}"/><line x1="${cx}" y1="8" x2="${cx}" y2="${g}" stroke="${v('--ink')}" stroke-width="3"/>`;
+  s+=`<text x="${cx+8}" y="20" font-family="IBM Plex Sans,Arial,sans-serif" font-size="13" font-weight="700" fill="${v('--ink')}">I = ${nf(f.I,0)} A · GPR = ${nf(c.GPR,0)} V</text>`;
+  s+=`<text x="8" y="${H-8}" font-family="IBM Plex Sans,Arial,sans-serif" font-size="11" fill="${v('--muted')}">Ancho del corte: ${nf(2*xview,1)} m</text>`;
+  $('f-corte').setAttribute('viewBox',`0 0 ${W} ${H}`); $('f-corte').innerHTML=s;
+}
+function profilePts(V,xmax,r0){ const pts=[]; const N=200; for(let i=0;i<=N;i++){ const x=-xmax+2*xmax*i/N; pts.push([x,V(x)]); } pts.push([r0,V(r0)]); pts.push([-r0,V(-r0)]); return pts.sort((a,b)=>a[0]-b[0]); }
+function renderFund(){
+  const f=st.fund, c=fCalc(), b=bodyCalc();
+  // paso 2
+  $('f-disp-formula').innerHTML=`R   = ρ/(2π·r₀) = ${nf(f.rho,0)}/(2π·${nf(f.r0,2)}) = ${nf(c.R,2)} Ω\nGPR = I·R = ${nf(f.I,0)} · ${nf(c.R,2)} = <span class="hi">${nf(c.GPR,0)} V</span>\nJ(x) = I/(2πx²)   E(x) = ρI/(2πx²)\nV(x) = ρI/(2πx) = ${nf(c.K,1)}/x`;
+  drawCorte(c);
+  const xm=Math.max(10,6*f.r0);
+  lineChart($('f-embudo'),{xmin:-xm,xmax:xm,ymin:0,ymax:c.GPR*1.08,xlab:'Distancia al centro del electrodo x (m)',ylab:'Potencial V (V)',series:[{pts:profilePts(c.V,xm,f.r0),color:'--accent',w:3}],hlines:[{y:c.GPR,color:'--soft',label:'GPR = '+nf(c.GPR,0)+' V'}],bands:[{x1:-f.r0,x2:f.r0,color:'--ink',op:.08}]});
+  $('f-tbl-v').innerHTML='<thead><tr><th>x (m)</th>'+[1,2,3,5,10,20].map(x=>`<th>${x}</th>`).join('')+'</tr></thead><tbody><tr><td>V(x) (V)</td>'+[1,2,3,5,10,20].map(x=>`<td class="calc">${nf(c.V(x),0)}</td>`).join('')+'</tr><tr><td>% del GPR</td>'+[1,2,3,5,10,20].map(x=>`<td class="dim">${nf(c.V(x)/c.GPR*100,0)} %</td>`).join('')+'</tr></tbody>';
+  const fr=1-1/f.k; $('f-k-bar').style.width=(fr*100)+'%';
+  $('f-k-formula').innerHTML=`R(r₀→x)/R = 1 − r₀/x = 1 − 1/${nf(f.k,1)}\n<span class="hi">= ${nf(fr*100,0)} % de R</span> está dentro de x = ${nf(f.k*f.r0,2)} m`;
+  // paso 3
+  const m=f.mode; ['c','p','t'].forEach(k=>$('fm-'+k).setAttribute('aria-pressed',m===k));
+  $('fw50').setAttribute('aria-pressed',f.peso===50); $('fw70').setAttribute('aria-pressed',f.peso===70);
+  $('f-grava').checked=f.grava;
+  const x=f.x, Vx=c.V(x), Vx1=c.V(x+1);
+  let U, Rpath, Etol, title, form, note;
+  if(m==='c'){ U=c.GPR-Vx; Rpath=b.Rc; Etol=b.Et; title='Contacto: mano en la estructura, pies a '+nf(x,1)+' m';
+    form=`Uc = GPR − V(x) = ${nf(c.GPR,0)} − ${nf(Vx,0)} = <span class="hi">${nf(U,0)} V</span>`;
+    note=x<=f.r0?'Los pies están sobre el electrodo: mano y pies al mismo potencial.':'Mientras más lejos están los pies, más diferencia hay entre la mano (GPR) y el suelo.'; }
+  else if(m==='p'){ U=Vx-Vx1; Rpath=b.Rp; Etol=b.Ep; title='Paso: pies a '+nf(x,1)+' m y '+nf(x+1,1)+' m';
+    form=`Up = V(x) − V(x+1) = ${nf(Vx,0)} − ${nf(Vx1,0)} = <span class="hi">${nf(U,0)} V</span>`;
+    note='La tensión de paso es máxima junto al electrodo, donde la pendiente del embudo es mayor.'; }
+  else { U=c.GPR; Rpath=b.Rc; Etol=b.Et; title='Transferida: persona en tierra lejana tocando un elemento unido al SPT';
+    form=`Ut = GPR − 0 = <span class="hi">${nf(U,0)} V</span>`;
+    note='Un cerco, una cañería o una pantalla de cable lleva todo el GPR a un lugar donde el suelo está a 0 V. La distancia x no influye.'; }
+  const Ibody=U/Rpath;
+  $('f-mode-title').textContent=title;
+  $('f-cp-formula').innerHTML=form+`\nResistencia del recorrido = 1000 + ${m==='p'?'6':'1,5'}·Cs·ρs = ${nf(Rpath,0)} Ω\nCorriente por el cuerpo = ${nf(U,0)}/${nf(Rpath,0)} = ${nf(Ibody*1000,0)} mA\nTolerable (${f.peso} kg, ${nf(f.ts,2)} s) = ${nf(b.kw,3)}/√ts = ${nf(b.Ib*1000,0)} mA\n<span class="hi">Tensión tolerable = ${nf(Etol,0)} V</span>`;
+  meter($('f-cp-meter'),U,Etol,m==='c'?'Uc':m==='p'?'Up':'Ut');
+  $('f-cp-note').textContent=note+(f.grava?` Con gravilla Cs = ${nf(b.Cs,2)} y ρs = 3.000 Ω·m: sube la resistencia del pie, no cambia la tensión aplicada.`:'');
+  $('f-x').disabled=m==='t';
+  drawPersona(m,U<=Etol);
+  // embudo con persona
+  const segs=[], dots=[];
+  if(m==='c'){ segs.push({x1:x,y1:Vx,x2:x,y2:c.GPR,color:'--red',label:'Uc '+nf(U,0)+' V'}); segs.push({x1:0,y1:c.GPR,x2:x,y2:c.GPR,color:'--red',w:2,dash:'4 4'}); dots.push({x:x,y:Vx,color:'--red'}); }
+  else if(m==='p'){ segs.push({x1:x+1,y1:Vx1,x2:x+1,y2:Vx,color:'--blue',label:'Up '+nf(U,0)+' V'}); segs.push({x1:x,y1:Vx,x2:x+1,y2:Vx,color:'--blue',w:2,dash:'4 4'}); dots.push({x:x,y:Vx,color:'--blue'},{x:x+1,y:Vx1,color:'--blue'}); }
+  lineChart($('f-embudo2'),{xmin:-xm,xmax:xm,ymin:0,ymax:c.GPR*1.08,xlab:'x (m)',ylab:'Potencial V (V)',series:[{pts:profilePts(c.V,xm,f.r0),color:'--accent',w:3}],segs,dots,hlines:[{y:c.GPR,color:'--soft',label:'GPR'}]});
+  // tensiones vs distancia
+  const xd=20, pc=[], pp=[]; for(let i=0;i<=200;i++){ const xx=xd*i/200; pc.push([xx,c.GPR-c.V(xx)]); pp.push([xx,c.V(xx)-c.V(xx+1)]); }
+  const ymax=Math.max(c.GPR,b.Et,b.Ep)*1.08;
+  lineChart($('f-cp-dist'),{xmin:0,xmax:xd,ymin:0,ymax,xlab:'Distancia de la persona al electrodo x (m)',ylab:'Tensión aplicada (V)',series:[{pts:pc,color:'--red',w:2.5},{pts:pp,color:'--blue',w:2.5}],hlines:[{y:b.Et,color:'--red',label:'E contacto tolerable '+nf(b.Et,0)+' V',op:.6},{y:b.Ep,color:'--blue',label:'E paso tolerable '+nf(b.Ep,0)+' V',op:.6}],vlines:m!=='t'?[{x:x,color:'--ink',label:'persona'}]:[]});
+  let xc=c.GPR>b.Et?c.K/(c.GPR-b.Et):Infinity; xc=Math.max(xc,f.r0);
+  let xp=0; for(let xx=0;xx<=200;xx+=0.01){ if(c.V(xx)-c.V(xx+1)<=b.Ep){xp=xx;break;} }
+  $('f-cp-dist-note').textContent=(c.GPR<=b.Et?'El GPR no supera la tensión de contacto tolerable: el contacto es seguro a cualquier distancia. ':`El contacto deja de ser seguro con los pies a más de ${nf(xc,2)} m de la estructura. `)+(xp>0?`El paso es peligroso hasta ${nf(xp,2)} m del electrodo.`:'El paso es seguro en toda la superficie.');
+  // paso 4
+  const a=f.lado/Math.sqrt(Math.PI), Rd=f.rho/(4*a), GPRd=f.I*Rd;
+  const Vd=xx=>{const z=Math.abs(xx); return z<=a?GPRd:GPRd*(2/Math.PI)*Math.asin(a/z);};
+  const xb=Math.max(a,f.r0)+12; const pd=[]; for(let i=0;i<=300;i++){ const xx=-xb+2*xb*i/300; pd.push([xx,Vd(xx)]); } pd.push([a,GPRd],[-a,GPRd]); pd.sort((p,q)=>p[0]-q[0]);
+  lineChart($('f-bm'),{xmin:-xb,xmax:xb,ymin:0,ymax:Math.max(c.GPR,GPRd)*1.08,xlab:'x (m)',ylab:'Potencial V (V)',series:[{pts:profilePts(c.V,xb,f.r0),color:'--accent',w:2.5},{pts:pd,color:'--blue',w:2.5}],bands:[{x1:-a,x2:a,color:'--blue',op:.08,label:'área de la malla'}]});
+  const rows=[['Resistencia R',nf(c.R,2)+' Ω',nf(Rd,2)+' Ω'],['GPR',nf(c.GPR,0)+' V',nf(GPRd,0)+' V'],
+    ['Contacto dentro del área','—','≈ 0 V (Em en malla real)'],
+    ['Contacto, pies a 1 m fuera del borde',nf(c.GPR-c.V(f.r0+1),0)+' V',nf(GPRd-Vd(a+1),0)+' V'],
+    ['Paso en el borde (1 m)',nf(c.V(f.r0)-c.V(f.r0+1),0)+' V',nf(GPRd-Vd(a+1),0)+' V'],
+    ['Paso a 5 m del borde',nf(c.V(f.r0+5)-c.V(f.r0+6),0)+' V',nf(Vd(a+5)-Vd(a+6),0)+' V']];
+  $('f-tbl-bm').innerHTML='<thead><tr><th></th><th>Semiesfera r₀ = '+nf(f.r0,2)+' m</th><th>Malla '+nf(f.lado,0)+' × '+nf(f.lado,0)+' m</th></tr></thead><tbody>'+rows.map(r=>`<tr><td style="text-align:left">${r[0]}</td><td class="calc">${r[1]}</td><td class="calc">${r[2]}</td></tr>`).join('')+'</tbody>';
+  $('f-bm-formula').innerHTML=`a   = lado/√π = ${nf(a,2)} m\nR   = ρ/(4a) = ${nf(f.rho,0)}/(4·${nf(a,2)}) = ${nf(Rd,2)} Ω\nV(x) = (2/π)·GPR·arcsen(a/x), x > a\n<span class="hi">Dentro del área, V = GPR: el suelo sube junto con la estructura</span>`;
+  renderTT();
+}
+function drawPersona(m,ok){
+  const v=css(); const W=320,H=170,g=140; let s=`<rect x="0" y="${g}" width="${W}" height="${H-g}" fill="${v('--soil')}"/><line x1="0" y1="${g}" x2="${W}" y2="${g}" stroke="${v('--ink')}" stroke-width="2"/>`;
+  const col=ok?v('--ok'):v('--bad'); const ink=v('--ink');
+  const fig=(cx,legs)=>`<circle cx="${cx}" cy="40" r="13" fill="none" stroke="${ink}" stroke-width="3"/><line x1="${cx}" y1="53" x2="${cx}" y2="100" stroke="${ink}" stroke-width="3"/><line x1="${cx}" y1="100" x2="${cx-legs}" y2="${g}" stroke="${ink}" stroke-width="3"/><line x1="${cx}" y1="100" x2="${cx+legs}" y2="${g}" stroke="${ink}" stroke-width="3"/>`;
+  if(m==='c'){ s+=`<rect x="40" y="20" width="34" height="${g-20}" fill="${v('--soft')}"/><path d="M42 ${g} A15 15 0 0 0 72 ${g} Z" fill="${ink}"/>`+fig(170,14)+`<line x1="170" y1="66" x2="74" y2="60" stroke="${ink}" stroke-width="3"/>`;
+    s+=`<polyline points="78,58 164,66 164,102 158,${g-4}" fill="none" stroke="${col}" stroke-width="3" stroke-dasharray="7 5"/><polyline points="176,102 182,${g-4}" fill="none" stroke="${col}" stroke-width="3" stroke-dasharray="7 5"/>`; }
+  else if(m==='p'){ s+=`<path d="M40 ${g} A20 20 0 0 0 80 ${g} Z" fill="${ink}"/><line x1="60" y1="${g-40}" x2="60" y2="${g}" stroke="${ink}" stroke-width="3"/>`+fig(200,40)+`<line x1="200" y1="66" x2="180" y2="92" stroke="${ink}" stroke-width="3"/><line x1="200" y1="66" x2="220" y2="92" stroke="${ink}" stroke-width="3"/>`;
+    s+=`<polyline points="164,${g-4} 196,104 204,104 236,${g-4}" fill="none" stroke="${col}" stroke-width="3" stroke-dasharray="7 5"/><text x="200" y="${g+22}" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" fill="${ink}">1 m</text>`; }
+  else { s+=`<path d="M10 ${g} A16 16 0 0 0 42 ${g} Z" fill="${ink}"/><line x1="26" y1="${g}" x2="26" y2="70" stroke="${v('--soft')}" stroke-width="3"/><line x1="26" y1="70" x2="250" y2="70" stroke="${v('--soft')}" stroke-width="4"/><text x="120" y="62" text-anchor="middle" font-family="IBM Plex Sans,Arial,sans-serif" font-size="12" fill="${v('--muted')}">cerco o cañería metálica</text>`+fig(280,12)+`<line x1="280" y1="66" x2="250" y2="72" stroke="${ink}" stroke-width="3"/>`;
+    s+=`<polyline points="254,74 274,70 274,102 270,${g-4}" fill="none" stroke="${col}" stroke-width="3" stroke-dasharray="7 5"/><text x="300" y="${g+22}" text-anchor="end" font-family="IBM Plex Sans,Arial,sans-serif" font-size="11" fill="${ink}">tierra lejana, 0 V</text>`; }
+  $('f-persona').setAttribute('viewBox',`0 0 ${W} ${H}`); $('f-persona').innerHTML=s;
+}
+function renderTT(){
+  const U0=num($('f-U0').value),RB=num($('f-RB').value),RA=num($('f-RA').value),In=num($('f-In').value),Idn=num($('f-Idn').value)/1000,UL=num($('f-UL').value);
+  if(![U0,RB,RA,In,Idn,UL].every(x=>x>0))return;
+  const Id=U0/(RA+RB), Uc=Id*RA, Un=Id*RB;
+  let mcb, mcbOk=false;
+  if(Id>=10*In){mcb='dispara en forma instantánea (≥ 10·In)';mcbOk=true;}
+  else if(Id>=5*In){mcb='zona incierta del magnético (5 a 10·In)';}
+  else if(Id>=1.45*In){mcb='solo el térmico, en segundos a minutos';}
+  else if(Id>1.13*In){mcb='puede tardar más de 1 hora';}
+  else mcb='no dispara nunca (≤ 1,13·In)';
+  const RAmcb=U0/(10*In)-RB;
+  $('f-tt-formula').innerHTML=`Id = U₀/(R_A + R_B) = ${nf(U0,0)}/(${nf(RA,1)} + ${nf(RB,1)})\n<span class="hi">Id = ${nf(Id,2)} A</span>\nUc = Id·R_A = <span class="hi">${nf(Uc,0)} V</span> en la carcasa\nNeutro respecto de tierra = Id·R_B = ${nf(Un,0)} V\nPara disparo instantáneo C${nf(In,0)}: Id ≥ ${nf(10*In,0)} A → R_A ≤ ${RAmcb>0?nf(RAmcb,3)+' Ω':'imposible con este R_B'}\nCon diferencial: R_A ≤ U_L/IΔn = ${nf(UL,0)}/${nf(Idn,3)} = ${nf(UL/Idn,0)} Ω`;
+  $('f-tt-checks').innerHTML=checkList([
+    [Uc<=UL,`Tensión en la carcasa ≤ ${nf(UL,0)} V: ${nf(Uc,0)} V`],
+    [mcbOk,`Termomagnético C${nf(In,0)} con ${nf(Id,2)} A: ${mcb}`],
+    [Id>=Idn,`Diferencial ${nf(Idn*1000,0)} mA: ${Id>=Idn?'detecta la fuga y despeja en menos de 300 ms':'no alcanza su umbral'}`],
+    [RA*Idn<=UL,`R_A·IΔn ≤ U_L: ${nf(RA*Idn,2)} V ≤ ${nf(UL,0)} V`]
+  ]);
+  // esquema
+  const v=css(), ink=v('--ink'), W=640, H=250, g=205;
+  let s=`<rect x="0" y="${g}" width="${W}" height="${H-g}" fill="${v('--soil')}"/><line x1="0" y1="${g}" x2="${W}" y2="${g}" stroke="${ink}" stroke-width="2"/>`;
+  s+=`<circle cx="70" cy="60" r="28" fill="none" stroke="${ink}" stroke-width="3"/><circle cx="96" cy="60" r="28" fill="none" stroke="${ink}" stroke-width="3"/>`;
+  s+=`<line x1="124" y1="60" x2="470" y2="60" stroke="${ink}" stroke-width="3"/><rect x="470" y="35" width="120" height="110" rx="8" fill="${v('--surface-2')}" stroke="${v('--soft')}" stroke-width="3"/>`;
+  s+=`<polyline points="470,60 492,75 478,90 500,105" fill="none" stroke="${v('--red')}" stroke-width="3"/>`;
+  s+=`<line x1="70" y1="88" x2="70" y2="120" stroke="${ink}" stroke-width="3"/><rect x="58" y="120" width="24" height="50" fill="${v('--surface')}" stroke="${ink}" stroke-width="3"/><line x1="70" y1="170" x2="70" y2="${g}" stroke="${ink}" stroke-width="3"/>`;
+  s+=`<line x1="530" y1="145" x2="530" y2="120" stroke="${ink}" stroke-width="3"/><rect x="518" y="150" width="24" height="40" fill="${v('--surface')}" stroke="${ink}" stroke-width="3"/><line x1="530" y1="190" x2="530" y2="${g}" stroke="${ink}" stroke-width="3"/>`;
+  s+=`<polyline points="150,48 440,48" fill="none" stroke="${v('--accent')}" stroke-width="3" stroke-dasharray="10 7"/><polyline points="555,190 555,${g+22} 45,${g+22} 45,120" fill="none" stroke="${v('--accent')}" stroke-width="3" stroke-dasharray="10 7"/>`;
+  const t=(x,y,txt,c,a='start',w=600)=>`<text x="${x}" y="${y}" text-anchor="${a}" font-family="IBM Plex Sans,Arial,sans-serif" font-size="13" font-weight="${w}" fill="${c||ink}">${txt}</text>`;
+  s+=t(90,140,'R_B = '+nf(RB,1)+' Ω')+t(510,175,'R_A = '+nf(RA,1)+' Ω',null,'end')+t(300,40,'Id = '+nf(Id,2)+' A →',v('--accent'),'middle')+t(530,30,'Carcasa: '+nf(Uc,0)+' V',Uc<=UL?v('--ok'):v('--bad'),'middle')+t(83,22,'U₀ = '+nf(U0,0)+' V',null,'middle',500)+t(300,g+38,'retorno por el terreno',v('--muted'),'middle',500);
+  $('f-tt-svg').setAttribute('viewBox',`0 0 ${W} ${H}`); $('f-tt-svg').innerHTML=s;
+  const pts=[]; for(let i=0;i<=200;i++){ const r=0.5+i; pts.push([r,U0*r/(r+RB)]); }
+  lineChart($('f-tt-chart'),{xmin:0,xmax:200,ymin:0,ymax:U0*1.05,xlab:'Resistencia de la tierra de protección R_A (Ω)',ylab:'Tensión en la carcasa (V)',series:[{pts,color:'--accent',w:2.5}],hlines:[{y:UL,color:'--bad',label:'U_L = '+nf(UL,0)+' V'}],dots:[{x:Math.min(RA,200),y:U0*Math.min(RA,200)/(Math.min(RA,200)+RB),color:'--ink'}]});
+}
+sliderBind('f-rho','rho',x=>nf(x,0)+' Ω·m',renderFund);
+sliderBind('f-I','I',x=>nf(x,0)+' A',renderFund);
+sliderBind('f-r0','r0',x=>nf(x,2)+' m',renderFund);
+sliderBind('f-k','k',x=>nf(x,1),renderFund);
+sliderBind('f-x','x',x=>nf(x,1)+' m',renderFund);
+sliderBind('f-ts','ts',x=>nf(x,2)+' s',renderFund);
+sliderBind('f-lado','lado',x=>nf(x,0)+' m',renderFund);
+['c','p','t'].forEach(k=>$('fm-'+k).onclick=()=>{st.fund.mode=k; renderFund(); save();});
+$('fw50').onclick=()=>{st.fund.peso=50; renderFund(); save();}; $('fw70').onclick=()=>{st.fund.peso=70; renderFund(); save();};
+$('f-grava').onchange=e=>{st.fund.grava=e.target.checked; renderFund(); save();};
+['f-U0','f-RB','f-RA','f-In','f-Idn','f-UL'].forEach(id=>$(id).addEventListener('input',renderTT));
+
+/* ---------- pestañas ---------- */
+const TAB_OF={'f-importancia':'fund','f-dispersion':'fund','f-tensiones':'fund','f-barra-malla':'fund','f-tt':'fund',arreglo:'res',registro:'res',curva:'res',equivalente:'res',datos:'malla',conductor:'malla',geometria:'malla',resistencia:'malla',tolerables:'malla',verificacion:'malla'};
+function showTab(t){
+  ['fund','res','malla'].forEach(k=>{ $('panel-'+k).hidden=t!==k; $('tab-'+k).setAttribute('aria-selected',t===k); });
+  st.tab=t; save();
+  if(t==='res'){ renderModel(); drawDiagram(); } else if(t==='malla'){ renderMalla(); } else { renderFund(); }
+}
+['fund','res','malla'].forEach(k=>$('tab-'+k).onclick=()=>{showTab(k); window.scrollTo({top:0});});
+$('b-to-malla').onclick=()=>{ $('b-m-rhoeq').click(); showTab('malla'); window.scrollTo({top:0}); };
+$('b-to-res').onclick=()=>{ showTab('res'); window.scrollTo({top:0}); };
+function routeHash(){ const id=location.hash.slice(1); const t=TAB_OF[id]; if(!t)return; if(st.tab!==t||$('panel-'+t).hidden) showTab(t); const el=$(id); if(el) requestAnimationFrame(()=>el.scrollIntoView()); }
+window.addEventListener('hashchange',routeHash);
+
+/* ---------- inicio ---------- */
+syncMallaInputs();
+syncSliders(); renderCfg(); renderTable(); renderEq();
+if(st.example.w||st.example.s){ fittedFor[st.method]=true; autoFit(); } else renderModel();
+renderMalla();
+const hid=location.hash.slice(1); showTab(TAB_OF[hid]||st.tab||'fund'); if(TAB_OF[hid]) routeHash();
+const redraw=()=>{ if(st.tab==='malla') renderMalla(); else if(st.tab==='fund') renderFund(); else {renderModel();drawDiagram();} };
+let rt; window.addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(()=>{ if(st.tab==='res') renderModel(); else if(st.tab==='fund') renderFund(); },120);});
+const mq=window.matchMedia('(prefers-color-scheme: dark)'); mq.addEventListener&&mq.addEventListener('change',redraw);
+new MutationObserver(redraw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+})();
+</script>
