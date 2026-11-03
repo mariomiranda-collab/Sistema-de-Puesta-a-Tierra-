@@ -222,11 +222,12 @@ input[type=range]:disabled{opacity:.4}
     <div class="panel">
       <h3>Corte del terreno</h3>
       <svg class="diagram" id="f-corte" role="img" aria-label="Corte del terreno con líneas de corriente y superficies equipotenciales"></svg>
-      <p class="note">Las bandas son superficies equipotenciales; cada una indica su tensión respecto de tierra lejana. Las flechas son líneas de corriente.</p>
+      <p class="note">La semiesfera oscura es el electrodo, de radio r₀ (cota bajo él). Las bandas son superficies equipotenciales; cada una indica su tensión respecto de tierra lejana. Las flechas son líneas de corriente.</p>
     </div>
   </div>
   <div class="panel">
     <h3>Embudo de potencial en la superficie</h3>
+    <p class="note">La franja sombreada entre −r₀ y +r₀ es el electrodo: ahí todo está al GPR. Desde el borde, el potencial cae como ρI/(2πx).</p>
     <div class="chart-wrap"><svg class="chart" id="f-embudo" role="img" aria-label="Potencial en la superficie versus distancia al electrodo"></svg></div>
     <div class="scroll"><table id="f-tbl-v"></table></div>
   </div>
@@ -1393,9 +1394,14 @@ function drawCorte(c){
   const re=f.r0*sc;
   for(let k=0;k<9;k++){ const a=Math.PI*(k+0.5)/9; const x1=cx+Math.cos(a)*(re+4), y1=g+Math.sin(a)*(re+4), x2=cx+Math.cos(a)*Math.min(280,re+150), y2=g+Math.sin(a)*Math.min(235,re+150);
     s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${v('--blue')}" stroke-width="2" marker-end="url(#fa)"/>`; }
-  s=`<defs><marker id="fa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${v('--blue')}"/></marker></defs>`+s;
+  s=`<defs><marker id="fa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${v('--blue')}"/></marker><marker id="fd" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" fill="${v('--ink')}"/></marker></defs>`+s;
   s+=`<path d="M${cx-re} ${g} A${re} ${re} 0 0 0 ${cx+re} ${g} Z" fill="${v('--ink')}"/><line x1="${cx}" y1="8" x2="${cx}" y2="${g}" stroke="${v('--ink')}" stroke-width="3"/>`;
   s+=`<text x="${cx+8}" y="20" font-family="IBM Plex Sans,Arial,sans-serif" font-size="13" font-weight="700" fill="${v('--ink')}">I = ${nf(f.I,0)} A · GPR = ${nf(c.GPR,0)} V</text>`;
+  { const yd=g+re+18, x1=cx, x2=cx+re;
+    s+=`<line x1="${x1}" y1="${g}" x2="${x1}" y2="${yd+4}" stroke="${v('--ink')}" stroke-dasharray="2 3"/><line x1="${x2}" y1="${g}" x2="${x2}" y2="${yd+4}" stroke="${v('--ink')}" stroke-dasharray="2 3"/>`;
+    s+=`<line x1="${x1}" y1="${yd}" x2="${x2}" y2="${yd}" stroke="${v('--ink')}" stroke-width="1.5" marker-start="url(#fd)" marker-end="url(#fd)"/>`;
+    s+=`<rect x="${x2+6}" y="${yd-11}" width="96" height="20" rx="4" fill="${v('--surface')}" opacity=".9"/><text x="${x2+10}" y="${yd+4}" font-family="IBM Plex Mono,monospace" font-size="13" font-weight="600" fill="${v('--ink')}">r₀ = ${nf(f.r0,2)} m</text>`;
+    s+=`<text x="${cx-re-6}" y="${g+14}" text-anchor="end" font-family="IBM Plex Sans,Arial,sans-serif" font-size="12" font-weight="600" fill="${v('--ink')}">electrodo</text>`; }
   s+=`<text x="8" y="${H-8}" font-family="IBM Plex Sans,Arial,sans-serif" font-size="11" fill="${v('--muted')}">Ancho del corte: ${nf(2*xview,1)} m</text>`;
   $('f-corte').setAttribute('viewBox',`0 0 ${W} ${H}`); $('f-corte').innerHTML=s;
 }
@@ -1406,7 +1412,7 @@ function renderFund(){
   $('f-disp-formula').innerHTML=`R   = ρ/(2π·r₀) = ${nf(f.rho,0)}/(2π·${nf(f.r0,2)}) = ${nf(c.R,2)} Ω\nGPR = I·R = ${nf(f.I,0)} · ${nf(c.R,2)} = <span class="hi">${nf(c.GPR,0)} V</span>\nJ(x) = I/(2πx²)   E(x) = ρI/(2πx²)\nV(x) = ρI/(2πx) = ${nf(c.K,1)}/x`;
   drawCorte(c);
   const xm=Math.max(10,6*f.r0);
-  lineChart($('f-embudo'),{xmin:-xm,xmax:xm,ymin:0,ymax:c.GPR*1.08,xlab:'Distancia al centro del electrodo x (m)',ylab:'Potencial V (V)',series:[{pts:profilePts(c.V,xm,f.r0),color:'--accent',w:3}],hlines:[{y:c.GPR,color:'--soft',label:'GPR = '+nf(c.GPR,0)+' V'}],bands:[{x1:-f.r0,x2:f.r0,color:'--ink',op:.08}]});
+  lineChart($('f-embudo'),{xmin:-xm,xmax:xm,ymin:0,ymax:c.GPR*1.08,xlab:'Distancia al centro del electrodo x (m)',ylab:'Potencial V (V)',series:[{pts:profilePts(c.V,xm,f.r0),color:'--accent',w:3}],hlines:[{y:c.GPR,color:'--soft',label:'GPR = '+nf(c.GPR,0)+' V'}],bands:[{x1:-f.r0,x2:f.r0,color:'--ink',op:.14}],vlines:[{x:-f.r0,color:'--ink'},{x:f.r0,color:'--ink',label:'r₀ = '+nf(f.r0,2)+' m'}]});
   $('f-tbl-v').innerHTML='<thead><tr><th>x (m)</th>'+[1,2,3,5,10,20].map(x=>`<th>${x}</th>`).join('')+'</tr></thead><tbody><tr><td>V(x) (V)</td>'+[1,2,3,5,10,20].map(x=>`<td class="calc">${nf(c.V(x),0)}</td>`).join('')+'</tr><tr><td>% del GPR</td>'+[1,2,3,5,10,20].map(x=>`<td class="dim">${nf(c.V(x)/c.GPR*100,0)} %</td>`).join('')+'</tr></tbody>';
   const fr=1-1/f.k; $('f-k-bar').style.width=(fr*100)+'%';
   $('f-k-formula').innerHTML=`R(r₀→x)/R = 1 − r₀/x = 1 − 1/${nf(f.k,1)}\n<span class="hi">= ${nf(fr*100,0)} % de R</span> está dentro de x = ${nf(f.k*f.r0,2)} m`;
