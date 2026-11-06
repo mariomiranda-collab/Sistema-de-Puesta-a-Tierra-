@@ -499,19 +499,34 @@ tr.sel td{background:var(--accent-bg)!important}
 
 <!-- ======================= B4 ======================= -->
 <section class="step" data-step="b4" hidden>
-  <div class="step-top"><p class="eyebrow" data-eyebrow></p><h2>Resistividad equivalente</h2><p class="lead">Método de Burgsdorf-Yakobs: reduce el modelo de estratos a un solo valor ρeq para el área que cubrirá el sistema de puesta a tierra.</p></div>
-  <div class="todo"><h3>Qué hacer</h3><ol><li>Revisa que los estratos sean los del ajuste del paso B3.</li><li>Ingresa el largo, el ancho y la profundidad del SPT que vas a diseñar.</li><li>Anota ρeq y presiona <b class="k">Llevar ρeq al diseño de malla</b>.</li></ol></div>
+  <div class="step-top"><p class="eyebrow" data-eyebrow></p><h2>Resistividad equivalente</h2><p class="lead">Reduce el modelo de estratos a un solo valor ρeq para el SPT que vas a construir. Cada tipo de SPT "ve" el terreno de forma distinta: una malla usa Burgsdorf-Yakobs con su área, una barra o una placa promedia los estratos que atraviesa.</p></div>
+  <div class="todo"><h3>Qué hacer</h3><ol><li>Revisa que los estratos sean los del ajuste del paso B3.</li><li>Elige el tipo de SPT e ingresa sus dimensiones (son las mismas del paso Tipo de SPT).</li><li>Anota ρeq y presiona <b class="k">Llevar ρeq al diseño del SPT</b>.</li></ol></div>
   <div class="grid2">
     <div class="panel">
       <h3>SPT y estratos</h3>
-      <div class="row">
-        <div class="field"><label for="e-A">Largo (m)</label><input type="number" id="e-A" min="1" step="1"></div>
-        <div class="field"><label for="e-B">Ancho (m)</label><input type="number" id="e-B" min="1" step="1"></div>
-        <div class="field"><label for="e-b">Profundidad b (m)</label><input type="number" id="e-b" min="0" step="0.1"></div>
+      <div class="types" id="eq-types" role="group" aria-label="Tipo de SPT para la resistividad equivalente"></div>
+      <div class="row" data-eqg="mesh">
+        <div class="field"><label for="eq-Lx">Largo Lx (m)</label><input type="number" id="eq-Lx" data-mm="Lx" min="1" step="1"></div>
+        <div class="field"><label for="eq-Ly">Ancho Ly (m)</label><input type="number" id="eq-Ly" data-mm="Ly" min="1" step="1"></div>
+        <div class="field"><label for="eq-mh">Profundidad h (m)</label><input type="number" id="eq-mh" data-mm="h" min="0.1" step="0.1"></div>
       </div>
+      <div class="row" data-eqg="rod" hidden>
+        <div class="field"><label for="eq-Lr">Largo de barra L (m)</label><input type="number" id="eq-Lr" data-spt="Lr" min="0.5" step="0.5"></div>
+        <div class="field"><label for="eq-t">Cabeza de la barra a t (m)</label><input type="number" id="eq-t" data-spt="t" min="0" step="0.1"></div>
+      </div>
+      <div class="row" data-eqg="cond" hidden>
+        <div class="field"><label for="eq-Lh">Largo del conductor L (m)</label><input type="number" id="eq-Lh" data-spt="Lh" min="1" step="1"></div>
+        <div class="field"><label for="eq-h">Profundidad h (m)</label><input type="number" id="eq-h" data-spt="h" min="0.1" step="0.1"></div>
+      </div>
+      <div class="row" data-eqg="placa" hidden>
+        <div class="field"><label for="eq-pA">Ancho a (m)</label><input type="number" id="eq-pA" data-spt="pA" min="0.1" step="0.1"></div>
+        <div class="field"><label for="eq-pB">Alto b (m)</label><input type="number" id="eq-pB" data-spt="pB" min="0.1" step="0.1"></div>
+        <div class="field"><label for="eq-hp">Borde superior a (m)</label><input type="number" id="eq-hp" data-spt="hp" min="0.1" step="0.1"></div>
+      </div>
+      <p class="note" id="eq-method"></p>
       <div class="scroll"><table id="tbl-layers"></table></div>
       <div class="tip-row"><button class="btn" id="b-layer">Agregar estrato</button></div>
-      <p class="note">El último estrato se considera semi-infinito (F = 1). Para tres o más capas, ingresa el modelo obtenido con IPI2Win.</p>
+      <p class="note">El último estrato se considera semi-infinito. Para tres o más capas, ingresa el modelo obtenido con IPI2Win.</p>
     </div>
     <div class="panel">
       <h3>Resultado</h3>
@@ -523,13 +538,13 @@ tr.sel td{background:var(--accent-bg)!important}
   <details class="dev"><summary>Desarrollo por estrato</summary><div class="dev-in"><div class="scroll"><table id="tbl-eq"></table></div></div></details>
   <div class="panel">
     <h3>Mismo terreno, distinto tamaño de SPT</h3>
-    <p class="note">SPT cuadrados a la misma profundidad. Uno chico "ve" la capa superficial; uno grande, las capas profundas.</p>
+    <p class="note" id="size-note"></p>
     <div class="scroll"><table id="tbl-size"></table></div>
   </div>
   <div class="callout">
-    <h3>Siguiente: diseño de malla</h3>
+    <h3>Siguiente: diseño del SPT</h3>
     <p id="next-text"></p>
-    <div class="tip-row"><button class="btn primary" id="b-to-malla">Llevar ρeq al diseño de malla</button><button class="btn" data-print="res">Imprimir resistividad del terreno</button></div>
+    <div class="tip-row"><button class="btn primary" id="b-to-malla">Llevar ρeq al diseño del SPT</button><button class="btn" data-print="res">Imprimir resistividad del terreno</button></div>
   </div>
   <div class="concl" data-qs="b4"></div>
 </section>
@@ -665,6 +680,7 @@ tr.sel td{background:var(--accent-bg)!important}
       <div class="formula" id="spt-formula"></div>
       <div class="result"><div><p class="eyebrow">Resistencia</p><p class="big" id="spt-R"></p></div><div><p class="eyebrow">GPR = IG·R</p><p class="big" id="spt-gpr"></p></div></div>
       <p class="note" id="spt-mat"></p>
+      <div class="tip-row" id="spt-rhoeq-row"><span class="note" id="spt-rhoeq" style="flex:1 1 260px"></span><button class="btn" id="b-spt-rhoeq">Usar este ρeq</button></div>
       <ul class="checks" id="spt-checks"></ul>
       <p class="note" id="spt-note"></p>
     </div>
@@ -673,7 +689,7 @@ tr.sel td{background:var(--accent-bg)!important}
     <h3>Comparación de los siete tipos</h3>
     <p class="note" id="spt-cmp-note"></p>
     <div class="scroll"><table id="spt-cmp"></table></div>
-    <div class="tip-row"><button class="btn primary" data-print="spt">Imprimir diseño del SPT</button><span class="note" style="border:0;padding:0">Descarga una hoja lista para imprimir o guardar como PDF.</span></div>
+    <div class="tip-row"><button class="btn primary" data-print="spt">Imprimir diseño del SPT</button><span class="note" style="border:0;padding:0">Descarga un PDF listo para imprimir.</span></div>
   </div>
   <div class="concl" data-qs="ctipo"></div>
 </section>
@@ -774,17 +790,18 @@ tr.sel td{background:var(--accent-bg)!important}
     <div class="scroll"><table id="tbl-fac"></table></div>
     <div class="grid2"><div class="formula" id="em-formula"></div><div class="formula" id="es-formula"></div></div>
   </div></details>
-  <div class="tip-row"><button class="btn primary" data-print="spt">Imprimir diseño del SPT</button><span class="note" style="border:0;padding:0">Descarga una hoja lista para imprimir o guardar como PDF.</span></div>
+  <div class="tip-row"><button class="btn primary" data-print="spt">Imprimir diseño del SPT</button><span class="note" style="border:0;padding:0">Descarga un PDF listo para imprimir.</span></div>
   <div class="concl" data-qs="c6"></div>
 </section>
 
 <!-- ======================= INFORME ======================= -->
 <section class="step" data-step="informe" hidden>
   <div class="step-top"><p class="eyebrow">Cierre</p><h2>Informe y descarga</h2><p class="lead">Resumen de todos tus datos, cálculos, verificaciones y respuestas. Revísalo y descárgalo para tu informe.</p></div>
-  <div class="todo"><h3>Qué hacer</h3><ol><li>Revisa que la identificación esté completa (paso Inicio).</li><li>Revisa la vista previa y vuelve a cualquier paso si falta algo.</li><li>Descarga el informe en HTML (se abre en el navegador o en Word) y los datos en CSV para Excel.</li></ol></div>
+  <div class="todo"><h3>Qué hacer</h3><ol><li>Revisa que la identificación esté completa (paso Inicio).</li><li>Revisa la vista previa y vuelve a cualquier paso si falta algo.</li><li>Descarga el informe en PDF (o en HTML para editarlo en Word) y los datos en CSV para Excel.</li></ol></div>
   <div class="panel">
     <div class="tip-row">
-      <button class="btn primary" id="b-dl-html">Descargar informe (.html)</button>
+      <button class="btn primary" id="b-dl-pdf">Descargar informe (.pdf)</button>
+      <button class="btn" id="b-dl-html">Descargar informe (.html)</button>
       <button class="btn" id="b-dl-csv">Descargar datos (.csv)</button>
       <button class="btn ghost" id="b-copy-rep">Copiar informe como texto</button>
     </div>
@@ -797,7 +814,7 @@ tr.sel td{background:var(--accent-bg)!important}
       <button class="btn" data-print="res">Imprimir resistividad del terreno</button>
       <button class="btn" data-print="spt">Imprimir diseño del SPT</button>
     </div>
-    <p class="note">Cada botón descarga una hoja con datos, figuras, cálculos y casilleros de firma. Al abrirla en el navegador se abre el diálogo de impresión, donde también puedes guardarla como PDF.</p>
+    <p class="note">Cada botón descarga un PDF tamaño carta con datos, figuras, cálculos y casilleros de firma, listo para imprimir.</p>
   </div>
   <div class="report" id="report"></div>
 </section>
@@ -807,7 +824,7 @@ tr.sel td{background:var(--accent-bg)!important}
   <button class="btn primary" id="next"><small>Siguiente</small><span id="next-t"></span></button>
 </nav>
 </div>
-<footer class="foot">Módulo A: dispersión semiesférica V(x) = ρI/(2πx), disco equivalente V = (2/π)·GPR·arcsen(a/x), criterio de Dalziel con Rc = 1.000 Ω y Rf = 3ρs. Módulo B: Wenner ρa = 2πaR; Schlumberger ρa = π(L² − l²)R/(2l); modelo de dos capas por serie de imágenes; ρeq por Burgsdorf-Yakobs; requisitos de medición según RIC N°06, Anexo 6.6. Módulo C: IEEE Std 80 (conductor, Sverak, Schwarz, Em, Es, tolerables), Laurent-Niemann, IEC 60364-5-54 y RIC N°06. Tipos de SPT: barra R = ρ/(2πL)·[ln(4L/a) − 1] (Dwight), conductor horizontal R = ρ/(πL)·[ln(2L/√(2ah)) − 1] (Sunde), barras en línea y en triángulo con coeficiente de utilización R = R₁(1 + λα)/n (Tagg), placa R = 0,8ρ/P. Las fórmulas de Em y Es valen para mallas regulares en suelo homogéneo. Los datos de ejemplo son supuestos o sintéticos. Material docente · Mario Miranda Araos · CFT Estatal O'Higgins.</footer>
+<footer class="foot">Módulo A: dispersión semiesférica V(x) = ρI/(2πx), disco equivalente V = (2/π)·GPR·arcsen(a/x), criterio de Dalziel con Rc = 1.000 Ω y Rf = 3ρs. Módulo B: Wenner ρa = 2πaR; Schlumberger ρa = π(L² − l²)R/(2l); modelo de dos capas por serie de imágenes; ρeq por Burgsdorf-Yakobs para mallas y conductores, y por promedio ponderado por largo para barras y placas; requisitos de medición según RIC N°06, Anexo 6.6. Módulo C: IEEE Std 80 (conductor, Sverak, Schwarz, Em, Es, tolerables), Laurent-Niemann, IEC 60364-5-54 y RIC N°06. Tipos de SPT: barra R = ρ/(2πL)·[ln(4L/a) − 1] (Dwight), conductor horizontal R = ρ/(πL)·[ln(2L/√(2ah)) − 1] (Sunde), barras en línea y en triángulo con coeficiente de utilización R = R₁(1 + λα)/n (Tagg), placa R = 0,8ρ/P. Las fórmulas de Em y Es valen para mallas regulares en suelo homogéneo. Los datos de ejemplo son supuestos o sintéticos. Material docente · Mario Miranda Araos · CFT Estatal O'Higgins.</footer>
 </main>
 </div>
 
@@ -850,6 +867,56 @@ function burgsdorf(S,b,layers){
     Fprev=F;
   });
   return {r,r02,q02,rows,rho:1/sum};
+}
+
+function layerBounds(layers){ let top=0; return layers.map((L,i)=>{ const last=i===layers.length-1, bot=last?Infinity:top+L.e, o={i:i+1,rho:L.rho,top,bot}; top=bot; return o; }); }
+function lenWeighted(t,L,layers){ let sum=0; const rows=layerBounds(layers).map(y=>{ const li=Math.max(0,Math.min(t+L,y.bot)-Math.max(t,y.top)); if(li>0) sum+=li/y.rho; return Object.assign({},y,{li}); }); return {rows,rho:L/sum}; }
+const eqGroup=t=>t==='malla'||t==='mallab'?'mesh':t==='cond'?'cond':t==='placa'?'placa':'rod';
+function eqCalc(tipo,g){
+  const p=Object.assign({},st.spt,g||{}), m=Object.assign({},st.malla,g||{}), layers=st.eq.layers, grp=eqGroup(tipo);
+  const fmtLw=(t,L,lw,what)=>{ const parts=lw.rows.filter(r=>r.li>0); return `${what} entre ${nf(t,2)} m y ${nf(t+L,2)} m \nρeq = L / Σ(Lᵢ/ρᵢ)\n   = ${nf(L,2)} / (${parts.map(r=>nf(r.li,2)+'/'+nf(r.rho,1)).join(' + ')})\n<span class="hi">ρeq = ${nf(lw.rho,1)} Ω·m</span>`; };
+  if(grp==='mesh'){
+    const S=m.Lx*m.Ly, b=m.h, res=burgsdorf(S,b,layers);
+    if(res.err) return {err:res.err,grp};
+    return {grp,method:'bur',rho:res.rho,res,
+      kv:[['Malla (m)',nf(m.Lx,1)+' × '+nf(m.Ly,1)+' · h = '+nf(b,2)+' m'],['Área S (m²)',nf(S,1)],['r = √(S/π) (m)',nf(res.r,3)],['r₀² · q₀² (m²)',nf(res.r02,3)+' · '+nf(res.q02,3)]],
+      f:`Burgsdorf-Yakobs con el área de la malla\nS   = ${nf(m.Lx,1)} × ${nf(m.Ly,1)} = ${nf(S,1)} m²\nr   = √(S/π) = ${nf(res.r,3)} m\nr₀² = r² − h² = ${nf(res.r02,3)} m²\nq₀² = 2·r·(r + h) = ${nf(res.q02,3)} m²\n<span class="hi">ρeq = 1 / Σ[(Fᵢ − Fᵢ₋₁)/ρᵢ] = ${nf(res.rho,1)} Ω·m</span>`,
+      desc:`una malla de ${nf(m.Lx,0)} × ${nf(m.Ly,0)} m enterrada a ${nf(b,2)} m`+(tipo==='mallab'?' (con barras)':''),
+      how:'Malla: método de Burgsdorf-Yakobs con el área S y la profundidad h de la malla.'+(tipo==='mallab'?' Las barras no cambian el área; si llegan a un estrato muy distinto, revisa también el valor de una barra sola.':'')};
+  }
+  if(grp==='rod'||grp==='placa'){
+    const t=grp==='rod'?p.t:p.hp, L=grp==='rod'?p.Lr:p.pB, lw=lenWeighted(t,L,layers);
+    const what=grp==='rod'?'Barra de '+nf(L,1)+' m':'Placa de '+nf(p.pA,2)+' × '+nf(p.pB,2)+' m';
+    const n=Math.max(1,Math.round(p.n));
+    const desc=grp==='placa'?`una placa de ${nf(p.pA,2)} × ${nf(p.pB,2)} m con el borde superior a ${nf(t,2)} m`:tipo==='barra'?`una barra de ${nf(L,1)} m con la cabeza a ${nf(t,2)} m`:tipo==='linea'?`${n} barras de ${nf(L,1)} m en línea, con la cabeza a ${nf(t,2)} m`:`3 barras de ${nf(L,1)} m en triángulo, con la cabeza a ${nf(t,2)} m`;
+    return {grp,method:'lw',rho:lw.rho,lw,
+      kv:[[grp==='rod'?'Largo de barra L (m)':'Alto de la placa b (m)',nf(L,2)],[grp==='rod'?'Cabeza a t (m)':'Borde superior a (m)',nf(t,2)],['Tramo que cubre (m)',nf(t,2)+' a '+nf(t+L,2)]],
+      f:fmtLw(t,L,lw,what),desc,
+      how:grp==='rod'?'Electrodos verticales: promedio de los estratos ponderado por el largo de barra que queda en cada uno (IEEE 80). Para varias barras se usa el largo de una barra.':'Placa vertical: promedio de los estratos ponderado por la altura de placa que queda en cada uno.'};
+  }
+  // conductor horizontal
+  const cond=COND.find(c=>c[0]===st.malla.cond)||COND[3], a=cond[2]/2000, h=p.h, L=p.Lh;
+  const q=2*L/Math.sqrt(2*a*h), Rn=(Math.log(q)-1)/(Math.PI*L), re=1/(2*Math.PI*Rn), S=Math.PI*re*re, res=burgsdorf(S,h,layers);
+  const base={grp,desc:`${nf(L,1)} m de conductor ${cond[0]} a ${nf(h,2)} m de profundidad`,how:'Conductor horizontal: Burgsdorf-Yakobs con el círculo de la semiesfera de igual resistencia, rₑ = 1/(2π·R/ρ). Un conductor largo alcanza capas más profundas que uno corto.'};
+  if(res.err){ const y=layerBounds(layers).find(y=>h>=y.top&&h<y.bot)||layerBounds(layers)[0];
+    return Object.assign(base,{method:'cap',rho:y.rho,kv:[['rₑ (m)',nf(re,3)],['Estrato en que queda el conductor',String(y.i)]],
+      f:`R/ρ = [ln(2L/√(2ah)) − 1]/(πL) = ${nf(Rn,4)} 1/m\nrₑ  = 1/(2π·R/ρ) = ${nf(re,3)} m  ≤  h = ${nf(h,2)} m\nEl conductor es corto: queda dentro del estrato ${y.i}\n<span class="hi">ρeq = ρ${y.i} = ${nf(y.rho,1)} Ω·m</span>`}); }
+  return Object.assign(base,{method:'bur',rho:res.rho,res,
+    kv:[['Conductor','L = '+nf(L,1)+' m · h = '+nf(h,2)+' m · '+cond[0]],['R/ρ (1/m)',nf(Rn,4)],['rₑ = 1/(2π·R/ρ) (m)',nf(re,3)],['S = π·rₑ² (m²)',nf(S,2)],['r₀² · q₀² (m²)',nf(res.r02,3)+' · '+nf(res.q02,3)]],
+    f:`Burgsdorf-Yakobs con la semiesfera de igual resistencia\nR/ρ = [ln(2L/√(2ah)) − 1]/(πL) = ${nf(Rn,4)} 1/m\nrₑ  = 1/(2π·R/ρ) = ${nf(re,3)} m\nS   = π·rₑ² = ${nf(S,2)} m²\nr₀² = rₑ² − h² = ${nf(res.r02,3)} m²   q₀² = 2·rₑ·(rₑ + h) = ${nf(res.q02,3)} m²\n<span class="hi">ρeq = 1 / Σ[(Fᵢ − Fᵢ₋₁)/ρᵢ] = ${nf(res.rho,1)} Ω·m</span>`});
+}
+function eqRowsHTML(r,rep){
+  const c1=rep?'n':'dim', c2=rep?'n':'calc';
+  if(r.method==='lw') return `<thead><tr><th>i</th><th>ρᵢ (Ω·m)</th><th>Desde (m)</th><th>Hasta (m)</th><th>Lᵢ en el estrato (m)</th><th>Lᵢ/ρᵢ</th></tr></thead><tbody>`+r.lw.rows.map(y=>`<tr><td>${y.i}</td><td class="${c1}">${nf(y.rho,1)}</td><td class="${c1}">${nf(y.top,2)}</td><td class="${c1}">${Number.isFinite(y.bot)?nf(y.bot,2):'∞'}</td><td class="${c2}">${nf(y.li,2)}</td><td class="${c1}">${y.li>0?(y.li/y.rho).toExponential(3).replace('.',','):'—'}</td></tr>`).join('')+'</tbody>';
+  if(r.method==='bur') return `<thead><tr><th>i</th><th>ρᵢ (Ω·m)</th><th>hᵢ acum. (m)</th><th>uᵢ² (m²)</th><th>vᵢ² (m²)</th><th>Fᵢ</th><th>Fᵢ − Fᵢ₋₁</th></tr></thead><tbody>`+r.res.rows.map(y=>`<tr><td>${y.i}</td><td class="${c1}">${nf(y.rho,1)}</td><td class="${c1}">${Number.isFinite(y.h)?nf(y.h,2):'∞'}</td><td class="${c1}">${Number.isFinite(y.u2)?nf(y.u2,3):'—'}</td><td class="${c1}">${Number.isFinite(y.v2)?nf(y.v2,3):'—'}</td><td class="${c2}">${nf(y.F,4)}</td><td class="${c2}">${nf(y.dF,4)}</td></tr>`).join('')+'</tbody>';
+  return '';
+}
+function eqSizes(tipo){
+  const g=eqGroup(tipo);
+  if(g==='mesh') return {note:'Mallas cuadradas a la misma profundidad. Una chica "ve" la capa superficial; una grande, las capas profundas.',head:'Malla cuadrada',list:[5,10,20,40,80].map(s=>({label:`${s} × ${s} m`,g:{Lx:s,Ly:s}}))};
+  if(g==='rod') return {note:'Barras con la cabeza a la misma profundidad. Una barra larga llega a los estratos profundos.',head:'Barra',list:[1.5,3,6,9,12].map(L=>({label:`${nf(L,1)} m`,g:{Lr:L}}))};
+  if(g==='cond') return {note:'Conductores a la misma profundidad. Uno largo reparte la corriente en un volumen mayor y alcanza capas más profundas.',head:'Conductor',list:[5,10,20,40,80].map(L=>({label:`${L} m`,g:{Lh:L}}))};
+  return {note:'Placas cuadradas con el borde superior a la misma profundidad.',head:'Placa',list:[0.5,1,1.5,2].map(s=>({label:`${nf(s,1)} × ${nf(s,1)} m`,g:{pA:s,pB:s}}))};
 }
 
 /* ---------- estado ---------- */
@@ -1114,23 +1181,21 @@ function renderLayers(){
 $('tbl-layers').addEventListener('input',e=>{const t=e.target; if(!t.dataset.k)return; const x=num(t.value); if(x>0){st.eq.layers[+t.dataset.li][t.dataset.k]=x; renderEq(true); save();}});
 $('tbl-layers').addEventListener('click',e=>{const d=e.target.dataset.ldel; if(d!==undefined){st.eq.layers.splice(+d,1); renderEq(); save();}});
 $('b-layer').onclick=()=>{ const L=st.eq.layers; const last=L[L.length-1]; if(!last.e)last.e=3; L.push({rho:last.rho,e:0}); renderEq(); save(); };
-[['e-A','A'],['e-B','B'],['e-b','b']].forEach(([id,k])=>{ $(id).value=st.eq[k]; $(id).addEventListener('input',e=>{const x=num(e.target.value); if(Number.isFinite(x)&&x>=0){st.eq[k]=x; renderEq(true); save();}}); });
 function renderEq(keepLayers){
   if(!keepLayers) renderLayers();
-  const q=st.eq, S=q.A*q.B; const res=burgsdorf(S,q.b,q.layers);
-  if(res.err){ $('eq-err').hidden=false; $('eq-err').textContent=res.err; $('eq-rho').textContent='—'; $('eq-formula').textContent=''; $('tbl-eq').innerHTML=''; return; }
+  if(!st.spt) return;
+  const t=st.spt.tipo, T=TIPOS.find(x=>x.id===t), r=eqCalc(t);
+  document.querySelectorAll('[data-eqg]').forEach(el=>{ el.hidden=el.dataset.eqg!==eqGroup(t); });
+  $('eq-method').textContent=r.how||'';
+  const sz=eqSizes(t); $('size-note').textContent=sz.note;
+  $('tbl-size').innerHTML=`<thead><tr><th>${sz.head}</th><th>ρeq (Ω·m)</th></tr></thead><tbody>`+sz.list.map(it=>{ const e=eqCalc(t,it.g); return `<tr><td>${it.label}</td><td class="calc">${e.err?'—':nf(e.rho,1)}</td></tr>`; }).join('')+'</tbody>';
+  if(r.err){ $('eq-err').hidden=false; $('eq-err').textContent=r.err; $('eq-rho').textContent='—'; $('eq-formula').textContent=''; $('tbl-eq').innerHTML=''; st.rhoEq=NaN; $('next-text').textContent='Corrige las dimensiones para obtener ρeq.'; return; }
   $('eq-err').hidden=true;
-  $('eq-rho').innerHTML=`${nf(res.rho,1)} <small>Ω·m</small>`;
-  $('eq-formula').innerHTML=`S   = ${nf(q.A,1)} × ${nf(q.B,1)} = ${nf(S,1)} m²\nr   = √(S/π) = ${nf(res.r,3)} m\nr₀² = r² − b² = ${nf(res.r02,3)} m²\nq₀² = 2·r·(r + b) = ${nf(res.q02,3)} m²\n<span class="hi">ρeq = 1 / Σ[(Fᵢ − Fᵢ₋₁)/ρᵢ] = ${nf(res.rho,1)} Ω·m</span>`;
-  let h='<thead><tr><th>i</th><th>ρᵢ (Ω·m)</th><th>hᵢ acum. (m)</th><th>uᵢ² (m²)</th><th>vᵢ² (m²)</th><th>Fᵢ</th><th>Fᵢ − Fᵢ₋₁</th><th>(Fᵢ − Fᵢ₋₁)/ρᵢ</th></tr></thead><tbody>';
-  res.rows.forEach(r=>{ h+=`<tr><td>${r.i}</td><td class="dim">${nf(r.rho,1)}</td><td class="dim">${Number.isFinite(r.h)?nf(r.h,2):'∞'}</td><td class="dim">${Number.isFinite(r.u2)?nf(r.u2,3):'—'}</td><td class="dim">${Number.isFinite(r.v2)?nf(r.v2,3):'—'}</td><td class="calc">${nf(r.F,4)}</td><td class="calc">${nf(r.dF,4)}</td><td class="dim">${(r.dF/r.rho).toExponential(3).replace('.',',')}</td></tr>`; });
-  $('tbl-eq').innerHTML=h+'</tbody>';
-  const sides=[5,10,20,40,80];
-  let t='<thead><tr><th>Malla cuadrada</th><th>Área S (m²)</th><th>ρeq (Ω·m)</th></tr></thead><tbody>';
-  sides.forEach(sd=>{ const r=burgsdorf(sd*sd,q.b,q.layers); t+=`<tr><td>${sd} × ${sd} m</td><td class="dim">${nf(sd*sd,0)}</td><td class="calc">${r.err?'—':nf(r.rho,1)}</td></tr>`; });
-  $('tbl-size').innerHTML=t+'</tbody>';
-  $('next-text').textContent=`Con ρeq = ${nf(res.rho,1)} Ω·m para una malla de ${nf(q.A,0)} × ${nf(q.B,0)} m enterrada a ${nf(q.b,2)} m, el siguiente módulo calculará la sección del conductor, la resistencia de la malla y las tensiones de paso y contacto.`;
-  st.rhoEq=res.rho;
+  $('eq-rho').innerHTML=`${nf(r.rho,1)} <small>Ω·m · ${T.short.toLowerCase()}</small>`;
+  $('eq-formula').innerHTML=r.f;
+  $('tbl-eq').innerHTML=eqRowsHTML(r,false);
+  $('next-text').textContent=`Con ρeq = ${nf(r.rho,1)} Ω·m para ${r.desc}, el módulo C calculará la sección del conductor, la resistencia del SPT y las verificaciones de seguridad.`;
+  st.rhoEq=r.rho;
 }
 
 /* =================== B. DISEÑO DE MALLA =================== */
@@ -1310,7 +1375,7 @@ $('m-rodPos').onchange=e=>{st.malla.rodPos=e.target.value; if(e.target.value!=='
 $('w50').onclick=()=>{st.malla.peso=50; onMallaChange();}; $('w70').onclick=()=>{st.malla.peso=70; onMallaChange();};
 $('b-df').onclick=()=>{ const v=+$('df-formula').dataset.df; if(v>0){ st.malla.Df=+v.toFixed(3); onMallaChange(); } };
 $('b-m-ejemplo').onclick=()=>{ undoStack=[]; st.malla=mallaEjemplo(); $('fix-note').textContent=''; onMallaChange(); };
-$('b-m-rhoeq').onclick=()=>{ if(st.rhoEq>0){ st.malla.rho=+st.rhoEq.toFixed(1); st.malla.Lx=st.eq.A; st.malla.Ly=st.eq.B; if(st.eq.b>0)st.malla.h=st.eq.b; onMallaChange(); } };
+$('b-m-rhoeq').onclick=()=>{ renderEq(true); if(st.rhoEq>0){ st.malla.rho=+st.rhoEq.toFixed(1); onMallaChange(); notify(`ρ de diseño = ${nf(st.malla.rho,1)} Ω·m (ρeq de ${TIPOS.find(x=>x.id===st.spt.tipo).short.toLowerCase()}).`); } };
 document.querySelectorAll('[data-fix]').forEach(b=>b.addEventListener('click',()=>{
   const m=st.malla, before=calcMalla(); undoStack.push(JSON.stringify(m)); let msg='';
   switch(b.dataset.fix){
@@ -1497,7 +1562,7 @@ $('f-grava').onchange=e=>{st.fund.grava=e.target.checked; renderFund(); save();}
 document.querySelectorAll('[data-tt]').forEach(el=>{ el.value=st.fund.tt[el.dataset.tt]; el.addEventListener('input',()=>{ const x=num(el.value); if(x>0){ st.fund.tt[el.dataset.tt]=x; renderTT(); save(); } }); });
 
 /* =================== TIPOS DE SPT =================== */
-const sptDef=()=>({tipo:'barra',Lr:3,dr:15.9,Lh:20,h:0.6,n:4,s:6,sT:6,pA:1,pB:1,hp:0.6});
+const sptDef=()=>({tipo:'barra',Lr:3,dr:15.9,Lh:20,h:0.6,n:4,s:6,sT:6,pA:1,pB:1,hp:0.6,t:0.3});
 st.spt=Object.assign(sptDef(),st.spt||{});
 const TIPOS=[
   {id:'barra',t:'Barra vertical',short:'Barra',ico:'<path d="M4 8h40"/><path d="M24 8v22" stroke-width="3.5"/>'},
@@ -1629,7 +1694,8 @@ function setTipo(t){
 function renderSPT(){
   if(!$('spt-types')) return;
   const p=st.spt, t=p.tipo, m=st.malla;
-  document.querySelectorAll('#spt-types [data-tipo]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tipo===t));
+  document.querySelectorAll('.types [data-tipo]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tipo===t));
+  document.querySelectorAll('[data-spt]').forEach(el=>{ if(el!==document.activeElement) el.value=p[el.dataset.spt]; });
   const show={rod:['barra','linea','tri','mallab'],hor:['cond'],lin:['linea'],tri:['tri'],pla:['placa'],mal:['malla','mallab'],mrod:['mallab']};
   Object.entries(show).forEach(([k,list])=>{ $('g-'+k).hidden=!list.includes(t); });
   $('f-sptLr').hidden=t==='mallab';
@@ -1641,18 +1707,22 @@ function renderSPT(){
   $('spt-gpr').innerHTML=`${nf(r.GPR,0)} <small>V</small>`;
   $('spt-mat').textContent=r.mat;
   $('spt-checks').innerHTML=checkList(r.checks);
+  { const e=eqCalc(t), same=!e.err&&Math.abs(e.rho-m.rho)<0.05;
+    $('spt-rhoeq').textContent=e.err?'ρeq no disponible para estas dimensiones (paso B4).':`ρeq de este tipo (paso B4): ${nf(e.rho,1)} Ω·m. ρ de diseño en uso: ${nf(m.rho,1)} Ω·m.`;
+    $('b-spt-rhoeq').hidden=e.err||same; }
   $('spt-note').textContent=isMallaTipo(t)
     ?'Sigue con Geometría, Resistencia, Tolerables y Verificación para calcular las tensiones de malla Em y de paso Es de este diseño.'
-    :'Las fórmulas suponen suelo homogéneo con el ρ de diseño. Un electrodo pequeño ve sobre todo la capa superficial: si ρ₁ y ρ₂ son muy distintos, recalcula ρeq en el paso B4 con el tamaño real del electrodo.'+(r.GPR>r.Et?' El GPR supera la tensión de contacto tolerable: un electrodo simple no controla la pendiente del potencial. Considera una malla, capa de gravilla o un despeje más rápido.':'');
+    :'Las fórmulas suponen suelo homogéneo con el ρ de diseño. Usa el ρeq de este tipo de SPT (botón Usar este ρeq), porque cada electrodo ve el terreno de forma distinta.'+(r.GPR>r.Et?' El GPR supera la tensión de contacto tolerable: un electrodo simple no controla la pendiente del potencial. Considera una malla, capa de gravilla o un despeje más rápido.':'');
   drawSPT();
+  if(st.cur==='b4') renderEq(true);
   const all=TIPOS.map(T=>({T,r:sptCalc(T.id)}));
   const maxR=Math.max(1,...all.map(a=>a.r.R).filter(Number.isFinite));
-  let h='<thead><tr><th>Tipo</th><th>Configuración</th><th>R (Ω)</th><th aria-label="Barra de resistencia"></th><th>GPR (V)</th><th>R ≤ 20 Ω</th><th>GPR ≤ E contacto</th><th aria-label="Elegir"></th></tr></thead><tbody>';
+  let h='<thead><tr><th>Tipo</th><th>Configuración</th><th>ρeq propio (Ω·m)</th><th>R (Ω)</th><th aria-label="Barra de resistencia"></th><th>GPR (V)</th><th>R ≤ 20 Ω</th><th>GPR ≤ E contacto</th><th aria-label="Elegir"></th></tr></thead><tbody>';
   all.forEach(({T,r})=>{ const sel=T.id===t;
-    h+=`<tr class="${sel?'sel':''}"><td style="text-align:left;font-weight:600">${T.t}</td><td style="text-align:left;white-space:normal;min-width:190px;color:var(--muted)">${r.cfg}</td><td class="calc">${nf(r.R,2)}</td><td style="min-width:90px"><div class="rbar" style="width:${Math.max(2,r.R/maxR*100).toFixed(1)}%"></div></td><td class="calc">${nf(r.GPR,0)}</td><td>${pill(r.R<=20)}</td><td>${pill(r.GPR<=r.Et)}</td><td>${sel?'<span class="pill warn">Elegido</span>':`<button class="btn ghost" data-tipo="${T.id}">Elegir</button>`}</td></tr>`; });
+    h+=`<tr class="${sel?'sel':''}"><td style="text-align:left;font-weight:600">${T.t}</td><td style="text-align:left;white-space:normal;min-width:190px;color:var(--muted)">${r.cfg}</td><td class="dim">${(e=>e.err?'—':nf(e.rho,1))(eqCalc(T.id))}</td><td class="calc">${nf(r.R,2)}</td><td style="min-width:90px"><div class="rbar" style="width:${Math.max(2,r.R/maxR*100).toFixed(1)}%"></div></td><td class="calc">${nf(r.GPR,0)}</td><td>${pill(r.R<=20)}</td><td>${pill(r.GPR<=r.Et)}</td><td>${sel?'<span class="pill warn">Elegido</span>':`<button class="btn ghost" data-tipo="${T.id}">Elegir</button>`}</td></tr>`; });
   $('spt-cmp').innerHTML=h+'</tbody>';
   const mc=calcMalla();
-  $('spt-cmp-note').textContent=`Todos con ρ = ${nf(m.rho,1)} Ω·m e IG = ${nf(mc.IG,0)} A. E contacto tolerable = ${nf(mc.Et,0)} V (${m.peso} kg, ts = ${nf(m.ts,2)} s${m.layer?', con gravilla':''}). Las barras usan Ø ${nf(p.dr,1)} mm; la malla, la geometría del paso Geometría.`;
+  $('spt-cmp-note').textContent=`Todos con ρ = ${nf(m.rho,1)} Ω·m e IG = ${nf(mc.IG,0)} A. E contacto tolerable = ${nf(mc.Et,0)} V (${m.peso} kg, ts = ${nf(m.ts,2)} s${m.layer?', con gravilla':''}). Las barras usan Ø ${nf(p.dr,1)} mm; la malla, la geometría del paso Geometría. La columna ρeq propio muestra la resistividad equivalente que vería cada tipo en el terreno medido.`;
   document.querySelectorAll('[data-notmalla]').forEach(el=>{ el.hidden=isMallaTipo(t); el.textContent=`El SPT elegido es ${T.t.toLowerCase()}. Estos pasos diseñan y verifican una malla: úsalos para comparar, o vuelve a Tipo de SPT para cambiar la elección.`; });
 }
 
@@ -1665,30 +1735,89 @@ function captureFigs(kind){
     if(kind==='res'){ drawDiagram(); out.arreglo=$('diagram').outerHTML; drawChart(points()); out.curva=$('chart').outerHTML; }
     else { drawSPT(); out.spt=$('spt-svg').outerHTML; if(isMallaTipo()){ drawPlan(calcMalla()); out.plan=$('plan').outerHTML; } }
   } finally { if(prev===null) root.removeAttribute('data-theme'); else root.setAttribute('data-theme',prev); }
+  Object.keys(out).forEach(k=>{ out[k]=out[k].replace(/font-family="IBM Plex Mono,monospace"/g,'font-family="Courier New,Courier,monospace"').replace(/font-family="IBM Plex Sans,Arial,sans-serif"/g,'font-family="Arial,Helvetica,sans-serif"');
+    const vb=/viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(out[k]); if(vb){ const w=+vb[1], h=+vb[2], sc=Math.min(1,640/w,330/h); out[k]=out[k].replace(/^<svg([^>]*?)(\sheight="[^"]*")?([^>]*)>/,(m,a,_h,b)=>`<svg${a}${b} width="${Math.round(w*sc)}" height="${Math.round(h*sc)}" preserveAspectRatio="xMidYMid meet">`); } });
   return out;
 }
 const firmas=(a,b)=>`<div class="firmas"><div>${a}</div><div>${b}</div></div>`;
-function sheetDoc(title,body){
-  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap"><style>${REPORT_CSS}${PRINT_CSS}</style></head><body><div class="noprint"><button onclick="window.print()">Imprimir o guardar como PDF</button><span>El diálogo de impresión se abre solo al cargar la hoja.</span></div>${body}<script>window.addEventListener('load',function(){setTimeout(function(){window.print();},600);});<\/script></body></html>`;
-}
 function sheetHead(title){
   return `<div class="shead"><div><p class="meta">CFT Estatal O'Higgins · PRO001 Protecciones Eléctricas · Unidad 3</p><h1>${title}</h1></div><p class="meta" style="text-align:right">${esc(st.id.caso||'')}<br>Emitida el ${new Date().toLocaleDateString('es-CL')}</p></div>`+idTable();
 }
-function printSheet(kind){
+const PDF_CSS=`#pdf-sheet{position:absolute;left:-12000px;top:0;width:760px;background:#fff;color:#1B2433;font-family:'IBM Plex Sans',Arial,sans-serif;font-size:13px;line-height:1.45;padding:0}
+#pdf-sheet *{box-sizing:border-box}
+#pdf-sheet h1{font-size:22px;color:#14213D;margin:0 0 4px;line-height:1.2}
+#pdf-sheet h2{font-size:16px;color:#14213D;margin:16px 0 6px;padding:6px 0 4px;border-bottom:2px solid #C9773A;line-height:1.2}
+#pdf-sheet h3{font-size:14px;color:#14213D;margin:0;padding:10px 0 4px;line-height:1.25}
+#pdf-sheet p{margin:0}
+#pdf-sheet table{border-collapse:collapse;width:100%;margin:4px 0 8px;font-size:12px}
+#pdf-sheet th{background:#14213D;color:#fff;padding:5px 8px;text-align:left;font-size:11.5px;font-weight:600;white-space:normal}
+#pdf-sheet td{background:#fff!important;border-top:1px solid #DDD8CC;padding:4px 8px;text-align:left;white-space:normal;color:#1B2433}
+#pdf-sheet td.n{text-align:right;font-family:'IBM Plex Mono',monospace}
+#pdf-sheet .ok{color:#1B7F5A;font-weight:600}#pdf-sheet .bad{color:#B3261E;font-weight:600}
+#pdf-sheet .ans{background:#F6F4EE;border-radius:6px;padding:6px 10px;margin:2px 0 8px;white-space:pre-wrap}
+#pdf-sheet .meta{color:#5A6476;font-size:11.5px}
+#pdf-sheet .shead{display:flex;justify-content:space-between;gap:16px;align-items:flex-end;border-bottom:3px solid #14213D;padding-bottom:8px;margin-bottom:10px}
+#pdf-sheet .fig{border:1px solid #DDD8CC;border-radius:6px;padding:8px;margin:6px 0 10px;background:#fff}
+#pdf-sheet .fig svg{display:block;margin:0 auto;max-width:100%}
+#pdf-sheet pre.f{font:11.5px/1.55 'IBM Plex Mono',monospace;background:#F6F4EE;color:#1B2433;border-radius:6px;padding:8px 10px;white-space:pre-wrap;margin:4px 0 8px}
+#pdf-sheet pre.f .hi{font-weight:700;color:#A9531B}
+#pdf-sheet .firmas{display:grid;grid-template-columns:1fr 1fr;gap:48px;padding-top:56px}
+#pdf-sheet .firmas div{border-top:1px solid #1B2433;padding-top:6px;font-size:11.5px;color:#5A6476;text-align:center}`;
+(()=>{ const s=document.createElement('style'); s.textContent=PDF_CSS; document.head.appendChild(s); })();
+function sheetParts(kind){
   const d=reportData(), figs=captureFigs(kind), who=slug(st.id.equipo?'equipo_'+st.id.equipo:st.id.nombre);
-  let title, body, fn;
   if(kind==='res'){
-    title='Resistividad del terreno';
-    body=sheetHead(title)+resHTML(d,figs)+`<h2>Respuestas · Resistividad</h2>`+answersHTML(['b1','b2','b3','b4'])+firmas('Medición realizada por','Revisado por (docente)');
-    fn=`hoja_resistividad_${who}.html`;
-  }else{
-    title='Diseño del sistema de puesta a tierra';
-    body=sheetHead(title)+sptHTML(d,figs)+`<h2>Respuestas · Diseño</h2>`+answersHTML(['c1','c2','ctipo'].concat(isMallaTipo()?['c3','c4','c5','c6']:[]))+firmas('Diseñado por','Revisado por (docente)');
-    fn=`hoja_diseno_spt_${who}.html`;
+    const title='Resistividad del terreno';
+    return {title,who,fn:`hoja_resistividad_${who}`,
+      body:sheetHead(title)+resHTML(d,figs)+`<h2>Respuestas · Resistividad</h2>`+answersHTML(['b1','b2','b3','b4'])+firmas('Medición realizada por','Revisado por (docente)')};
   }
-  doSave(fn,sheetDoc(title+(st.id.equipo?' · Equipo '+st.id.equipo:''),body));
+  if(kind==='spt'){
+    const title='Diseño del sistema de puesta a tierra';
+    return {title,who,fn:`hoja_diseno_spt_${who}`,
+      body:sheetHead(title)+sptHTML(d,figs)+`<h2>Respuestas · Diseño</h2>`+answersHTML(['c1','c2','ctipo'].concat(isMallaTipo()?['c3','c4','c5','c6']:[]))+firmas('Diseñado por','Revisado por (docente)')};
+  }
+  return {title:'Informe del laboratorio',who,fn:`informe_spt_${who}`,body:reportHTML()};
 }
-document.addEventListener('click',e=>{ const b=e.target.closest('[data-print]'); if(b) printSheet(b.dataset.print); });
+let pdfBusy=false;
+async function makePDF(kind){
+  if(pdfBusy) return;
+  if(!window.html2canvas||!(window.jspdf&&window.jspdf.jsPDF)){ notify('No se pudo cargar el generador de PDF. Revisa tu conexión y recarga la página.'); return; }
+  pdfBusy=true; document.querySelectorAll('[data-print],#b-dl-pdf').forEach(b=>b.disabled=true);
+  notify('Generando el PDF…');
+  const box=document.createElement('div'); box.id='pdf-sheet';
+  try{
+    const P=sheetParts(kind); box.innerHTML=P.body; document.body.appendChild(box);
+    try{ await document.fonts.ready; }catch(e){}
+    const scale=2, W=box.offsetWidth;
+    const canvas=await html2canvas(box,{scale,backgroundColor:'#ffffff',logging:false,useCORS:true,windowWidth:1200});
+    // puntos de corte: inicio de cada bloque (sin separar un título de lo que sigue) y de cada fila de tabla
+    const top0=box.getBoundingClientRect().top, cuts=new Set([0]);
+    [...box.children].forEach(el=>{ const prev=el.previousElementSibling; if(!prev||!/^H[1-3]$/.test(prev.tagName)) cuts.add(el.getBoundingClientRect().top-top0); });
+    box.querySelectorAll('tbody tr, .ans, pre.f').forEach(el=>cuts.add(el.getBoundingClientRect().top-top0));
+    const totalH=box.scrollHeight, sorted=[...cuts].filter(c=>c>0&&c<totalH).sort((a,b)=>a-b);
+    const {jsPDF}=window.jspdf, pdf=new jsPDF({unit:'mm',format:'letter',orientation:'portrait'});
+    const pw=215.9, ph=279.4, mx=14, mtop=14, mbot=16, cw=pw-2*mx, ch=ph-mtop-mbot, pxPerMm=W/cw, pageH=ch*pxPerMm;
+    const pages=[]; let start=0;
+    while(start<totalH-1){
+      let end=Math.min(totalH,start+pageH);
+      if(end<totalH){ const c=sorted.filter(x=>x>start+pageH*0.3&&x<=start+pageH); if(c.length) end=c[c.length-1]; }
+      pages.push([start,end]); start=end;
+    }
+    pages.forEach(([a,b],i)=>{
+      if(i) pdf.addPage();
+      const sh=Math.round((b-a)*scale), part=document.createElement('canvas'); part.width=canvas.width; part.height=Math.max(1,sh);
+      const g=part.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,part.width,part.height); g.drawImage(canvas,0,Math.round(a*scale),canvas.width,sh,0,0,canvas.width,sh);
+      pdf.addImage(part.toDataURL('image/jpeg',0.92),'JPEG',mx,mtop,cw,(b-a)/pxPerMm);
+      pdf.setFont('helvetica','normal'); pdf.setFontSize(8); pdf.setTextColor(90,100,118);
+      pdf.text(`PRO001 - Laboratorio de puesta a tierra - ${P.title}`,mx,ph-8);
+      pdf.text(`Página ${i+1} de ${pages.length}`,pw-mx,ph-8,{align:'right'});
+    });
+    pdf.setProperties({title:P.title,subject:'PRO001 Protecciones Eléctricas · CFT Estatal O\'Higgins',creator:'Laboratorio de puesta a tierra'});
+    await doSave(P.fn+'.pdf',pdf.output('arraybuffer'));
+  }catch(err){ notify('No se pudo generar el PDF en esta vista. Usa "Descargar informe (.html)" como alternativa.'); }
+  finally{ box.remove(); pdfBusy=false; document.querySelectorAll('[data-print],#b-dl-pdf').forEach(b=>b.disabled=false); }
+}
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-print]'); if(b) makePDF(b.dataset.print); });
 
 /* =================== RECORRIDO POR PASOS =================== */
 const MODS={A:'Fundamentos',B:'Resistividad del terreno',C:'Diseño del SPT'};
@@ -1837,7 +1966,7 @@ function reportData(){
   const U=f.mode==='c'?c.GPR-Vx:f.mode==='p'?Vx-Vx1:c.GPR, Etol=f.mode==='p'?b.Ep:b.Et;
   const pts=points(), m=st.model; const K=(m.r2-m.r1)/(m.r2+m.r1);
   const rms=pts.length?Math.sqrt(cost([Math.log(m.r1),Math.log(m.r2),Math.log(m.h)],pts))*100:NaN;
-  const eq=burgsdorf(st.eq.A*st.eq.B,st.eq.b,st.eq.layers);
+  const eq=eqCalc(st.spt.tipo);
   const mc=calcMalla();
   return {f,c,b,tt,U,Etol,pts,m,K,rms,eq,mc,sc:sptCalc(st.spt.tipo)};
 }
@@ -1864,12 +1993,15 @@ function resHTML(d,figs){
   h+=`</tbody></table>`;
   if(figs.curva) h+=`<h3>Curva de campo (puntos) y modelo de dos capas (línea)</h3><div class="fig">${figs.curva}</div>`;
   h+=`<h3>Modelo de dos capas</h3>`+T2([R2('ρ₁ (Ω·m)',nf(d.m.r1,1)),R2('h₁ (m)',nf(d.m.h,2)),R2('ρ₂ (Ω·m)',nf(d.m.r2,1)),R2('K = (ρ₂ − ρ₁)/(ρ₂ + ρ₁)',nf(d.K,3)),R2('Error RMS (%)',nf(d.rms,1))]);
-  h+=`<h3>Resistividad equivalente (Burgsdorf-Yakobs)</h3>`;
-  if(d.eq.err) h+=`<p class="bad">${esc(d.eq.err)}</p>`;
-  else{
-    h+=T2([R2('SPT (m)',nf(st.eq.A,1)+' × '+nf(st.eq.B,1)+' · b = '+nf(st.eq.b,2)+' m'),R2('Área S (m²)',nf(st.eq.A*st.eq.B,1)),R2('r = √(S/π) (m)',nf(d.eq.r,3)),R2('r₀² (m²) · q₀² (m²)',nf(d.eq.r02,3)+' · '+nf(d.eq.q02,3)),R2('<b>ρeq (Ω·m)</b>','<b>'+nf(d.eq.rho,1)+'</b>')]);
-    h+=`<table><thead><tr><th>i</th><th>ρᵢ (Ω·m)</th><th>hᵢ acum. (m)</th><th>uᵢ²</th><th>vᵢ²</th><th>Fᵢ</th><th>Fᵢ − Fᵢ₋₁</th></tr></thead><tbody>`+d.eq.rows.map(r=>`<tr><td class="n">${r.i}</td><td class="n">${nf(r.rho,1)}</td><td class="n">${Number.isFinite(r.h)?nf(r.h,2):'∞'}</td><td class="n">${Number.isFinite(r.u2)?nf(r.u2,3):'—'}</td><td class="n">${Number.isFinite(r.v2)?nf(r.v2,3):'—'}</td><td class="n">${nf(r.F,4)}</td><td class="n">${nf(r.dF,4)}</td></tr>`).join('')+`</tbody></table>`;
-    h+=`<h3>Mismo terreno, distinto tamaño de SPT</h3><table><thead><tr><th>Malla cuadrada</th><th>Área S (m²)</th><th>ρeq (Ω·m)</th></tr></thead><tbody>`+[5,10,20,40,80].map(sd=>{ const r=burgsdorf(sd*sd,st.eq.b,st.eq.layers); return `<tr><td>${sd} × ${sd} m</td><td class="n">${nf(sd*sd,0)}</td><td class="n">${r.err?'—':nf(r.rho,1)}</td></tr>`; }).join('')+`</tbody></table>`;
+  { const T=TIPOS.find(x=>x.id===st.spt.tipo), e=d.eq, sz=eqSizes(st.spt.tipo);
+    h+=`<h3>Resistividad equivalente · ${T.t}</h3>`;
+    if(e.err) h+=`<p class="bad">${esc(e.err)}</p>`;
+    else{
+      h+=T2(e.kv.map(([k,v])=>R2(k,v)).concat([R2('<b>ρeq (Ω·m)</b>','<b>'+nf(e.rho,1)+'</b>')]));
+      h+=`<p class="meta">${e.how}</p><pre class="f">${e.f}</pre>`;
+      if(e.method!=='cap') h+=`<table>${eqRowsHTML(e,true)}</table>`;
+    }
+    h+=`<h3>Mismo terreno, distinto tamaño de SPT</h3><table><thead><tr><th>${sz.head}</th><th>ρeq (Ω·m)</th></tr></thead><tbody>`+sz.list.map(it=>{ const r=eqCalc(st.spt.tipo,it.g); return `<tr><td>${it.label}</td><td class="n">${r.err?'—':nf(r.rho,1)}</td></tr>`; }).join('')+`</tbody></table>`;
   }
   return h;
 }
@@ -1934,7 +2066,7 @@ function csvData(){
   add('A','R semiesfera (ohm)',nf(d.c.R,2)); add('A','GPR (V)',nf(d.c.GPR,0)); add('A','Tensión aplicada (V)',nf(d.U,0)); add('A','Tolerable (V)',nf(d.Etol,0));
   add('A · TT','Id (A)',nf(d.tt.Id,2)); add('A · TT','Tensión carcasa (V)',nf(d.tt.Uc,0));
   rows().forEach(r=>{ const w=st.method==='w'; add('B · registro',w?`a=${r.a} m`:`L=${r.L} m; l=${r.l} m`,`R=${r.R} ohm; rho_a=${nfa(rowRho(r))} ohm·m`); });
-  add('B','rho1 (ohm·m)',nf(d.m.r1,1)); add('B','h1 (m)',nf(d.m.h,2)); add('B','rho2 (ohm·m)',nf(d.m.r2,1)); add('B','RMS (%)',nf(d.rms,1)); add('B','rho_eq (ohm·m)',d.eq.err?'—':nf(d.eq.rho,1));
+  add('B','rho1 (ohm·m)',nf(d.m.r1,1)); add('B','h1 (m)',nf(d.m.h,2)); add('B','rho2 (ohm·m)',nf(d.m.r2,1)); add('B','RMS (%)',nf(d.rms,1)); add('B','Tipo de SPT para rho_eq',TIPOS.find(x=>x.id===st.spt.tipo).t); add('B','rho_eq (ohm·m)',d.eq.err?'—':nf(d.eq.rho,1));
   { const T=TIPOS.find(x=>x.id===st.spt.tipo); add('C','Tipo de SPT',T.t); add('C','Configuración',d.sc.cfg); add('C','R tipo adoptado (ohm)',nf(d.sc.R,2)); add('C','GPR tipo adoptado (V)',nf(d.sc.GPR,0)); }
   add('C','IG (A)',nf(mc.IG,0)); add('C','Conductor',mc.cond[0]); add('C','Lx x Ly (m)',`${m.Lx} x ${m.Ly}`); add('C','D (m)',nf(mc.D,2)); add('C','Barras',mc.nR?`${mc.nR} x ${m.Lr} m`:'0'); add('C','LT (m)',nf(mc.LT,1));
   add('C','Rg Laurent (ohm)',nf(mc.Rl,2)); add('C','Rg Sverak (ohm)',nf(mc.Rg,2)); add('C','E contacto (V)',nf(mc.Et,0)); add('C','E paso (V)',nf(mc.Ep,0)); add('C','GPR (V)',nf(mc.GPR,0)); add('C','Em (V)',nf(mc.Em,0)); add('C','Es (V)',nf(mc.Es,0));
@@ -1950,6 +2082,7 @@ async function doSave(filename,data){
   catch(err){ const c=err&&err.code; notify(c==='declined'?'Descarga cancelada.':c==='rate_limited'?'Ya hay una descarga pendiente; espera unos segundos.':'No se pudo descargar en esta vista.'); }
 }
 $('b-dl-html').onclick=()=>doSave(`informe_spt_${slug(st.id.equipo?'equipo_'+st.id.equipo:st.id.nombre)}.html`,reportDoc());
+$('b-dl-pdf').onclick=()=>makePDF('informe');
 $('b-dl-csv').onclick=()=>doSave(`datos_spt_${slug(st.id.equipo?'equipo_'+st.id.equipo:st.id.nombre)}.csv`,csvData());
 $('b-copy-rep').onclick=()=>{ const t=$('report').innerText; const done=()=>{$('dl-msg').textContent='Informe copiado. Pégalo en Word o Google Docs.';};
   try{ navigator.clipboard.writeText(t).then(done,()=>selectReport()); }catch(e){ selectReport(); } };
@@ -1957,10 +2090,10 @@ function selectReport(){ const r=document.createRange(); r.selectNodeContents($(
 
 /* ---------- inicio ---------- */
 buildNav(); showWho();
-$('spt-types').innerHTML=TIPOS.map(T=>`<button data-tipo="${T.id}" aria-pressed="false"><svg viewBox="0 0 48 32" aria-hidden="true">${T.ico}</svg><span>${T.short}</span></button>`).join('');
-$('spt-types').addEventListener('click',e=>{ const b=e.target.closest('[data-tipo]'); if(b) setTipo(b.dataset.tipo); });
+['spt-types','eq-types'].forEach(id=>{ $(id).innerHTML=TIPOS.map(T=>`<button data-tipo="${T.id}" aria-pressed="false"><svg viewBox="0 0 48 32" aria-hidden="true">${T.ico}</svg><span>${T.short}</span></button>`).join(''); $(id).addEventListener('click',e=>{ const b=e.target.closest('[data-tipo]'); if(b) setTipo(b.dataset.tipo); }); });
+$('b-spt-rhoeq').onclick=()=>{ const e=eqCalc(st.spt.tipo); if(!e.err){ st.malla.rho=+e.rho.toFixed(1); onMallaChange(); } };
 $('spt-cmp').addEventListener('click',e=>{ const b=e.target.closest('[data-tipo]'); if(b) setTipo(b.dataset.tipo); });
-document.querySelectorAll('[data-spt]').forEach(el=>{ el.value=st.spt[el.dataset.spt]; el.addEventListener('input',()=>{ let x=num(el.value); if(!(x>0)) return; if(el.dataset.spt==='n') x=Math.min(30,Math.max(1,Math.round(x))); st.spt[el.dataset.spt]=x; renderSPT(); save(); }); });
+document.querySelectorAll('[data-spt]').forEach(el=>{ el.value=st.spt[el.dataset.spt]; el.addEventListener('input',()=>{ let x=num(el.value); if(!(x>0)&&!(el.dataset.spt==='t'&&x===0)) return; if(el.dataset.spt==='n') x=Math.min(30,Math.max(1,Math.round(x))); st.spt[el.dataset.spt]=x; renderSPT(); save(); }); });
 $('spt-dr').value=String(st.spt.dr); $('spt-dr').onchange=e=>{ st.spt.dr=+e.target.value; renderSPT(); save(); };
 document.querySelectorAll('[data-mm]').forEach(el=>el.addEventListener('input',()=>{ const x=num(el.value); if(!(x>0)) return; const k=el.dataset.mm; st.malla[k]=k==='nR'?Math.round(x):x; if(k==='nR'&&st.malla.rodPos==='none') st.malla.rodPos='per'; renderMalla(); save(); }));
 ['c3','c4','c5','c6'].forEach(id=>{ const top=document.querySelector(`section[data-step="${id}"] .step-top`); if(top) top.insertAdjacentHTML('afterend','<p class="note" data-notmalla hidden></p>'); });
@@ -1980,3 +2113,5 @@ $('b-to-malla').onclick=()=>{ $('b-m-rhoeq').click(); go('c1'); };
 
 })();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
