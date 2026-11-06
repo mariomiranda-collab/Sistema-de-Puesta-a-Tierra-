@@ -216,6 +216,11 @@ tr.sel td{background:var(--accent-bg)!important}
 .report pre.f{font:12px/1.55 var(--mono);background:#F6F4EE;color:#1B2433;border-radius:6px;padding:8px 10px;white-space:pre-wrap;margin:4px 0 8px}
 .report pre.f .hi{font-weight:700;color:#A9531B}
 
+tr.hl td{background:var(--warn-bg)!important;font-weight:600}
+.checks.plain{list-style:disc;padding-left:20px;gap:6px}.checks.plain li{display:list-item}
+ol.proc{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-size:14px;max-width:88ch}
+td input[type=text]{padding:5px 8px;font-size:14px}
+
 @media (max-width: 960px){
   .layout{grid-template-columns:minmax(0,1fr)}
   #menu-btn{display:inline-block}
@@ -270,9 +275,10 @@ tr.sel td{background:var(--accent-bg)!important}
     <div><b>3</b><p><b style="font:inherit;color:var(--ink);font-weight:600">Descarga el informe al final.</b> Incluye datos, resultados, verificaciones y tus respuestas.</p></div>
   </div>
   <div class="mods">
-    <div class="mod-card"><span class="tag">A</span><h3>Fundamentos</h3><ol><li>Por qué importa el SPT</li><li>Dispersión y embudo</li><li>Contacto, paso y transferida</li><li>Barra contra malla</li><li>Falla en esquema TT</li></ol></div>
+    <div class="mod-card"><span class="tag">A</span><h3>Fundamentos</h3><ol><li>Por qué importa el SPT</li><li>Dispersión y embudo</li><li>Contacto, paso y transferida</li><li>Barra contra malla</li><li>Falla en esquema TT</li><li>Falla en esquema TN-S</li></ol></div>
     <div class="mod-card"><span class="tag">B</span><h3>Resistividad del terreno</h3><ol><li>Arreglo de electrodos</li><li>Planilla de registro</li><li>Curva y modelo</li><li>Resistividad equivalente</li></ol></div>
     <div class="mod-card"><span class="tag">C</span><h3>Diseño del SPT</h3><ol><li>Datos de diseño</li><li>Conductor</li><li>Tipo de SPT: barra, conductor, barras en línea o triángulo, placa, malla</li><li>Geometría de la malla</li><li>Resistencia</li><li>Tolerables</li><li>Verificación</li></ol></div>
+    <div class="mod-card"><span class="tag">D</span><h3>Ejecución y medición</h3><ol><li>Aditivos</li><li>Cotización de materiales</li><li>Medición por caída de potencial</li><li>Medición con dos pinzas</li></ol></div>
   </div>
   <div class="tip-row">
     <button class="btn primary" id="b-start">Comenzar en el módulo A</button>
@@ -301,13 +307,18 @@ tr.sel td{background:var(--accent-bg)!important}
 
 <!-- ======================= A2 ======================= -->
 <section class="step" data-step="a2" hidden>
-  <div class="step-top"><p class="eyebrow" data-eyebrow></p><h2>Dispersión de la corriente y embudo de potencial</h2><p class="lead">Electrodo semiesférico de radio r₀ en suelo homogéneo. La corriente se reparte en semiesferas cada vez más grandes y el potencial cae como 1/x.</p></div>
-  <div class="todo"><h3>Qué hacer</h3><ol><li>Parte con ρ = 100 Ω·m, I = 100 A y r₀ = 0,5 m (valores de la presentación SPT 1).</li><li>Mueve ρ, I y r₀ de a uno y observa cómo cambian R, el GPR y la forma del embudo.</li><li>Usa el control x/r₀ para ver dónde se concentra la resistencia.</li></ol></div>
+  <div class="step-top"><p class="eyebrow" data-eyebrow></p><h2>Dispersión de la corriente y embudo de potencial</h2><p class="lead">Todo electrodo real se representa por una semiesfera equivalente de radio r₀ = ρ/(2πR): la que tiene su misma resistencia. Elige qué se entierra y observa su r₀. La corriente se reparte en semiesferas cada vez más grandes y el potencial cae como 1/x.</p></div>
+  <div class="todo"><h3>Qué hacer</h3><ol><li>Parte con la semiesfera ideal, ρ = 100 Ω·m, I = 100 A y r₀ = 0,5 m (valores de la presentación SPT 1).</li><li>Cambia el elemento enterrado (barra, conductor, placa o malla) y observa su radio equivalente r₀.</li><li>Mueve ρ, I y r₀ de a uno y observa cómo cambian R, el GPR y la forma del embudo.</li><li>Usa el control x/r₀ para ver dónde se concentra la resistencia.</li></ol></div>
   <div class="grid2">
     <div class="panel">
       <h3>Datos</h3>
       <div class="slider"><label for="f-rho">ρ</label><input type="range" id="f-rho" min="10" max="2000" step="10"><span class="val" id="f-rho-v"></span></div>
       <div class="slider"><label for="f-I">I</label><input type="range" id="f-I" min="10" max="2000" step="10"><span class="val" id="f-I-v"></span></div>
+      <div class="field" style="flex:none"><label for="f-el">Elemento enterrado</label><select id="f-el" class="sel"><option value="semi">Semiesfera ideal</option><option value="barra">Barra vertical (copperweld)</option><option value="hor">Conductor horizontal desnudo</option><option value="placa">Placa</option><option value="malla">Malla cuadrada</option></select></div>
+      <div class="row" data-el="barra"><div class="field"><label for="fe-Lb">Largo L (m)</label><input type="number" id="fe-Lb" data-fe="Lb" min="0.3" step="0.5"></div><div class="field"><label for="fe-db">Diámetro</label><select id="fe-db" class="sel"><option value="12.7">1/2" · 12,7 mm</option><option value="15.9">5/8" · 15,9 mm</option><option value="19.1">3/4" · 19,1 mm</option><option value="25.4">1" · 25,4 mm</option></select></div></div>
+      <div class="row" data-el="hor"><div class="field"><label for="fe-Lh">Largo L (m)</label><input type="number" id="fe-Lh" data-fe="Lh" min="0.5" step="1"></div><div class="field"><label for="fe-ch">Conductor</label><select id="fe-ch" class="sel"></select></div><div class="field"><label for="fe-hh">Profundidad h (m)</label><input type="number" id="fe-hh" data-fe="hh" min="0.1" step="0.1"></div></div>
+      <div class="row" data-el="placa"><div class="field"><label for="fe-pa">Lado a (m)</label><input type="number" id="fe-pa" data-fe="pa" min="0.1" step="0.1"></div><div class="field"><label for="fe-pb">Lado b (m)</label><input type="number" id="fe-pb" data-fe="pb" min="0.1" step="0.1"></div></div>
+      <div class="row" data-el="malla"><div class="field"><label for="fe-gl">Lado (m)</label><input type="number" id="fe-gl" data-fe="gl" min="1" step="1"></div><div class="field"><label for="fe-gD">Retícula D (m)</label><input type="number" id="fe-gD" data-fe="gD" min="0.5" step="0.5"></div><div class="field"><label for="fe-gh">Profundidad h (m)</label><input type="number" id="fe-gh" data-fe="gh" min="0.1" step="0.1"></div></div>
       <div class="slider"><label for="f-r0">r₀</label><input type="range" id="f-r0" min="0.1" max="2" step="0.05"><span class="val" id="f-r0-v"></span></div>
       <div class="formula" id="f-disp-formula"></div>
     </div>
@@ -321,6 +332,14 @@ tr.sel td{background:var(--accent-bg)!important}
     <h3>Embudo de potencial en la superficie</h3>
     <div class="chart-wrap"><svg class="chart" id="f-embudo" role="img" aria-label="Potencial en la superficie versus distancia al electrodo"></svg></div>
     <div class="scroll"><table id="f-tbl-v"></table></div>
+  </div>
+  <div class="panel">
+    <h3>Radio equivalente según lo que se entierra</h3>
+    <p class="note">Mismo ρ para todos. Como R es proporcional a ρ, r₀ = ρ/(2πR) depende solo de la geometría: es el tamaño de la semiesfera que equivale a cada elemento. La fila destacada es la elegida arriba.</p>
+    <div class="scroll"><table id="f-tbl-el"></table></div>
+    <div class="legend"><span><i class="sw-line" style="background:var(--accent)"></i>Barra vertical (largo)</span><span><i class="sw-line" style="background:var(--blue)"></i>Conductor horizontal (largo)</span><span><i class="sw-line" style="background:var(--ok)"></i>Malla cuadrada (lado)</span><span><i class="sw-line" style="background:var(--red)"></i>Placa cuadrada (lado)</span></div>
+    <div class="chart-wrap"><svg class="chart" id="f-el-chart" role="img" aria-label="Radio equivalente versus dimensión principal de cada elemento"></svg></div>
+    <p class="note" id="f-el-note"></p>
   </div>
   <div class="panel">
     <h3>¿Dónde está la resistencia?</h3>
@@ -414,6 +433,53 @@ tr.sel td{background:var(--accent-bg)!important}
     <p class="note">Ninguna resistencia de tierra realista hace operar un termomagnético en TT. La protección real contra contactos indirectos en BT es el diferencial: R_A ≤ U_L / IΔn.</p>
   </div>
   <div class="concl" data-qs="a5"></div>
+</section>
+
+<!-- ======================= A6 ======================= -->
+<section class="step" data-step="a6" hidden>
+  <div class="step-top"><p class="eyebrow" data-eyebrow></p><h2>Falla fase–masa en esquema TN-S</h2><p class="lead">Las masas van al conductor de protección PE, unido al neutro solo en el transformador. La corriente de falla vuelve por el PE, que es metálico: lo que decide si la protección despeja es la impedancia del lazo, no la resistencia de la puesta a tierra.</p></div>
+  <div class="todo"><h3>Qué hacer</h3><ol><li>Ingresa la impedancia de la fuente, el largo y las secciones del circuito.</li><li>Elige la curva y la corriente nominal del termomagnético, y revisa si dispara en forma instantánea.</li><li>Alarga el circuito en el gráfico hasta que deje de cumplir y compara con el esquema TT del paso anterior.</li></ol></div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="row">
+        <div class="field"><label for="tn-U0">U₀ fase–neutro (V)</label><input type="number" id="tn-U0" data-tn="U0" min="1" step="1"></div>
+        <div class="field"><label for="tn-Zt">Impedancia de la fuente (mΩ)</label><input type="number" id="tn-Zt" data-tn="Zt" min="0" step="5"></div>
+        <div class="field"><label for="tn-L">Largo del circuito L (m)</label><input type="number" id="tn-L" data-tn="L" min="1" step="5"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="tn-Sf">Sección de fase (mm²)</label><select id="tn-Sf" class="sel" data-tns="Sf"></select></div>
+        <div class="field"><label for="tn-Spe">Sección del PE (mm²)</label><select id="tn-Spe" class="sel" data-tns="Spe"></select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="tn-curve">Curva del termomagnético</label><select id="tn-curve" class="sel" data-tns="k"><option value="5">B · Ia = 5·In</option><option value="10">C · Ia = 10·In</option><option value="20">D · Ia = 20·In</option></select></div>
+        <div class="field"><label for="tn-In">In (A)</label><input type="number" id="tn-In" data-tn="In" min="1" step="1"></div>
+        <div class="field"><label for="tn-Idn">Diferencial IΔn (mA)</label><input type="number" id="tn-Idn" data-tn="Idn" min="1" step="1"></div>
+      </div>
+      <svg class="diagram" id="tn-svg" role="img" aria-label="Circuito de falla en esquema TN-S"></svg>
+    </div>
+    <div class="panel">
+      <div class="formula" id="tn-formula"></div>
+      <ul class="checks" id="tn-checks"></ul>
+      <p class="note">Resistividad del cobre en caliente 0,0225 Ω·mm²/m. Impedancias sumadas en forma aritmética, lo que deja el resultado del lado seguro.</p>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Corriente de falla según el largo del circuito</h3>
+    <div class="chart-wrap"><svg class="chart" id="tn-chart" role="img" aria-label="Corriente de falla versus largo del circuito, con la corriente de disparo magnético"></svg></div>
+    <p class="note" id="tn-chart-note"></p>
+  </div>
+  <div class="panel">
+    <h3>Falla directa de una fase a tierra</h3>
+    <p class="note">Si un conductor de fase toca el suelo y no una masa, la corriente vuelve por la tierra de servicio R_B. El PE y todas las masas suben de potencial.</p>
+    <div class="grid2">
+      <div class="row">
+        <div class="field"><label for="tn-RB">R_B tierra de servicio (Ω)</label><input type="number" id="tn-RB" data-tn="RB" min="0.1" step="0.5"></div>
+        <div class="field"><label for="tn-RE">R_E contacto de la fase con el suelo (Ω)</label><input type="number" id="tn-RE" data-tn="RE" min="0.1" step="1"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0"><div class="formula" id="tn-rb-formula"></div><ul class="checks" id="tn-rb-checks"></ul></div>
+    </div>
+  </div>
+  <div class="concl" data-qs="a6"></div>
 </section>
 
 <!-- ======================= B1 ======================= -->
@@ -559,8 +625,25 @@ tr.sel td{background:var(--accent-bg)!important}
 <!-- ======================= C1 ======================= -->
 <section class="step" data-step="c1" hidden>
   <div class="step-top"><p class="eyebrow" data-eyebrow></p><h2>Datos de diseño</h2><p class="lead">Resistividad, corriente de falla a tierra y tiempos de despeje. En instalaciones con MT, la corriente de falla a tierra la entrega la distribuidora en la factibilidad.</p></div>
-  <div class="todo"><h3>Qué hacer</h3><ol><li>Presiona <b class="k">Cargar ejemplo SPT 3</b> para partir de una planilla limpia y luego <b class="k">Usar ρeq del módulo B</b>.</li><li>Ingresa la corriente de falla, Sf y Df (puedes calcular Df con X/R y tf).</li><li>Define tiempos, capa superficial y criterio de peso.</li></ol></div>
+  <div class="todo"><h3>Qué hacer</h3><ol><li>Presiona <b class="k">Cargar ejemplo SPT 3</b> para partir de una planilla limpia y luego <b class="k">Usar ρeq del módulo B</b>.</li><li>Elige qué tierra estás calculando: servicio, protección o TS + TP común en TN-S.</li><li>Ingresa la corriente de falla, Sf y Df (puedes calcular Df con X/R y tf).</li><li>Define tiempos, capa superficial y criterio de peso.</li></ol></div>
   <div class="tip-row"><button class="btn" id="b-m-ejemplo">Cargar ejemplo SPT 3</button><button class="btn primary" id="b-m-rhoeq">Usar ρeq del módulo B</button></div>
+  <div class="panel">
+    <h3>¿Qué tierra se está calculando?</h3>
+    <div class="seg" role="group" aria-label="Función de la puesta a tierra">
+      <button id="g-TS" aria-pressed="false">Tierra de servicio (TS)</button><button id="g-TP" aria-pressed="true">Tierra de protección (TP)</button><button id="g-TN" aria-pressed="false">TS + TP común (TN-S)</button>
+    </div>
+    <p class="note" id="gtipo-desc" style="max-width:none"></p>
+    <div class="row" id="gtn-fields" hidden>
+      <div class="field" style="flex:none"><label>Alimentación de la instalación</label><div class="seg" role="group" aria-label="Alimentación"><button id="gtn-BT" aria-pressed="false">Desde BT (empalme)</button><button id="gtn-MT" aria-pressed="true">Subestación MT/BT propia</button></div></div>
+    </div>
+    <div class="row" id="gtp-fields">
+      <div class="field"><label for="m-Vs">Tensión de seguridad Vs (V)</label><select id="m-Vs" class="sel"><option value="50">50 V · lugar seco</option><option value="24">24 V · lugar húmedo</option></select></div>
+      <div class="field"><label for="m-I0bt">Corriente de operación de la protección I₀ (A)</label><input type="number" id="m-I0bt" data-m="I0bt" min="0.001" step="0.01"></div>
+      <p class="note" style="flex:2 1 260px">Con diferencial, I₀ = IΔn (0,03 A para 30 mA). Con termomagnético, I₀ es la corriente de disparo magnético (por ejemplo 10·In en curva C), y el valor exigido suele ser inviable.</p>
+    </div>
+    <div class="formula" id="gtipo-formula"></div>
+    <p class="note">Este criterio se aplica en Tipo de SPT, Resistencia de la malla y en las hojas para imprimir.</p>
+  </div>
   <div class="grid2">
     <div class="panel">
       <h3>Terreno y falla</h3>
@@ -639,7 +722,7 @@ tr.sel td{background:var(--accent-bg)!important}
 
 <!-- ======================= C TIPO ======================= -->
 <section class="step" data-step="ctipo" hidden>
-  <div class="step-top"><p class="eyebrow" data-eyebrow></p><h2>Tipo de SPT</h2><p class="lead">Calcula la resistencia de distintos electrodos con el mismo terreno y la misma falla: barra, conductor desnudo, barras en línea, barras en triángulo, placa, malla y malla con barras. Al final, compáralos y elige uno.</p></div>
+  <div class="step-top"><p class="eyebrow" data-eyebrow></p><h2>Tipo de SPT</h2><span class="pill warn" data-chip style="align-self:flex-start"></span><p class="lead">Calcula la resistencia de distintos electrodos con el mismo terreno y la misma falla: barra, conductor desnudo, barras en línea, barras en triángulo, placa, malla y malla con barras. Al final, compáralos y elige uno.</p></div>
   <div class="todo"><h3>Qué hacer</h3><ol><li>Elige un tipo de SPT.</li><li>Ingresa sus dimensiones y revisa el desarrollo de la fórmula y las verificaciones.</li><li>Compara los siete tipos en la tabla final y deja seleccionado el que vas a adoptar.</li></ol></div>
   <div class="types" id="spt-types" role="group" aria-label="Tipo de SPT"></div>
   <div class="grid2">
@@ -734,8 +817,8 @@ tr.sel td{background:var(--accent-bg)!important}
 
 <!-- ======================= C4 ======================= -->
 <section class="step" data-step="c4" hidden>
-  <div class="step-top"><p class="eyebrow" data-eyebrow></p><h2>Resistencia de la malla</h2><p class="lead">Laurent-Niemann sirve para pre-dimensionar; Sverak (IEEE 80) considera la profundidad y es el valor que sigue en la verificación.</p></div>
-  <div class="todo"><h3>Qué hacer</h3><ol><li>Compara Laurent-Niemann con Sverak.</li><li>Revisa las exigencias del RIC N°06.</li><li>En instalaciones de BT, completa el panel de tierra de protección con Vs e I₀.</li></ol></div>
+  <div class="step-top"><p class="eyebrow" data-eyebrow></p><h2>Resistencia de la malla</h2><span class="pill warn" data-chip style="align-self:flex-start"></span><p class="lead">Laurent-Niemann sirve para pre-dimensionar; Sverak (IEEE 80) considera la profundidad y es el valor que sigue en la verificación.</p></div>
+  <div class="todo"><h3>Qué hacer</h3><ol><li>Compara Laurent-Niemann con Sverak.</li><li>Revisa las exigencias del RIC N°06.</li><li>Revisa el criterio de resistencia de la tierra que estás calculando (se elige en Datos de diseño).</li></ol></div>
   <div class="grid2">
     <div class="panel"><h3>Laurent-Niemann</h3><div class="formula" id="r-laurent"></div></div>
     <div class="panel"><h3>Sverak · IEEE 80</h3><div class="formula" id="r-sverak"></div><p class="big" id="r-big"></p></div>
@@ -743,13 +826,9 @@ tr.sel td{background:var(--accent-bg)!important}
   <div class="grid2">
     <div class="panel"><h3>Exigencias del RIC N°06</h3><ul class="checks" id="ric-checks"></ul></div>
     <div class="panel">
-      <h3>Tierra de protección en BT · RIC 7.3</h3>
-      <div class="row">
-        <div class="field"><label for="m-Vs">Tensión de seguridad Vs (V)</label><select id="m-Vs" class="sel"><option value="50">50 V · lugar seco</option><option value="24">24 V · lugar húmedo</option></select></div>
-        <div class="field"><label for="m-I0bt">Operación de la protección I₀ (A)</label><input type="number" id="m-I0bt" data-m="I0bt" min="0.001" step="0.01"></div>
-      </div>
+      <h3 id="crit-title">Criterio de resistencia</h3>
       <div class="formula" id="bt-formula"></div>
-      <p class="note">Con diferencial, I₀ = IΔn (0,03 A para 30 mA). Con termomagnético, I₀ es la corriente de disparo magnético, y el valor exigido suele ser inviable.</p>
+      <p class="note" id="crit-note"></p>
     </div>
   </div>
   <div class="concl" data-qs="c4"></div>
@@ -801,6 +880,206 @@ tr.sel td{background:var(--accent-bg)!important}
   <div class="concl" data-qs="c6"></div>
 </section>
 
+<!-- ======================= D1 ADITIVOS ======================= -->
+<section class="step" data-step="d1" hidden>
+  <div class="step-top"><p class="eyebrow" data-eyebrow></p><h2>Aditivos y mejoramiento del terreno</h2><p class="lead">Un aditivo reemplaza el terreno que rodea al electrodo por un material de baja resistividad. Baja la resistencia porque el electrodo se comporta como si fuera más grueso, pero solo actúa en la zona cercana: el resto del terreno sigue mandando.</p></div>
+  <div class="todo"><h3>Qué hacer</h3><ol><li>Lee la tabla de aditivos y elige uno (o ingresa la resistividad de la ficha técnica).</li><li>Define el radio del relleno alrededor del electrodo.</li><li>Compara la resistencia con y sin aditivo, y revisa en el gráfico por qué agrandar el relleno rinde cada vez menos.</li></ol></div>
+  <div class="scroll"><table class="left">
+    <thead><tr><th>Aditivo</th><th>Cómo actúa</th><th>Duración y cuidados</th></tr></thead>
+    <tbody>
+      <tr><td><b>Bentonita</b> (arcilla sódica)</td><td>Absorbe agua y se hincha; rellena el contacto entre electrodo y terreno y retiene humedad.</td><td>Estable mientras se mantenga húmeda. Si se seca, se contrae y pierde contacto. No es corrosiva.</td></tr>
+      <tr><td><b>Gel químico</b> (sales que forman un gel)</td><td>Dos componentes que reaccionan en el terreno y forman un gel conductor que no se lava fácilmente.</td><td>Varios años, según fabricante. Se aplica disuelto en agua en el pozo o la zanja.</td></tr>
+      <tr><td><b>Cemento conductivo</b> (a base de carbón)</td><td>Fragua alrededor del electrodo; queda como un electrodo grueso de muy baja resistividad.</td><td>Permanente, no depende de la humedad. Útil en suelos rocosos o secos.</td></tr>
+      <tr><td><b>Carbón, coque o grafito</b></td><td>Relleno conductor granular alrededor del electrodo.</td><td>Permanente. Puede generar corrosión galvánica con el cobre si no es de buena calidad.</td></tr>
+      <tr><td><b>Sal común</b> (cloruro de sodio)</td><td>Disuelta en el agua del terreno baja su resistividad.</td><td>Se lixivia con la lluvia y el riego: el efecto se pierde en meses. Es corrosiva para el cobre y el acero. No se recomienda.</td></tr>
+    </tbody></table></div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Datos</h3>
+      <div class="row">
+        <div class="field"><label for="ad-tipo">Aditivo</label><select id="ad-tipo" class="sel"></select></div>
+        <div class="field"><label for="ad-rb">ρ del aditivo ρa (Ω·m)</label><input type="number" id="ad-rb" data-ad="rb" min="0.01" step="0.1"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="ad-r1">Radio del relleno r₁ (m)</label><input type="number" id="ad-r1" data-ad="r1" min="0.01" step="0.01"></div>
+        <div class="field"><label for="ad-rho">ρ del terreno (Ω·m)</label><input type="number" id="ad-rho" disabled></div>
+      </div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="ad-use"> Incluir el aditivo en el SPT y en la cotización</label>
+      <p class="note">ρ del terreno es el ρ de diseño (paso Datos de diseño). Las resistividades de la lista son orientativas: usa el dato de la ficha técnica del producto. Un pozo de 15 cm de diámetro da r₁ = 0,075 m.</p>
+      <svg class="diagram" id="ad-svg" role="img" aria-label="Electrodo dentro de un relleno de aditivo"></svg>
+    </div>
+    <div class="panel">
+      <h3>Modelo de capas concéntricas</h3>
+      <div class="formula" id="ad-formula"></div>
+      <div class="scroll"><table id="ad-tbl"></table></div>
+      <p class="note" id="ad-note"></p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Resistencia de la barra según el radio del relleno</h3>
+      <div class="legend"><span><i class="sw-line" style="background:var(--soft)"></i>Sin aditivo</span><span><i class="sw-line" style="background:var(--accent)"></i>Con el aditivo elegido</span><span><i class="sw-line" style="background:var(--blue)"></i>Aditivo ideal (ρa = 0)</span></div>
+      <div class="chart-wrap"><svg class="chart" id="ad-chart" role="img" aria-label="Resistencia de la barra versus radio del relleno"></svg></div>
+    </div>
+    <div class="panel">
+      <h3>Por qué la sal no sirve en el tiempo</h3>
+      <div class="slider"><label for="ad-tau">τ</label><input type="range" id="ad-tau" min="1" max="36" step="1"><span class="val" id="ad-tau-v"></span></div>
+      <div class="chart-wrap"><svg class="chart" id="ad-time" role="img" aria-label="Resistencia en el tiempo con sal y con un aditivo estable"></svg></div>
+      <p class="note">Modelo ilustrativo: la sal se lava con constante de tiempo τ y el relleno vuelve a la resistividad del terreno, ρa(t) = ρ − (ρ − ρa₀)·e^(−t/τ). Un aditivo estable mantiene ρa.</p>
+    </div>
+  </div>
+  <div class="concl" data-qs="d1"></div>
+</section>
+
+<!-- ======================= D2 COTIZACIÓN ======================= -->
+<section class="step" data-step="d2" hidden>
+  <div class="step-top"><p class="eyebrow" data-eyebrow></p><h2>Cotización de materiales</h2><p class="lead">Las cantidades salen del SPT que diseñaste. Revisa cada una, ajústala si tu obra lo requiere e ingresa el precio unitario que cotices con proveedores.</p><span class="pill warn" data-cotchip style="align-self:flex-start"></span></div>
+  <div class="todo"><h3>Qué hacer</h3><ol><li>Revisa las cantidades calculadas desde el diseño; cámbialas si hace falta (la cantidad calculada queda como referencia).</li><li>Ingresa el precio unitario neto de cada ítem en pesos chilenos.</li><li>Agrega los ítems que falten y revisa el total con IVA.</li></ol></div>
+  <div class="panel">
+    <div class="row">
+      <div class="field" style="flex:0 1 220px"><label for="cot-baj">Bajada al tablero o cámara (m)</label><input type="number" id="cot-baj" data-cot="baj" min="0" step="0.5"></div>
+      <div class="field" style="flex:0 1 220px"><label for="cot-merma">Pérdida de conductor (%)</label><input type="number" id="cot-merma" data-cot="merma" min="0" step="1"></div>
+      <div class="field" style="flex:0 1 220px"><label for="cot-gg">Gastos generales y utilidades (%)</label><input type="number" id="cot-gg" data-cot="gg" min="0" step="1"></div>
+    </div>
+    <div class="scroll"><table id="cot-tbl"></table></div>
+    <div class="tip-row"><button class="btn" id="cot-add">Agregar ítem</button><button class="btn ghost" id="cot-reset">Volver a las cantidades del diseño</button><button class="btn ghost" id="cot-copy">Copiar para Excel</button></div>
+    <textarea class="copybox" id="cot-copybox" hidden readonly aria-label="Cotización para copiar"></textarea>
+    <div class="result" id="cot-tot"></div>
+    <p class="note">Los precios quedan guardados en este navegador. Las cantidades de excavación y uniones son estimaciones para empezar: ajústalas según el plano de obra.</p>
+  </div>
+  <div class="concl" data-qs="d2"></div>
+</section>
+
+<!-- ======================= D3 CAÍDA DE POTENCIAL ======================= -->
+<section class="step" data-step="d3" hidden>
+  <div class="step-top"><p class="eyebrow" data-eyebrow></p><h2>Medición por caída de potencial</h2><p class="lead">Una vez construido el SPT, se mide su resistencia real. Es el método que pide el RIC N°06 (punto 11 y Anexo 6.3): se inyecta corriente entre el SPT y un electrodo auxiliar lejano y se mide la tensión con un electrodo de potencial que se desplaza entre ambos.</p></div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Teoría</h3>
+      <p style="font-size:14px">El telurómetro inyecta una corriente I entre el SPT (E) y el electrodo de corriente (C), y mide la tensión V entre E y el electrodo de potencial (P). La lectura es R = V/I. Cerca de E o de C, P queda dentro de sus embudos de potencial y la lectura sube; en el tramo intermedio aparece una zona plana donde la lectura es la resistencia del SPT.</p>
+      <div class="formula" id="cp-theory"></div>
+      <p class="note">Para electrodos semiesféricos el error se anula cuando x = 0,618·D. Por eso el RIC N°06 ubica P al 62 % de la distancia a C.</p>
+    </div>
+    <div class="panel">
+      <h3>Exigencias del RIC N°06</h3>
+      <ul class="checks plain" style="font-size:14px">
+        <li>Electrodo de corriente a una distancia de al menos <b>6 veces la mayor diagonal</b> del SPT (Anexo 6.3).</li>
+        <li>Electrodo de potencial a aproximadamente el <b>62 %</b> de esa distancia (Anexo 6.3).</li>
+        <li>Repetir la medición en otra dirección, de preferencia <b>perpendicular</b> a la primera (Anexo 6.3).</li>
+        <li>Telurómetro de <b>cuatro terminales</b>, resolución no mayor a 0,01 Ω y escala de 1 a 100 Ω o más, con <b>certificado de calibración vigente</b> (Anexo 6.3; el punto 11.4 admite hasta 24 meses y el Anexo pide no más de 1 año: conviene cumplir el más exigente).</li>
+        <li>Dejar al menos un <b>punto accesible</b> lo más cerca posible del centro de la malla (punto 11.3).</li>
+        <li>Respaldar con <b>registro fotográfico e informe</b> (punto 11.4).</li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Cómo realizar la medición</h3>
+    <ol class="proc">
+      <li>Revisa el telurómetro, sus cables y el certificado de calibración. Anota marca, modelo y número de serie.</li>
+      <li>Determina la mayor diagonal del SPT y calcula la distancia D al electrodo de corriente (al menos 6 veces esa diagonal). Elige una dirección libre de cañerías, cercos y otras tierras enterradas.</li>
+      <li>Si el SPT está unido a otras tierras (neutro de la empresa, otras mallas), desconecta la unión en la cámara de inspección mientras mides, para que la corriente no se vaya por caminos en paralelo.</li>
+      <li>Hinca el electrodo de corriente C a la distancia D y el de potencial P al 62 % de D, en línea recta con el SPT.</li>
+      <li>Conecta: E (o C1 y P1 puenteados) al SPT, P2 al electrodo de potencial y C2 al de corriente. Mide y anota la lectura.</li>
+      <li>Desplaza P entre el 10 % y el 90 % de D, anotando cada lectura, para trazar la curva. La lectura al 62 % es válida si las lecturas al 52 % y al 72 % difieren poco de ella.</li>
+      <li>Repite en una dirección perpendicular. Anota la fecha, el estado del terreno (seco o húmedo) y toma fotografías.</li>
+      <li>Vuelve a conectar las uniones que desconectaste.</li>
+    </ol>
+  </div>
+  <div class="panel">
+    <h3>Montaje</h3>
+    <svg class="diagram" id="cp-svg" role="img" aria-label="Montaje de la medición por caída de potencial"></svg>
+  </div>
+  <div class="panel">
+    <h3>Registro de la medición</h3>
+    <div class="row">
+      <div class="field"><label for="cp-dg">Mayor diagonal del SPT (m)</label><input type="number" id="cp-dg" data-cp="dg" min="0.1" step="0.5"></div>
+      <div class="field"><label for="cp-D">Distancia a C, D (m)</label><input type="number" id="cp-D" data-cp="D" min="1" step="1"></div>
+      <div class="field"><label for="cp-inst">Telurómetro (marca, serie)</label><input type="text" id="cp-inst" data-cpt="inst" placeholder="[Marca, modelo, N° serie]"></div>
+      <div class="field"><label for="cp-fecha">Fecha</label><input type="date" id="cp-fecha" data-cpt="fecha"></div>
+      <div class="field"><label for="cp-cond">Terreno / clima</label><input type="text" id="cp-cond" data-cpt="cond" placeholder="[Seco, húmedo…]"></div>
+    </div>
+    <ul class="checks" id="cp-checks"></ul>
+    <div class="tip-row"><button class="btn primary" id="cp-ej">Cargar datos simulados</button><button class="btn" id="cp-std">Distancias estándar (10 % a 90 %)</button><button class="btn" id="cp-add">Agregar fila</button><button class="btn ghost" id="cp-clear">Vaciar</button></div>
+    <p class="note" id="cp-exnote"></p>
+    <div class="scroll"><table id="cp-tbl"></table></div>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Curva de caída de potencial</h3>
+      <div class="legend"><span><i class="sw-line" style="background:var(--accent)"></i>Dirección 1</span><span><i class="sw-line" style="background:var(--blue)"></i>Dirección 2 (perpendicular)</span><span><i class="sw-line" style="background:var(--soft)"></i>Curva teórica del diseño</span></div>
+      <div class="chart-wrap"><svg class="chart" id="cp-chart" role="img" aria-label="Resistencia medida versus posición del electrodo de potencial"></svg></div>
+    </div>
+    <div class="panel">
+      <h3>Resultado</h3>
+      <div class="result" id="cp-res"></div>
+      <div class="formula" id="cp-formula"></div>
+      <ul class="checks" id="cp-res-checks"></ul>
+    </div>
+  </div>
+  <div class="concl" data-qs="d3"></div>
+</section>
+
+<!-- ======================= D4 DOS PINZAS ======================= -->
+<section class="step" data-step="d4" hidden>
+  <div class="step-top"><p class="eyebrow" data-eyebrow></p><h2>Medición con el método de dos pinzas</h2><p class="lead">Mide sin estacas ni desconexiones, pero solo en sistemas con varias puestas a tierra unidas entre sí. Una pinza induce una tensión en el lazo y la otra mide la corriente que circula. El RIC N°06 (Anexo 6.3) lo acepta para inspección de un SPT existente, no para la recepción inicial.</p></div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Teoría</h3>
+      <p style="font-size:14px">La corriente recorre un lazo cerrado: baja por el electrodo medido Rx, vuelve por el terreno y sube por todas las otras puestas a tierra, que quedan en paralelo, hasta cerrar por el conductor que las une. La lectura es la resistencia de todo el lazo.</p>
+      <div class="formula" id="pz-theory"></div>
+      <p class="note">Con muchos electrodos en paralelo, su resistencia equivalente es pequeña y la lectura se acerca a Rx, siempre algo por encima (del lado seguro).</p>
+    </div>
+    <div class="panel">
+      <h3>Condiciones y limitaciones</h3>
+      <ul class="checks plain" style="font-size:14px">
+        <li>Solo funciona si el electrodo forma parte de un sistema <b>puesto a tierra en más de un punto</b> (por ejemplo, el neutro multiaterrizado de una red o varias tierras unidas).</li>
+        <li>Un electrodo aislado da circuito abierto: la pinza no puede medirlo.</li>
+        <li>Una lectura casi nula indica un lazo metálico (por ejemplo, la estructura o una cañería) y no el terreno.</li>
+        <li>Uniones corroídas o cortadas cambian la lectura (Anexo 6.3).</li>
+        <li>Válido para <b>inspección y mantenimiento</b>; la recepción inicial se hace por caída de potencial.</li>
+        <li>Separa las dos pinzas la distancia mínima que indique el fabricante, para que una no induzca en la otra.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Cómo realizar la medición</h3>
+    <ol class="proc">
+      <li>Identifica la bajada que une el electrodo con el resto del sistema y verifica que no haya otro camino metálico en el tramo donde pondrás las pinzas.</li>
+      <li>Abraza la bajada con la pinza de inyección (tensión) y, más abajo, con la pinza de medición (corriente), separadas según el fabricante.</li>
+      <li>Lee la resistencia del lazo. Si el equipo muestra circuito abierto, el electrodo no tiene camino de retorno.</li>
+      <li>Repite en cada electrodo del sistema y registra las lecturas en la tabla.</li>
+      <li>Revisa también la corriente de fuga que muestra el equipo: si es alta, hay un problema en la instalación.</li>
+    </ol>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Simulador del lazo</h3>
+      <div class="row">
+        <div class="field"><label for="pz-rx">Rx del electrodo medido (Ω)</label><input type="number" id="pz-rx" data-pz="rx" min="0.1" step="0.5"></div>
+        <div class="field"><label for="pz-n">Otros electrodos en paralelo n</label><input type="number" id="pz-n" data-pz="n" min="1" step="1"></div>
+        <div class="field"><label for="pz-ri">R de cada uno (Ω)</label><input type="number" id="pz-ri" data-pz="ri" min="0.1" step="0.5"></div>
+        <div class="field"><label for="pz-rc">Conductores del lazo (Ω)</label><input type="number" id="pz-rc" data-pz="rc" min="0" step="0.05"></div>
+      </div>
+      <svg class="diagram" id="pz-svg" role="img" aria-label="Lazo de medición con dos pinzas"></svg>
+      <div class="formula" id="pz-formula"></div>
+    </div>
+    <div class="panel">
+      <h3>Lectura según la cantidad de electrodos en paralelo</h3>
+      <div class="chart-wrap"><svg class="chart" id="pz-chart" role="img" aria-label="Lectura de la pinza versus número de electrodos en paralelo"></svg></div>
+      <p class="note" id="pz-note"></p>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Registro de las lecturas</h3>
+    <p class="note">Si mides todos los electrodos de un mismo sistema, la planilla estima la resistencia propia de cada uno: a cada lectura le resta el paralelo de los demás, R = R_lazo − 1/Σ(1/Rⱼ), y repite hasta que los valores se estabilizan. Supone que los electrodos solo se unen por el conductor común.</p>
+    <div class="tip-row"><button class="btn primary" id="pz-ej">Cargar ejemplo</button><button class="btn" id="pz-add">Agregar electrodo</button><button class="btn ghost" id="pz-clear">Vaciar</button></div>
+    <div class="scroll"><table id="pz-tbl"></table></div>
+    <ul class="checks" id="pz-checks"></ul>
+  </div>
+  <div class="tip-row"><button class="btn primary" data-print="med">Imprimir medición del SPT</button><span class="note" style="border:0;padding:0">Descarga un PDF con la caída de potencial y las lecturas de pinza.</span></div>
+  <div class="concl" data-qs="d4"></div>
+</section>
+
 <!-- ======================= INFORME ======================= -->
 <section class="step" data-step="informe" hidden>
   <div class="step-top"><p class="eyebrow">Cierre</p><h2>Informe y descarga</h2><p class="lead">Resumen de todos tus datos, cálculos, verificaciones y respuestas. Revísalo y descárgalo para tu informe.</p></div>
@@ -831,7 +1110,7 @@ tr.sel td{background:var(--accent-bg)!important}
   <button class="btn primary" id="next"><small>Siguiente</small><span id="next-t"></span></button>
 </nav>
 </div>
-<footer class="foot">Módulo A: dispersión semiesférica V(x) = ρI/(2πx), disco equivalente V = (2/π)·GPR·arcsen(a/x), criterio de Dalziel con Rc = 1.000 Ω y Rf = 3ρs. Módulo B: Wenner ρa = 2πaR; Schlumberger ρa = π(L² − l²)R/(2l); modelo de dos capas por serie de imágenes; ρeq por Burgsdorf-Yakobs para mallas y conductores, y por promedio ponderado por largo para barras y placas; requisitos de medición según RIC N°06, Anexo 6.6. Módulo C: IEEE Std 80 (conductor, Sverak, Schwarz, Em, Es, tolerables), Laurent-Niemann, IEC 60364-5-54 y RIC N°06. Tipos de SPT: barra R = ρ/(2πL)·[ln(4L/a) − 1] (Dwight), conductor horizontal R = ρ/(πL)·[ln(2L/√(2ah)) − 1] (Sunde), barras en línea y en triángulo con coeficiente de utilización R = R₁(1 + λα)/n (Tagg), placa R = 0,8ρ/P. Las fórmulas de Em y Es valen para mallas regulares en suelo homogéneo. Los datos de ejemplo son supuestos o sintéticos. Material docente · Mario Miranda Araos · CFT Estatal O'Higgins.</footer>
+<footer class="foot">Módulo A: dispersión semiesférica V(x) = ρI/(2πx), disco equivalente V = (2/π)·GPR·arcsen(a/x), criterio de Dalziel con Rc = 1.000 Ω y Rf = 3ρs. Módulo B: Wenner ρa = 2πaR; Schlumberger ρa = π(L² − l²)R/(2l); modelo de dos capas por serie de imágenes; ρeq por Burgsdorf-Yakobs para mallas y conductores, y por promedio ponderado por largo para barras y placas; requisitos de medición según RIC N°06, Anexo 6.6. Módulo C: IEEE Std 80 (conductor, Sverak, Schwarz, Em, Es, tolerables), Laurent-Niemann, IEC 60364-5-54 y RIC N°06. Tipos de SPT: barra R = ρ/(2πL)·[ln(4L/a) − 1] (Dwight), conductor horizontal R = ρ/(πL)·[ln(2L/√(2ah)) − 1] (Sunde), barras en línea y en triángulo con coeficiente de utilización R = R₁(1 + λα)/n (Tagg), placa R = 0,8ρ/P. Módulo D: barra en relleno de aditivo R = [ρa·ln(r₁/a) + ρ·(ln(4L/r₁) − 1)]/(2πL); medición por caída de potencial según RIC N°06, punto 11 y Anexo 6.3 (IEEE Std 81); método de dos pinzas para inspección. Las fórmulas de Em y Es valen para mallas regulares en suelo homogéneo. Los datos de ejemplo son supuestos o sintéticos. Material docente · Mario Miranda Araos · CFT Estatal O'Higgins.</footer>
 </main>
 </div>
 
@@ -1332,14 +1611,11 @@ function renderMalla(){
   const ric=[
     [m.h>=0.5,`Profundidad h ≥ 0,5 m (RIC 8.11): ${nf(m.h,2)} m`],
     [c.cond[1]>=25,`Conductor ≥ 25 mm² (RIC 8.7)`],
-    [c.Rg<=20,`Tierra de servicio Rg ≤ 20 Ω (RIC 6.1): ${nf(c.Rg,2)} Ω`],
-    [c.Rg<=5,`Red interna BT desde SE de MT, todas las PT combinadas ≤ 5 Ω (RIC 6.7.3)`,'warn']
-  ];
+  ].concat(critChecks(c.Rg,c.IG));
   if(c.perRods) ric.push([c.rodSpacing>=2*m.Lr,`Separación entre barras ≥ 2·Lr (RIC 8.3.2): ${nf(c.rodSpacing,1)} m ≥ ${nf(2*m.Lr,1)} m`]);
   if(m.h<0.25||m.h>2.5) ric.push([false,`Fórmula de Ks válida para 0,25 ≤ h ≤ 2,5 m`]);
   $('ric-checks').innerHTML=checkList(ric);
-  const Rbt=(+m.Vs)/m.I0bt;
-  $('bt-formula').innerHTML=`R_TP ≤ Vs / I₀ = ${m.Vs} / ${nf(m.I0bt,3)}\n<span class="hi">R_TP ≤ ${nf(Rbt,Rbt<10?2:0)} Ω</span>   malla: ${nf(c.Rg,2)} Ω → ${c.Rg<=Rbt?'cumple':'no cumple'}`;
+  renderCrit(c);
   // 5. tolerables
   $('tol-formula').innerHTML=(m.layer?`Cs = 1 − 0,09·(1 − ρ/ρs)/(2·hs + 0,09)\n   = 1 − 0,09·(1 − ${nf(m.rho,0)}/${nf(m.rhos,0)})/(2·${nf(m.hs,2)} + 0,09)\n   = ${nf(c.Cs,3)}\n`:`Sin capa superficial: Cs = 1 y ρs = ρ\n`)+
     `Factor de tiempo ${nf(c.kw,3)}/√ts = ${nf(c.kw,3)}/√${nf(m.ts,2)} = ${nf(c.ft,4)}\nE contacto = (1000 + 1,5·Cs·ρs)·${nf(c.ft,4)}\n<span class="hi">E contacto = ${nf(c.Et,0)} V</span>\nE paso     = (1000 + 6·Cs·ρs)·${nf(c.ft,4)}\n<span class="hi">E paso     = ${nf(c.Ep,0)} V</span>`;
@@ -1377,7 +1653,7 @@ $('m-layer').onchange=e=>{st.malla.layer=e.target.checked; $('layer-fields').hid
 $('m-kf').onchange=e=>{st.malla.kf=e.target.value; renderMalla(); save();};
 $('m-kiec').onchange=e=>{st.malla.kiec=e.target.value; renderMalla(); save();};
 $('m-cond').onchange=e=>{st.malla.cond=e.target.value; renderMalla(); save();};
-$('m-Vs').onchange=e=>{st.malla.Vs=e.target.value; renderMalla(); save();};
+$('m-Vs').onchange=e=>{st.malla.Vs=e.target.value; renderGTipo(); renderMalla(); save();};
 $('m-rodPos').onchange=e=>{st.malla.rodPos=e.target.value; if(e.target.value!=='none'&&!(st.malla.nR>0))st.malla.nR=4; onMallaChange();};
 $('w50').onclick=()=>{st.malla.peso=50; onMallaChange();}; $('w70').onclick=()=>{st.malla.peso=70; onMallaChange();};
 $('b-df').onclick=()=>{ const v=+$('df-formula').dataset.df; if(v>0){ st.malla.Df=+v.toFixed(3); onMallaChange(); } };
@@ -1398,8 +1674,37 @@ $('b-undo').onclick=()=>{ const s=undoStack.pop(); if(s){ st.malla=JSON.parse(s)
 
 /* =================== A. FUNDAMENTOS =================== */
 const ttDef=()=>({U0:220,RB:10,RA:20,In:16,Idn:30,UL:50});
-const fundDef=()=>({rho:100,I:100,r0:0.5,k:2,x:1,ts:0.5,grava:false,peso:50,mode:'c',lado:20,tt:ttDef()});
-st.fund=Object.assign(fundDef(),st.fund||{}); st.fund.tt=Object.assign(ttDef(),st.fund.tt||{});
+const fundDef=()=>({rho:100,I:100,r0:0.5,k:2,x:1,ts:0.5,grava:false,peso:50,mode:'c',lado:20,tt:ttDef(),el:'semi',ep:{Lb:3,db:'15.9',Lh:6,ch:'2/0 AWG',hh:0.6,pa:1,pb:0.5,gl:10,gD:5,gh:0.6}});
+st.fund=Object.assign(fundDef(),st.fund||{}); st.fund.tt=Object.assign(ttDef(),st.fund.tt||{}); st.fund.ep=Object.assign(fundDef().ep,st.fund.ep||{});
+const EL_NAMES={barra:'Barra vertical',hor:'Conductor horizontal',placa:'Placa',malla:'Malla cuadrada',semi:'Semiesfera ideal'};
+function gridGeom(Lx,Ly,D){ const nx=Math.max(2,Math.ceil(Ly/D-1e-9)+1), ny=Math.max(2,Math.ceil(Lx/D-1e-9)+1); return {nx,ny,LC:nx*Lx+ny*Ly,A:Lx*Ly}; }
+function elCalc(type,rho,ep,r0semi){
+  let R,f,geo,mat;
+  if(type==='barra'){ const L=ep.Lb, a=(+ep.db)/2000; R=rho/(2*Math.PI*L)*(Math.log(4*L/a)-1);
+    f=`R  = ρ/(2πL)·[ln(4L/a) − 1]\n   = ${nf(rho,0)}/(2π·${nf(L,2)})·[ln(4·${nf(L,2)}/${nf(a,5)}) − 1] = ${nf(R,2)} Ω`; geo=`L = ${nf(L,1)} m, Ø ${nf(+ep.db,1)} mm`; mat=`${nf(L,1)} m de barra`; }
+  else if(type==='hor'){ const L=ep.Lh, c=COND.find(x=>x[0]===ep.ch)||COND[3], a=c[2]/2000, h=ep.hh; R=rho/(Math.PI*L)*(Math.log(2*L/Math.sqrt(2*a*h))-1);
+    f=`R  = ρ/(πL)·[ln(2L/√(2a·h)) − 1]\n   = ${nf(rho,0)}/(π·${nf(L,1)})·[ln(2·${nf(L,1)}/√(2·${nf(a,5)}·${nf(h,2)})) − 1] = ${nf(R,2)} Ω`; geo=`L = ${nf(L,1)} m, ${c[0]}, h = ${nf(h,2)} m`; mat=`${nf(L,1)} m de conductor`; }
+  else if(type==='placa'){ const A=ep.pa*ep.pb, r=Math.sqrt(A/Math.PI); R=rho/(4*r);
+    f=`r  = √(a·b/π) = √(${nf(A,2)}/π) = ${nf(r,3)} m   (disco equivalente)\nR  = ρ/(4r) = ${nf(rho,0)}/(4·${nf(r,3)}) = ${nf(R,2)} Ω\n   (0,8·ρ/P = ${nf(0.8*rho/(2*(ep.pa+ep.pb)),2)} Ω)`; geo=`${nf(ep.pa,2)} × ${nf(ep.pb,2)} m`; mat=`${nf(A,2)} m² de placa`; }
+  else if(type==='malla'){ const l=ep.gl, G=gridGeom(l,l,Math.min(ep.gD,l)), h=ep.gh; R=rho*(1/G.LC+1/Math.sqrt(20*G.A)*(1+1/(1+h*Math.sqrt(20/G.A))));
+    f=`R  = ρ·[1/LT + 1/√(20A)·(1 + 1/(1 + h·√(20/A)))]   (Sverak)\n   A = ${nf(G.A,0)} m², LT = ${nf(G.LC,1)} m, h = ${nf(h,2)} m → R = ${nf(R,2)} Ω`; geo=`${nf(l,0)} × ${nf(l,0)} m, D = ${nf(Math.min(ep.gD,l),1)} m`; mat=`${nf(G.LC,0)} m de conductor`; }
+  else { const r=r0semi; R=rho/(2*Math.PI*r); f=`R  = ρ/(2π·r₀) = ${nf(rho,0)}/(2π·${nf(r,2)}) = ${nf(R,2)} Ω`; geo=`r = ${nf(r,2)} m`; mat='—'; }
+  return {R,r0:rho/(2*Math.PI*R),f,geo,mat};
+}
+function renderElCompare(){
+  const f=st.fund, ep=f.ep, rho=f.rho;
+  const rows=['barra','hor','placa','malla','semi'].map(t=>Object.assign({t},elCalc(t,rho,ep,t==='semi'?(f.el==='semi'?f.r0:0.5):0)));
+  $('f-tbl-el').innerHTML='<thead><tr><th>Elemento</th><th>Geometría</th><th>Material</th><th>R (Ω)</th><th>r₀ equivalente (m)</th></tr></thead><tbody>'+rows.map(r=>{ const sel=r.t===f.el;
+    return `<tr${sel?' class="hl"':''}><td style="text-align:left">${EL_NAMES[r.t]}${sel?' ◀':''}</td><td class="dim" style="text-align:left">${r.geo}</td><td class="dim">${r.mat}</td><td class="calc">${nf(r.R,2)}</td><td class="calc">${nf(r.r0,2)}</td></tr>`; }).join('')+'</tbody>';
+  const X=[]; for(let i=0;i<=80;i++) X.push(0.5+19.5*i/80);
+  const ser=fn=>X.map(x=>[x,fn(x)]);
+  const sB=ser(x=>elCalc('barra',rho,Object.assign({},ep,{Lb:x})).r0), sH=ser(x=>elCalc('hor',rho,Object.assign({},ep,{Lh:Math.max(x,4*ep.hh)})).r0);
+  const sM=ser(x=>elCalc('malla',rho,Object.assign({},ep,{gl:Math.max(1,x)})).r0), sP=ser(x=>elCalc('placa',rho,Object.assign({},ep,{pa:x,pb:x})).r0);
+  const ymax=Math.max(...sM.map(q=>q[1]),...sP.map(q=>q[1]))*1.05;
+  lineChart($('f-el-chart'),{xmin:0,xmax:20,ymin:0,ymax,xlab:'Dimensión principal: largo de barra o conductor, lado de malla o placa (m)',ylab:'r₀ equivalente (m)',series:[{pts:sB,color:'--accent',w:2.5},{pts:sH,color:'--blue',w:2.5},{pts:sM,color:'--ok',w:2.5},{pts:sP,color:'--red',w:2,dash:'6 4'}]});
+  const b3=elCalc('barra',rho,Object.assign({},ep,{Lb:3})).r0, b6=elCalc('barra',rho,Object.assign({},ep,{Lb:6})).r0, h6=elCalc('hor',rho,Object.assign({},ep,{Lh:6})).r0, m6=elCalc('malla',rho,Object.assign({},ep,{gl:6})).r0;
+  $('f-el-note').textContent=`Una barra de 3 m equivale a una semiesfera de ${nf(b3,2)} m; duplicar su largo a 6 m lleva r₀ a ${nf(b6,2)} m. Un conductor horizontal de 6 m da ${nf(h6,2)} m: algo menos que la barra del mismo largo, porque queda cerca de la superficie. Una malla de 6 × 6 m da ${nf(m6,2)} m: lo que más agranda r₀ es abarcar terreno. El largo manda; el diámetro casi no influye, porque está dentro de un logaritmo. La placa es la cota ideal de una superficie metálica llena: una malla se le acerca con mucho menos material.`;
+}
 const css=()=>{const cs=getComputedStyle(document.documentElement); return n=>cs.getPropertyValue(n).trim();};
 function niceStep(range,count){ const raw=range/count, p=Math.pow(10,Math.floor(Math.log10(raw))), f=raw/p; return (f<1.5?1:f<3?2:f<7?5:10)*p; }
 function fmtTick(v){ const a=Math.abs(v); return v.toLocaleString('es-CL',{maximumFractionDigits:a<1&&a>0?2:a<10?1:0}); }
@@ -1454,9 +1759,14 @@ function drawCorte(c){
 }
 function profilePts(V,xmax,r0){ const pts=[]; const N=200; for(let i=0;i<=N;i++){ const x=-xmax+2*xmax*i/N; pts.push([x,V(x)]); } pts.push([r0,V(r0)]); pts.push([-r0,V(-r0)]); return pts.sort((a,b)=>a[0]-b[0]); }
 function renderFund(){
+  { const f=st.fund; if(f.el!=='semi'){ f.r0=Math.max(0.01,elCalc(f.el,f.rho,f.ep,f.r0).r0); }
+    $('f-el').value=f.el; document.querySelectorAll('[data-el]').forEach(el=>{ el.hidden=el.dataset.el!==f.el; });
+    $('f-r0').disabled=f.el!=='semi'; $('f-r0').value=Math.min(2,f.r0); $('f-r0-v').textContent=nf(f.r0,2)+' m';
+    renderElCompare(); }
   const f=st.fund, c=fCalc(), b=bodyCalc();
   // paso 2
-  $('f-disp-formula').innerHTML=`R   = ρ/(2π·r₀) = ${nf(f.rho,0)}/(2π·${nf(f.r0,2)}) = ${nf(c.R,2)} Ω\nGPR = I·R = ${nf(f.I,0)} · ${nf(c.R,2)} = <span class="hi">${nf(c.GPR,0)} V</span>\nJ(x) = I/(2πx²)   E(x) = ρI/(2πx²)\nV(x) = ρI/(2πx) = ${nf(c.K,1)}/x`;
+  const E=elCalc(f.el,f.rho,f.ep,f.r0);
+  $('f-disp-formula').innerHTML=`${EL_NAMES[f.el]}:\n${E.f}\nr₀ = ρ/(2πR) = <span class="hi">${nf(f.r0,2)} m</span>\n\nGPR = I·R = ${nf(f.I,0)} · ${nf(c.R,2)} = <span class="hi">${nf(c.GPR,0)} V</span>\nJ(x) = I/(2πx²)   E(x) = ρI/(2πx²)\nV(x) = ρI/(2πx) = ${nf(c.K,1)}/x`;
   drawCorte(c);
   const xm=Math.max(10,6*f.r0);
   lineChart($('f-embudo'),{xmin:-xm,xmax:xm,ymin:0,ymax:c.GPR*1.08,xlab:'Distancia al centro del electrodo x (m)',ylab:'Potencial V (V)',series:[{pts:profilePts(c.V,xm,f.r0),color:'--accent',w:3}],hlines:[{y:c.GPR,color:'--soft',label:'GPR = '+nf(c.GPR,0)+' V'}],bands:[{x1:-f.r0,x2:f.r0,color:'--ink',op:.08}]});
@@ -1559,6 +1869,11 @@ function renderTT(){
 sliderBind('f-rho','rho',x=>nf(x,0)+' Ω·m',renderFund);
 sliderBind('f-I','I',x=>nf(x,0)+' A',renderFund);
 sliderBind('f-r0','r0',x=>nf(x,2)+' m',renderFund);
+$('f-el').onchange=e=>{ st.fund.el=e.target.value; renderFund(); save(); };
+document.querySelectorAll('[data-fe]').forEach(el=>{ el.value=st.fund.ep[el.dataset.fe]; el.addEventListener('input',e=>{ const x=num(e.target.value); if(x>0){ st.fund.ep[e.target.dataset.fe]=x; renderFund(); save(); } }); });
+$('fe-db').value=st.fund.ep.db; $('fe-db').onchange=e=>{ st.fund.ep.db=e.target.value; renderFund(); save(); };
+$('fe-ch').innerHTML=COND.map(c=>`<option value="${c[0]}">${c[0]} · Ø ${nf(c[2],1)} mm</option>`).join(''); $('fe-ch').value=st.fund.ep.ch;
+$('fe-ch').onchange=e=>{ st.fund.ep.ch=e.target.value; renderFund(); save(); };
 sliderBind('f-k','k',x=>nf(x,1),renderFund);
 sliderBind('f-x','x',x=>nf(x,1)+' m',renderFund);
 sliderBind('f-ts','ts',x=>nf(x,2)+' s',renderFund);
@@ -1567,6 +1882,111 @@ sliderBind('f-lado','lado',x=>nf(x,0)+' m',renderFund);
 $('fw50').onclick=()=>{st.fund.peso=50; renderFund(); save();}; $('fw70').onclick=()=>{st.fund.peso=70; renderFund(); save();};
 $('f-grava').onchange=e=>{st.fund.grava=e.target.checked; renderFund(); save();};
 document.querySelectorAll('[data-tt]').forEach(el=>{ el.value=st.fund.tt[el.dataset.tt]; el.addEventListener('input',()=>{ const x=num(el.value); if(x>0){ st.fund.tt[el.dataset.tt]=x; renderTT(); save(); } }); });
+
+/* =================== TIPO DE TIERRA (TS / TP / TN-S) =================== */
+if(!['TS','TP','TN'].includes(st.gtipo)) st.gtipo='TP';
+if(st.tnFeed!=='BT'&&st.tnFeed!=='MT') st.tnFeed='MT';
+const fmtL=x=>!Number.isFinite(x)?'—':x>=10?nf(x,0):nf(x,2);
+const gLargo=()=>st.gtipo==='TS'?'Tierra de servicio (TS)':st.gtipo==='TP'?'Tierra de protección (TP)':'TS + TP común en TN-S, '+(st.tnFeed==='MT'?'subestación MT/BT':'alimentación BT');
+function rLim(){ return st.gtipo==='TS'?20:st.gtipo==='TN'?(st.tnFeed==='MT'?5:20):(+st.malla.Vs)/st.malla.I0bt; }
+function vca(t){ if(t<=0.9) return 72/Math.max(t,0.1); if(t<=3) return 78/Math.pow(t,0.18); if(t<=5) return 64; return 50; }
+function interCheck(R,IG){ const m=st.malla, t=m.tf, V=vca(t), Rmax=V/IG, D=m.rho*IG/(2*Math.PI*250); return {t,V,Rmax,ok:R<Rmax,D}; }
+function critChecks(R,IG){
+  const lim=rLim(), m=st.malla;
+  if(st.gtipo==='TS') return [[R<=20,`Tierra de servicio R ≤ 20 Ω (RIC 6.1): ${nf(R,2)} Ω`]];
+  if(st.gtipo==='TP') return [[R<=lim,`Tierra de protección R ≤ Vs/I₀ = ${m.Vs}/${nf(m.I0bt,3)} = ${fmtL(lim)} Ω (RIC 7.3): ${nf(R,2)} Ω`]];
+  if(st.tnFeed==='BT') return [[R<=20,`TS + TP común desde BT, R ≤ 20 Ω (RIC 6.1): ${nf(R,2)} Ω`]];
+  const ic=interCheck(R,IG);
+  return [[R<=5,`TS + TP común con subestación, R ≤ 5 Ω (RIC 6.1 y 6.7.3): ${nf(R,2)} Ω`],
+    [ic.ok,`Interconexión MT–BT, R < Vca/Id = ${nf(ic.V,0)}/${nf(IG,0)} = ${nf(ic.Rmax,3)} Ω (RIC 10.2)`]];
+}
+const GTXT={
+  TS:'<b>Tierra de servicio (TS):</b> une a tierra el <b>neutro</b> del sistema, en el transformador o en el empalme. Fija el potencial del neutro respecto de tierra y entrega el camino de retorno a las corrientes de falla.',
+  TP:'<b>Tierra de protección (TP):</b> une a tierra las <b>masas</b>: carcasas, tableros y estructuras metálicas que normalmente no tienen tensión. Ante una falla de aislación limita la tensión que queda en la carcasa y permite que la protección despeje. Es el caso del esquema TT.',
+  TN:'<b>TS + TP común en esquema TN-S:</b> un solo electrodo para el <b>neutro</b> del transformador y las <b>masas</b>. Neutro (N) y protección (PE) salen separados desde ese punto y no se vuelven a unir. Las masas se protegen por el lazo de falla (Zs·Ia ≤ U₀) o con diferencial, no por la R del electrodo: ver el paso A6.'
+};
+function renderGTipo(){
+  if(!$('g-TS')) return;
+  const t=st.gtipo, m=st.malla, lim=rLim();
+  ['TS','TP','TN'].forEach(k=>$('g-'+k).setAttribute('aria-pressed',t===k));
+  $('gtn-fields').hidden=t!=='TN'; $('gtn-BT').setAttribute('aria-pressed',st.tnFeed==='BT'); $('gtn-MT').setAttribute('aria-pressed',st.tnFeed==='MT');
+  $('gtp-fields').hidden=t!=='TP';
+  $('gtipo-desc').innerHTML=GTXT[t];
+  $('gtipo-formula').innerHTML=t==='TN'
+    ?(st.tnFeed==='MT'
+      ?`Conexión: neutro + masas → un electrodo (malla de la subestación)\n<span class="hi">R ≤ mín(20 Ω; 5 Ω) = 5 Ω</span>   (RIC 6.1 y 6.7.3)\nEm ≤ E contacto y Es ≤ E paso   (Verificación)\nInterconexión MT–BT: R < Vca/Id   (RIC 10.2)\nMasas: Zs·Ia ≤ U₀ o diferencial   (paso A6)`
+      :`Conexión: neutro + masas → un electrodo\n<span class="hi">R ≤ 20 Ω</span>   (RIC 6.1)\nMasas: Zs·Ia ≤ U₀ o diferencial   (paso A6)\nFalla directa a tierra: R_B/R_E ≤ 50/(U₀ − 50)`)
+    :t==='TS'?`Conexión: neutro → electrodo\n<span class="hi">R_TS ≤ 20 Ω</span>   (RIC 6.1)`
+    :`Conexión: masas → electrodo\nR_TP ≤ Vs / I₀ = ${m.Vs} / ${nf(m.I0bt,3)}   (RIC 7.3)\n<span class="hi">R_TP ≤ ${fmtL(lim)} Ω</span>`;
+  document.querySelectorAll('[data-chip]').forEach(el=>{ el.textContent='Calculando: '+gLargo(); });
+}
+function renderCrit(c){
+  const lim=rLim(), ok=c.Rg<=lim;
+  $('crit-title').textContent='Criterio de resistencia · '+gLargo();
+  if(st.gtipo==='TN'){
+    const ic=interCheck(c.Rg,c.IG), mt=st.tnFeed==='MT';
+    $('bt-formula').innerHTML=mt
+      ?`R ≤ mín(20 Ω; 5 Ω) = 5 Ω   (RIC 6.1 y 6.7.3)\nRg = ${nf(c.Rg,2)} Ω → ${ok?'cumple':'no cumple'}\n\nInterconexión MT–BT (RIC 10.2), despeje tf = ${nf(ic.t,2)} s:\nVca = ${ic.t<=0.9?'72/t':ic.t<=3?'78/t^0,18':'valor fijo'} = ${nf(ic.V,0)} V\nR < Vca/Id = ${nf(ic.V,0)}/${nf(c.IG,0)} = ${nf(ic.Rmax,3)} Ω\n<span class="hi">${ic.ok?'Se puede usar una tierra común':'No se puede usar tierra común'}: Rg ${ic.ok?'<':'≥'} ${nf(ic.Rmax,3)} Ω</span>${ic.ok?'':`\nTierras independientes a D ≥ ρ·Id/(2π·250) = ${nf(ic.D,0)} m`}`
+      :`R ≤ 20 Ω   (RIC 6.1)\n<span class="hi">${ok?'Cumple':'No cumple'}: ${nf(c.Rg,2)} Ω ${ok?'≤':'>'} 20 Ω</span>\nMasas: Zs·Ia ≤ U₀ o diferencial (paso A6)`;
+    $('crit-note').textContent=mt
+      ?'Con subestación propia, la falla a tierra de MT eleva la malla, el neutro de BT y las masas. Por eso, además de R, deben cumplirse Em y Es y la condición de interconexión. Id es la corriente IG de Datos de diseño y tf la duración de la falla (en "Calcular Df").'
+      :'Alimentada desde BT, la malla es la tierra de servicio y de protección a la vez. La protección de las personas depende del lazo de falla o del diferencial, no de este valor.';
+    return;
+  }
+  const m=st.malla;
+  $('bt-formula').innerHTML=(st.gtipo==='TS'?`R_TS ≤ 20 Ω   (RIC N°06, 6.1)\nRg = ${nf(c.Rg,2)} Ω`:`R_TP ≤ Vs / I₀ = ${m.Vs} / ${nf(m.I0bt,3)}   (RIC N°06, 7.3)\nR_TP ≤ ${fmtL(lim)} Ω\nRg = ${nf(c.Rg,2)} Ω`)+`\n<span class="hi">${ok?'Cumple':'No cumple'}: ${nf(c.Rg,2)} Ω ${ok?'≤':'>'} ${fmtL(lim)} Ω</span>`;
+  $('crit-note').textContent=st.gtipo==='TS'
+    ?'La malla se evalúa como tierra de servicio: a ella se conecta el neutro del transformador. Cambia el tipo de tierra en Datos de diseño.'
+    :'La malla se evalúa como tierra de protección: a ella se conectan las masas. Vs e I₀ se ajustan en Datos de diseño. Con termomagnético, el valor exigido suele ser inviable; por eso se usa diferencial.';
+}
+function setGTipo(t){ st.gtipo=t; save(); renderGTipo(); renderMalla(); }
+$('g-TS').onclick=()=>setGTipo('TS'); $('g-TP').onclick=()=>setGTipo('TP'); $('g-TN').onclick=()=>setGTipo('TN');
+['BT','MT'].forEach(f=>$('gtn-'+f).onclick=()=>{ st.tnFeed=f; save(); renderGTipo(); renderMalla(); });
+
+/* =================== A6. FALLA EN TN-S =================== */
+const SECC=[1.5,2.5,4,6,10,16,25,35,50];
+const tnDef=()=>({U0:220,Zt:30,L:40,Sf:2.5,Spe:2.5,k:10,In:16,Idn:30,RB:5,RE:20});
+st.tn=Object.assign(tnDef(),st.tn||{});
+$('tn-Sf').innerHTML=SECC.map(x=>`<option value="${x}">${nf(x,x%1?1:0)}</option>`).join(''); $('tn-Spe').innerHTML=$('tn-Sf').innerHTML;
+document.querySelectorAll('[data-tn]').forEach(el=>{ el.value=st.tn[el.dataset.tn]; el.addEventListener('input',()=>{ const x=num(el.value); if(x>0||(el.dataset.tn==='Zt'&&x===0)){ st.tn[el.dataset.tn]=x; renderTN(); save(); } }); });
+document.querySelectorAll('[data-tns]').forEach(el=>{ el.value=String(st.tn[el.dataset.tns]); el.addEventListener('change',()=>{ st.tn[el.dataset.tns]=+el.value; renderTN(); save(); }); });
+function tnCalc(){
+  const T=st.tn, U0=T.U0, Zt=T.Zt/1000, L=T.L, Sf=T.Sf, Spe=T.Spe, k=T.k, In=T.In, Idn=T.Idn/1000;
+  const rc=0.0225, Rf=rc*L/Sf, Rpe=rc*L/Spe, Zs=Zt+Rf+Rpe, Id=U0/Zs, Ia=k*In, Uf=Id*Rpe, ok=Zs*Ia<=U0, Lmax=(U0/Ia-Zt)/(rc*(1/Sf+1/Spe));
+  const cur={5:'B',10:'C',20:'D'}[k]||'', SpeMin=Sf<=16?Sf:Sf<=35?16:Sf/2;
+  const RB=T.RB, RE=T.RE, Upe=U0*RB/(RB+RE), lim=50/(U0-50);
+  return {U0,Zt,L,Sf,Spe,k,In,Idn,rc,Rf,Rpe,Zs,Id,Ia,Uf,ok,Lmax,cur,SpeMin,RB,RE,Upe,lim,difOk:Id>=Idn};
+}
+function renderTN(){
+  const c=tnCalc(); if(![c.U0,c.L,c.Sf,c.Spe,c.k,c.In,c.Idn,c.RB,c.RE].every(x=>x>0)) return;
+  $('tn-formula').innerHTML=`Zs = Z_fuente + ρ·L/S_fase + ρ·L/S_PE\n   = ${nf(c.Zt,3)} + ${nf(c.Rf,3)} + ${nf(c.Rpe,3)}\n<span class="hi">Zs = ${nf(c.Zs,3)} Ω</span>\nId = U₀/Zs = ${nf(c.U0,0)}/${nf(c.Zs,3)} = <span class="hi">${nf(c.Id,0)} A</span>\nIa = ${c.k}·In = ${c.k}·${nf(c.In,0)} = ${nf(c.Ia,0)} A  (disparo magnético ${c.cur})\nCondición: Zs·Ia ≤ U₀ → ${nf(c.Zs*c.Ia,0)} V ${c.ok?'≤':'>'} ${nf(c.U0,0)} V\nTensión de falla en la carcasa ≈ Id·R_PE = ${nf(c.Uf,0)} V\nLargo máximo con esta protección: ${c.Lmax>0?nf(c.Lmax,0)+' m':'ninguno'}`;
+  $('tn-checks').innerHTML=checkList([
+    [c.ok,`Termomagnético ${c.cur}${nf(c.In,0)}: Id = ${nf(c.Id,0)} A ${c.ok?'≥':'<'} Ia = ${nf(c.Ia,0)} A, ${c.ok?'dispara en forma instantánea (< 0,4 s)':'no asegura el disparo en 0,4 s'}`],
+    [c.difOk,`Diferencial ${nf(c.Idn*1000,0)} mA: detecta la falla y despeja en menos de 300 ms`],
+    [c.Uf<=50||c.ok,`Carcasa a ${nf(c.Uf,0)} V durante la falla: ${c.Uf<=50?'bajo 50 V':c.ok?'sobre 50 V, pero por muy poco tiempo':'sobre 50 V y sin despeje rápido: peligro'}`],
+    [c.Spe>=c.SpeMin,`Sección del PE: ${nf(c.Spe,1)} mm² frente a ${nf(c.SpeMin,1)} mm² exigidos para fase de ${nf(c.Sf,1)} mm²`]
+  ]);
+  const v=css(), ink=v('--ink'), W=640, H=250, g=215;
+  let s=`<rect x="0" y="${g}" width="${W}" height="${H-g}" fill="${v('--soil')}"/><line x1="0" y1="${g}" x2="${W}" y2="${g}" stroke="${ink}" stroke-width="2"/>`;
+  s+=`<circle cx="70" cy="70" r="28" fill="none" stroke="${ink}" stroke-width="3"/><circle cx="96" cy="70" r="28" fill="none" stroke="${ink}" stroke-width="3"/>`;
+  const t=(x,y,txt,col,a='start',w=600)=>`<text x="${x}" y="${y}" text-anchor="${a}" font-family="IBM Plex Sans,Arial,sans-serif" font-size="13" font-weight="${w}" fill="${col||ink}">${txt}</text>`;
+  s+=`<line x1="124" y1="55" x2="470" y2="55" stroke="${ink}" stroke-width="3"/>`+t(135,50,'L1');
+  s+=`<polyline points="83,98 83,120 470,120" fill="none" stroke="${v('--blue')}" stroke-width="3"/>`+t(300,113,'N',v('--blue'),'middle');
+  s+=`<polyline points="83,120 83,160 470,160" fill="none" stroke="${v('--ok')}" stroke-width="3"/>`+t(300,153,'PE',v('--ok'),'middle');
+  s+=`<line x1="83" y1="160" x2="83" y2="185" stroke="${ink}" stroke-width="3"/><rect x="71" y="185" width="24" height="22" fill="${v('--surface')}" stroke="${ink}" stroke-width="3"/><line x1="83" y1="207" x2="83" y2="${g}" stroke="${ink}" stroke-width="3"/>`+t(102,201,'R_B');
+  s+=`<circle cx="83" cy="120" r="5" fill="${ink}"/>`+t(76,114,'unión N–PE','','end',500);
+  s+=`<rect x="470" y="35" width="120" height="140" rx="8" fill="${v('--surface-2')}" stroke="${v('--soft')}" stroke-width="3"/><line x1="470" y1="160" x2="530" y2="160" stroke="${v('--ok')}" stroke-width="3"/>`;
+  s+=`<polyline points="470,55 492,72 478,88 500,105 512,160" fill="none" stroke="${v('--red')}" stroke-width="3"/>`;
+  s+=`<polyline points="150,45 440,45" fill="none" stroke="${v('--accent')}" stroke-width="3" stroke-dasharray="10 7"/><polyline points="440,172 150,172" fill="none" stroke="${v('--accent')}" stroke-width="3" stroke-dasharray="10 7"/>`;
+  s+=t(300,30,'Id = '+nf(c.Id,0)+' A →',v('--accent'),'middle')+t(300,190,'← retorno por el PE, no por el terreno',v('--accent'),'middle',500)+t(530,25,'Carcasa: '+nf(c.Uf,0)+' V',c.ok?v('--ok'):v('--bad'),'middle');
+  $('tn-svg').setAttribute('viewBox',`0 0 ${W} ${H}`); $('tn-svg').innerHTML=s;
+  const xm=Math.max(50,Math.ceil(Math.max(c.L,c.Lmax>0?c.Lmax:0)*1.6/10)*10), pts=[];
+  for(let i=1;i<=200;i++){ const x=xm*i/200; pts.push([x,c.U0/(c.Zt+c.rc*x*(1/c.Sf+1/c.Spe))]); }
+  lineChart($('tn-chart'),{xmin:0,xmax:xm,ymin:0,ymax:c.Ia*3,xlab:'Largo del circuito L (m)',ylab:'Corriente de falla Id (A)',series:[{pts,color:'--accent',w:2.5}],hlines:[{y:c.Ia,color:'--bad',label:'Ia = '+nf(c.Ia,0)+' A'}],vlines:[{x:c.L,color:'--ink',label:'L'}].concat(c.Lmax>0&&c.Lmax<xm?[{x:c.Lmax,color:'--bad',label:'L máx'}]:[])});
+  $('tn-chart-note').textContent=c.Lmax>0?`Hasta ${nf(c.Lmax,0)} m la corriente de falla supera el disparo magnético. Más allá, hay que aumentar la sección, bajar In, cambiar a curva B o usar diferencial.`:'Con esta fuente y protección no hay largo que asegure el disparo magnético: usa diferencial.';
+  $('tn-rb-formula').innerHTML=`Ifalla = U₀/(R_B + R_E) = ${nf(c.U0/(c.RB+c.RE),2)} A\nU_PE = U₀·R_B/(R_B + R_E) = <span class="hi">${nf(c.Upe,0)} V</span>\nCondición: R_B/R_E ≤ 50/(U₀ − 50) = ${nf(c.lim,3)}\nR_B/R_E = ${nf(c.RB/c.RE,3)} → R_B máx = ${nf(c.lim*c.RE,2)} Ω`;
+  $('tn-rb-checks').innerHTML=checkList([[c.Upe<=50,`PE y masas a ${nf(c.Upe,0)} V respecto de tierra lejana (≤ 50 V)`],[c.RB<=20,`Tierra de servicio R_B ≤ 20 Ω (RIC N°06, 6.1): ${nf(c.RB,1)} Ω`]]);
+}
 
 /* =================== TIPOS DE SPT =================== */
 const sptDef=()=>({tipo:'barra',Lr:3,dr:15.9,Lh:20,h:0.6,n:4,s:6,sT:6,pA:1,pB:1,hp:0.6,t:0.3});
@@ -1638,10 +2058,9 @@ function sptCalc(tipo){
       if(m.rodPos!=='int'){ const sp=c.Lp/nR; ex.push([sp>=2*Lr,`Separación entre barras ≥ 2·Lr (RIC 8.3.2): ${nf(sp,1)} m ≥ ${nf(2*Lr,1)} m`]); }
       break; }
   }
-  const GPR=IG*R, Rbt=(+m.Vs)/m.I0bt;
-  const checks=[[R<=20,`R ≤ 20 Ω, tierra de servicio (RIC 6.1): ${nf(R,2)} Ω`],
-    [R<=Rbt,`R ≤ Vs/I₀ = ${nf(Rbt,Rbt<10?2:0)} Ω, tierra de protección en BT (RIC 7.3)`],
-    [GPR<=Et,`GPR ≤ E contacto tolerable (IEEE 80): ${nf(GPR,0)} V ≤ ${nf(Et,0)} V`]].concat(ex);
+  const GPR=IG*R;
+  const checks=critChecks(R,IG).concat([
+    [GPR<=Et,`GPR ≤ E contacto tolerable (IEEE 80): ${nf(GPR,0)} V ≤ ${nf(Et,0)} V`]]).concat(ex);
   return {R,GPR,f,cfg,mat,checks,IG,Et,Ep:mc0.Ep};
 }
 
@@ -1722,11 +2141,12 @@ function renderSPT(){
     :'Las fórmulas suponen suelo homogéneo con el ρ de diseño. Usa el ρeq de este tipo de SPT (botón Usar este ρeq), porque cada electrodo ve el terreno de forma distinta.'+(r.GPR>r.Et?' El GPR supera la tensión de contacto tolerable: un electrodo simple no controla la pendiente del potencial. Considera una malla, capa de gravilla o un despeje más rápido.':'');
   drawSPT();
   if(st.cur==='b4') renderEq(true);
+  renderGTipo();
   const all=TIPOS.map(T=>({T,r:sptCalc(T.id)}));
   const maxR=Math.max(1,...all.map(a=>a.r.R).filter(Number.isFinite));
-  let h='<thead><tr><th>Tipo</th><th>Configuración</th><th>ρeq propio (Ω·m)</th><th>R (Ω)</th><th aria-label="Barra de resistencia"></th><th>GPR (V)</th><th>R ≤ 20 Ω</th><th>GPR ≤ E contacto</th><th aria-label="Elegir"></th></tr></thead><tbody>';
+  let h=`<thead><tr><th>Tipo</th><th>Configuración</th><th>ρeq propio (Ω·m)</th><th>R (Ω)</th><th aria-label="Barra de resistencia"></th><th>GPR (V)</th><th>R ≤ ${fmtL(rLim())} Ω</th><th>GPR ≤ E contacto</th><th aria-label="Elegir"></th></tr></thead><tbody>`;
   all.forEach(({T,r})=>{ const sel=T.id===t;
-    h+=`<tr class="${sel?'sel':''}"><td style="text-align:left;font-weight:600">${T.t}</td><td style="text-align:left;white-space:normal;min-width:190px;color:var(--muted)">${r.cfg}</td><td class="dim">${(e=>e.err?'—':nf(e.rho,1))(eqCalc(T.id))}</td><td class="calc">${nf(r.R,2)}</td><td style="min-width:90px"><div class="rbar" style="width:${Math.max(2,r.R/maxR*100).toFixed(1)}%"></div></td><td class="calc">${nf(r.GPR,0)}</td><td>${pill(r.R<=20)}</td><td>${pill(r.GPR<=r.Et)}</td><td>${sel?'<span class="pill warn">Elegido</span>':`<button class="btn ghost" data-tipo="${T.id}">Elegir</button>`}</td></tr>`; });
+    h+=`<tr class="${sel?'sel':''}"><td style="text-align:left;font-weight:600">${T.t}</td><td style="text-align:left;white-space:normal;min-width:190px;color:var(--muted)">${r.cfg}</td><td class="dim">${(e=>e.err?'—':nf(e.rho,1))(eqCalc(T.id))}</td><td class="calc">${nf(r.R,2)}</td><td style="min-width:90px"><div class="rbar" style="width:${Math.max(2,r.R/maxR*100).toFixed(1)}%"></div></td><td class="calc">${nf(r.GPR,0)}</td><td>${pill(r.R<=rLim())}</td><td>${pill(r.GPR<=r.Et)}</td><td>${sel?'<span class="pill warn">Elegido</span>':`<button class="btn ghost" data-tipo="${T.id}">Elegir</button>`}</td></tr>`; });
   $('spt-cmp').innerHTML=h+'</tbody>';
   const mc=calcMalla();
   $('spt-cmp-note').textContent=`Todos con ρ = ${nf(m.rho,1)} Ω·m e IG = ${nf(mc.IG,0)} A. E contacto tolerable = ${nf(mc.Et,0)} V (${m.peso} kg, ts = ${nf(m.ts,2)} s${m.layer?', con gravilla':''}). Las barras usan Ø ${nf(p.dr,1)} mm; la malla, la geometría del paso Geometría. La columna ρeq propio muestra la resistividad equivalente que vería cada tipo en el terreno medido.`;
@@ -1740,6 +2160,7 @@ function captureFigs(kind){
   root.setAttribute('data-theme','light');
   try{
     if(kind==='res'){ drawDiagram(); out.arreglo=$('diagram').outerHTML; drawChart(points()); out.curva=$('chart').outerHTML; }
+    else if(kind==='med'){ drawCp(); out.cpsvg=$('cp-svg').outerHTML; cpChartAndResult(); out.cpchart=$('cp-chart').outerHTML; }
     else { drawSPT(); out.spt=$('spt-svg').outerHTML; if(isMallaTipo()){ drawPlan(calcMalla()); out.plan=$('plan').outerHTML; } }
   } finally { if(prev===null) root.removeAttribute('data-theme'); else root.setAttribute('data-theme',prev); }
   Object.keys(out).forEach(k=>{ out[k]=out[k].replace(/font-family="IBM Plex Mono,monospace"/g,'font-family="Courier New,Courier,monospace"').replace(/font-family="IBM Plex Sans,Arial,sans-serif"/g,'font-family="Arial,Helvetica,sans-serif"');
@@ -1781,7 +2202,12 @@ function sheetParts(kind){
   if(kind==='spt'){
     const title='Diseño del sistema de puesta a tierra';
     return {title,who,fn:`hoja_diseno_spt_${who}`,
-      body:sheetHead(title)+sptHTML(d,figs)+`<h2>Respuestas · Diseño</h2>`+answersHTML(['c1','c2','ctipo'].concat(isMallaTipo()?['c3','c4','c5','c6']:[]))+firmas('Diseñado por','Revisado por (docente)')};
+      body:sheetHead(title)+sptHTML(d,figs)+adHTML()+cotHTML()+`<h2>Respuestas · Diseño</h2>`+answersHTML(['c1','c2','ctipo'].concat(isMallaTipo()?['c3','c4','c5','c6']:[]).concat(['d1','d2']))+firmas('Diseñado por','Revisado por (docente)')};
+  }
+  if(kind==='med'){
+    const title='Medición del sistema de puesta a tierra';
+    return {title,who,fn:`hoja_medicion_spt_${who}`,
+      body:sheetHead(title)+medHTML(figs)+`<h2>Respuestas · Medición</h2>`+answersHTML(['d3','d4'])+firmas('Medición realizada por','Revisado por (docente)')};
   }
   return {title:'Informe del laboratorio',who,fn:`informe_spt_${who}`,body:reportHTML()};
 }
@@ -1826,8 +2252,308 @@ async function makePDF(kind){
 }
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-print]'); if(b) makePDF(b.dataset.print); });
 
+/* =================== D. EJECUCIÓN Y MEDICIÓN =================== */
+const ADT=[
+  {k:'bentonita',t:'Bentonita',rb:2.5},
+  {k:'gel',t:'Gel químico',rb:1},
+  {k:'cemento',t:'Cemento conductivo',rb:0.15},
+  {k:'carbon',t:'Carbón o coque',rb:0.5},
+  {k:'sal',t:'Sal común en el terreno',rb:5},
+  {k:'otro',t:'Otro (ficha técnica)',rb:null}
+];
+st.adt=Object.assign({tipo:'bentonita',rb:2.5,r1:0.075,use:false,tau:6},st.adt||{});
+st.cot=Object.assign({baj:3,merma:5,gg:0,q:{},pu:{},custom:[]},st.cot||{});
+st.med=Object.assign({dg:null,D:null,rows:[],ex:false,inst:'',fecha:'',cond:''},st.med||{});
+st.pz=Object.assign({rx:10,n:5,ri:15,rc:0.1,rows:[]},st.pz||{});
+
+/* ---------- aditivos ---------- */
+function rodAd(rho,L,dmm,rb,r1){ const a=dmm/2000; r1=Math.max(r1,a); return (rb*Math.log(r1/a)+rho*(Math.log(4*L/r1)-1))/(2*Math.PI*L); }
+function condAd(rho,L,a,h,rb,r1){ r1=Math.max(r1,a); return (rb*Math.log(r1/a))/(Math.PI*L)+rho/(Math.PI*L)*(Math.log(2*L/Math.sqrt(2*r1*h))-1); }
+function adCalc(){
+  const A=st.adt, rho=st.malla.rho, p=st.spt, m=st.malla, cond=COND.find(c=>c[0]===m.cond)||COND[3], ac=cond[2]/2000;
+  const rb=A.rb, r1=A.r1, Lr=st.spt.tipo==='mallab'?m.Lr:p.Lr;
+  const R0b=rodR(rho,Lr,p.dr), R1b=rodAd(rho,Lr,p.dr,rb,r1);
+  const hc=isMallaTipo()?m.h:p.h, Lc=p.Lh;
+  const R0c=rho/(Math.PI*Lc)*(Math.log(2*Lc/Math.sqrt(2*ac*hc))-1), R1c=condAd(rho,Lc,ac,hc,rb,r1);
+  const t=p.tipo, sc=sptCalc(t); let Rt=NaN, how='';
+  if(['barra','linea','tri'].includes(t)){ Rt=sc.R*R1b/R0b; how='R del tipo × (R barra con aditivo / R barra sin aditivo)'; }
+  else if(t==='cond'){ Rt=R1c; how='conductor con relleno de aditivo'; }
+  else if(t==='malla'||t==='mallab'){ const c=calcMalla(), Lm=Math.sqrt(c.A), R0m=rho/(Math.PI*Lm)*(Math.log(2*Lm/Math.sqrt(2*ac*m.h))-1), R1m=condAd(rho,Lm,ac,m.h,rb,r1), k=R1m/R0m;
+    const t1=rho/c.LT, t2=rho*c.sv/Math.sqrt(20*c.A); Rt=(k*t1+t2)*(sc.R/(t1+t2)); how=`Sverak: solo el término ρ/LT baja (× ${nf(k,3)}); el término del área no cambia`; }
+  else { Rt=sc.R; how='En una placa el aditivo mejora el contacto, pero el modelo no aplica: se mantiene R.'; }
+  // volumen
+  const vRod=Math.PI*(r1*r1-(p.dr/2000)**2)*Lr, vM=Math.PI*(r1*r1-ac*ac);
+  const it=cotGeom(); const vol=it.nRods*vRod+it.condLen*vM;
+  return {rho,rb,r1,Lr,R0b,R1b,Lc,hc,R0c,R1c,Rt,how,R0t:sc.R,vol,vRod,vM,ac,cond};
+}
+function drawAd(){
+  const v=css(), ink=v('--ink'), W=640, H=230, g=40, cx=320, A=st.adt, p=st.spt;
+  const rpx=Math.min(110,Math.max(12,A.r1*600)), L=160;
+  let s=`<rect x="0" y="${g}" width="${W}" height="${H-g}" fill="${v('--soil')}"/><line x1="0" y1="${g}" x2="${W}" y2="${g}" stroke="${ink}" stroke-width="2"/>`;
+  s+=`<rect x="${cx-rpx}" y="${g}" width="${2*rpx}" height="${L+10}" rx="6" fill="${v('--surface-2')}" stroke="${v('--soft')}" stroke-dasharray="5 4"/>`;
+  s+=`<rect x="${cx-4}" y="${g-14}" width="8" height="${L+14}" fill="${v('--blue')}"/>`;
+  const F='font-family="IBM Plex Mono,monospace" font-size="13"', FS='font-family="IBM Plex Sans,Arial,sans-serif" font-size="12"';
+  s+=`<line x1="${cx}" y1="${g+L+28}" x2="${cx+rpx}" y2="${g+L+28}" stroke="${ink}"/><line x1="${cx+rpx}" y1="${g+L+22}" x2="${cx+rpx}" y2="${g+L+34}" stroke="${ink}"/><text x="${cx+rpx+8}" y="${g+L+32}" ${F} fill="${ink}">r₁ = ${nf(A.r1,3)} m</text>`;
+  s+=`<text x="${cx-rpx-10}" y="${g+60}" text-anchor="end" ${FS} fill="${ink}">Aditivo ρa = ${nf(A.rb,2)} Ω·m</text><text x="${cx+rpx+14}" y="${g+90}" ${FS} fill="${ink}">Terreno ρ = ${nf(st.malla.rho,1)} Ω·m</text>`;
+  s+=`<text x="${cx+12}" y="${g+22}" ${FS} fill="${ink}">barra Ø ${nf(p.dr,1)} mm</text>`;
+  $('ad-svg').setAttribute('viewBox',`0 0 ${W} ${H}`); $('ad-svg').innerHTML=s;
+}
+function renderAd(){
+  const A=st.adt, r=adCalc();
+  $('ad-tipo').value=A.tipo; if(document.activeElement!==$('ad-rb')) $('ad-rb').value=A.rb; if(document.activeElement!==$('ad-r1')) $('ad-r1').value=A.r1;
+  $('ad-rho').value=nf(r.rho,1); $('ad-use').checked=!!A.use;
+  const red=(1-r.R1b/r.R0b)*100, a=st.spt.dr/2000;
+  $('ad-formula').innerHTML=`Barra de L = ${nf(r.Lr,1)} m dentro de un relleno de radio r₁:\nR = [ρa·ln(r₁/a) + ρ·(ln(4L/r₁) − 1)] / (2πL)\n  = [${nf(r.rb,2)}·ln(${nf(r.r1,3)}/${nf(a,4)}) + ${nf(r.rho,1)}·(ln(4·${nf(r.Lr,1)}/${nf(r.r1,3)}) − 1)] / (2π·${nf(r.Lr,1)})\n<span class="hi">R = ${nf(r.R1b,2)} Ω</span>   (sin aditivo ${nf(r.R0b,2)} Ω, baja ${nf(red,0)} %)\nLímite con ρa = 0: ${nf(rodAd(r.rho,r.Lr,st.spt.dr,0,r.r1),2)} Ω, como una barra de radio r₁`;
+  const T=TIPOS.find(x=>x.id===st.spt.tipo);
+  $('ad-tbl').innerHTML=`<thead><tr><th>Electrodo</th><th>Sin aditivo (Ω)</th><th>Con aditivo (Ω)</th><th>Reducción</th></tr></thead><tbody>
+    <tr><td style="text-align:left">Barra ${nf(r.Lr,1)} m</td><td class="dim">${nf(r.R0b,2)}</td><td class="calc">${nf(r.R1b,2)}</td><td class="dim">${nf((1-r.R1b/r.R0b)*100,0)} %</td></tr>
+    <tr><td style="text-align:left">Conductor ${nf(r.Lc,1)} m a ${nf(r.hc,2)} m</td><td class="dim">${nf(r.R0c,2)}</td><td class="calc">${nf(r.R1c,2)}</td><td class="dim">${nf((1-r.R1c/r.R0c)*100,0)} %</td></tr>
+    <tr class="hl"><td style="text-align:left">SPT elegido: ${T.t}</td><td class="dim">${nf(r.R0t,2)}</td><td class="calc">${nf(r.Rt,2)}</td><td class="dim">${nf((1-r.Rt/r.R0t)*100,0)} %</td></tr></tbody>`;
+  $('ad-note').textContent=`${r.how}. Volumen de aditivo para el SPT elegido: ${nf(r.vol,3)} m³ (${nf(r.vol*1000,0)} litros). El aditivo solo reemplaza el terreno hasta r₁: más allá, la corriente recorre el terreno natural, que sigue fijando la mayor parte de R.`;
+  drawAd();
+  // R vs r1
+  const pts0=[],pts1=[],pts2=[]; const r1max=0.5;
+  for(let i=0;i<=100;i++){ const x=a+(r1max-a)*i/100; pts0.push([x,r.R0b]); pts1.push([x,rodAd(r.rho,r.Lr,st.spt.dr,r.rb,x)]); pts2.push([x,rodAd(r.rho,r.Lr,st.spt.dr,0,x)]); }
+  const ymin=Math.min(...pts2.map(q=>q[1]))*0.9;
+  lineChart($('ad-chart'),{xmin:0,xmax:r1max,ymin:Math.max(0,ymin),ymax:r.R0b*1.08,xlab:'Radio del relleno r₁ (m)',ylab:'R de la barra (Ω)',series:[{pts:pts0,color:'--soft',w:2,dash:'6 4'},{pts:pts1,color:'--accent',w:2.5},{pts:pts2,color:'--blue',w:2}],vlines:[{x:r.r1,color:'--ink',label:'r₁'}]});
+  // tiempo
+  $('ad-tau').value=A.tau; $('ad-tau-v').textContent=A.tau+' meses';
+  const tS=[],tB=[]; for(let i=0;i<=72;i++){ const tm=36*i/72, rbS=r.rho-(r.rho-5)*Math.exp(-tm/A.tau); tS.push([tm,rodAd(r.rho,r.Lr,st.spt.dr,rbS,r.r1)]); tB.push([tm,r.R1b]); }
+  lineChart($('ad-time'),{xmin:0,xmax:36,ymin:0,ymax:r.R0b*1.1,xlab:'Tiempo desde la instalación (meses)',ylab:'R de la barra (Ω)',series:[{pts:tB,color:'--accent',w:2.5},{pts:tS,color:'--red',w:2.5}],hlines:[{y:r.R0b,color:'--soft',label:'sin tratamiento'}]});
+}
+$('ad-tipo').innerHTML=ADT.map(x=>`<option value="${x.k}">${x.t}${x.rb!=null?' · ≈ '+nf(x.rb,x.rb<1?2:1)+' Ω·m':''}</option>`).join('');
+$('ad-tipo').onchange=e=>{ const x=ADT.find(y=>y.k===e.target.value); st.adt.tipo=x.k; if(x.rb!=null) st.adt.rb=x.rb; renderAd(); save(); };
+document.querySelectorAll('[data-ad]').forEach(el=>el.addEventListener('input',()=>{ const x=num(el.value); if(x>0){ st.adt[el.dataset.ad]=x; if(el.dataset.ad==='rb') st.adt.tipo=ADT.find(y=>y.rb===x)?.k||'otro'; renderAd(); save(); } }));
+$('ad-use').onchange=e=>{ st.adt.use=e.target.checked; renderAd(); save(); };
+$('ad-tau').addEventListener('input',e=>{ st.adt.tau=+e.target.value; renderAd(); save(); });
+
+/* ---------- cotizador ---------- */
+function cotGeom(){
+  const t=st.spt.tipo, p=st.spt, m=st.malla, c=calcMalla(), n=Math.max(1,Math.round(p.n));
+  const nRods=t==='barra'?1:t==='linea'?n:t==='tri'?3:t==='mallab'?mallaRods(m):0;
+  const Lr=t==='mallab'?m.Lr:p.Lr;
+  const condLen=t==='cond'?p.Lh:t==='linea'?(n-1)*p.s:t==='tri'?3*p.sT:(t==='malla'||t==='mallab')?c.LC:0;
+  const cruces=(t==='malla'||t==='mallab')?c.nx*c.ny:0;
+  const h=(t==='malla'||t==='mallab')?m.h:t==='cond'?p.h:0.6;
+  return {t,nRods,Lr,condLen,cruces,h,c,m,p};
+}
+function cotAuto(){
+  const g=cotGeom(), C=st.cot, cond=g.c.cond[0], items=[];
+  const condTot=(g.condLen+C.baj)*(1+C.merma/100);
+  if(g.nRods) items.push({k:'barra',desc:`Barra copperweld ${nf(g.Lr,1)} m · Ø ${nf(st.spt.dr,1)} mm`,un:'un',q:g.nRods});
+  if(g.t==='placa') items.push({k:'placa',desc:`Placa de cobre ${nf(g.p.pA,2)} × ${nf(g.p.pB,2)} m`,un:'un',q:1});
+  items.push({k:'cond',desc:`Conductor de cobre desnudo ${cond} (incluye bajada y ${nf(C.merma,0)} % de pérdida)`,un:'m',q:Math.ceil(condTot)});
+  const un=g.nRods+g.cruces+1+(g.t==='placa'?1:0);
+  items.push({k:'union',desc:'Unión por soldadura exotérmica (molde y carga)',un:'un',q:un});
+  items.push({k:'camara',desc:'Cámara de inspección con tapa',un:'un',q:1});
+  items.push({k:'barrapt',desc:'Barra o terminal de conexión a tierra en el tablero',un:'un',q:1});
+  if(st.adt.use){ const r=adCalc(); items.push({k:'aditivo',desc:`Aditivo: ${ADT.find(x=>x.k===st.adt.tipo)?.t||'aditivo'} (r₁ = ${nf(st.adt.r1,3)} m)`,un:'m³',q:+r.vol.toFixed(3)}); }
+  const exc=g.t==='placa'?(g.p.pA+0.6)*0.6*(g.p.hp+g.p.pB+0.2):g.condLen*0.4*(g.h+0.1);
+  if(exc>0) items.push({k:'exc',desc:g.t==='placa'?'Excavación del pozo para la placa':`Excavación de zanja (0,4 m de ancho, ${nf(g.h+0.1,2)} m de profundidad) y relleno compactado`,un:'m³',q:+exc.toFixed(2)});
+  if(g.nRods) items.push({k:'hinca',desc:'Hincado de barras',un:'un',q:g.nRods});
+  if((g.t==='malla'||g.t==='mallab')&&g.m.layer) items.push({k:'grava',desc:`Gravilla superficial ${nf(g.m.hs*100,0)} cm (1 m fuera del perímetro)`,un:'m³',q:+((g.m.Lx+2)*(g.m.Ly+2)*g.m.hs).toFixed(2)});
+  items.push({k:'mo',desc:'Mano de obra de instalación',un:'gl',q:1});
+  items.push({k:'medicion',desc:'Medición de resistencia e informe (telurómetro calibrado)',un:'gl',q:1});
+  return items;
+}
+const clp=x=>'$ '+Math.round(x||0).toLocaleString('es-CL');
+function cotRows(){
+  const C=st.cot;
+  return cotAuto().map(it=>({key:'a:'+it.k,auto:it.q,desc:it.desc,un:it.un,q:C.q[it.k]!=null?C.q[it.k]:it.q,pu:C.pu[it.k]||0,edited:C.q[it.k]!=null,k:it.k}))
+    .concat(C.custom.map((c,i)=>({key:'c:'+i,custom:i,desc:c.desc,un:c.un,q:c.q||0,pu:c.pu||0})));
+}
+function cotTotals(){ const R=cotRows(); const neto=R.reduce((s,r)=>s+(r.q||0)*(r.pu||0),0), gg=neto*st.cot.gg/100, base=neto+gg, iva=base*0.19; return {R,neto,gg,base,iva,total:base+iva}; }
+function renderCot(){
+  const T=cotTotals(), Tp=TIPOS.find(x=>x.id===st.spt.tipo);
+  document.querySelectorAll('[data-cotchip]').forEach(el=>el.textContent=`SPT: ${Tp.t} · ${sptCalc(st.spt.tipo).cfg}`);
+  document.querySelectorAll('[data-cot]').forEach(el=>{ if(el!==document.activeElement) el.value=st.cot[el.dataset.cot]; });
+  let h='<thead><tr><th>Ítem</th><th>Unidad</th><th>Cantidad</th><th>Precio unitario neto ($)</th><th>Subtotal</th><th aria-label="Quitar"></th></tr></thead><tbody>';
+  T.R.forEach((r,i)=>{
+    const descCell=r.custom!=null?`<input type="text" id="cotd-${r.custom}" data-cc="desc" data-ci="${r.custom}" value="${esc(r.desc)}" style="min-width:240px">`:`${esc(r.desc)}`;
+    const unCell=r.custom!=null?`<input type="text" id="cotu-${r.custom}" data-cc="un" data-ci="${r.custom}" value="${esc(r.un)}" style="width:64px">`:r.un;
+    h+=`<tr><td style="text-align:left;white-space:normal;min-width:240px">${descCell}${r.edited?`<br><small style="color:var(--muted)">Calculado desde el diseño: ${nf(r.auto,r.auto%1?2:0)}</small>`:''}</td><td>${unCell}</td>
+      <td><input type="number" id="cotq-${r.key.replace(':','-')}" data-ck="${r.key}" data-f="q" step="any" min="0" value="${r.q}"></td>
+      <td><input type="number" id="cotp-${r.key.replace(':','-')}" data-ck="${r.key}" data-f="pu" step="1" min="0" value="${r.pu||''}" placeholder="$"></td>
+      <td class="calc">${clp((r.q||0)*(r.pu||0))}</td>
+      <td>${r.custom!=null?`<button class="x" data-cdel="${r.custom}" aria-label="Quitar ítem">×</button>`:(r.edited?`<button class="x" data-crev="${r.k}" aria-label="Usar la cantidad del diseño" title="Usar la cantidad del diseño">↺</button>`:'')}</td></tr>`;
+  });
+  $('cot-tbl').innerHTML=h+'</tbody>';
+  $('cot-tot').innerHTML=`<div><p class="eyebrow">Neto</p><p class="big" style="font-size:22px">${clp(T.neto)}</p></div>${st.cot.gg?`<div><p class="eyebrow">GG y utilidades ${nf(st.cot.gg,0)} %</p><p class="big" style="font-size:22px">${clp(T.gg)}</p></div>`:''}<div><p class="eyebrow">IVA 19 %</p><p class="big" style="font-size:22px">${clp(T.iva)}</p></div><div><p class="eyebrow">Total</p><p class="big">${clp(T.total)}</p></div>`;
+}
+$('cot-tbl').addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset.ck){ const x=num(t.value), key=t.dataset.ck, f=t.dataset.f;
+    if(key.startsWith('a:')){ const k=key.slice(2); if(f==='q'){ if(Number.isFinite(x)) st.cot.q[k]=x; } else st.cot.pu[k]=Number.isFinite(x)?x:0; }
+    else { const c=st.cot.custom[+key.slice(2)]; c[f]=Number.isFinite(x)?x:0; }
+    save(); const T=cotTotals(); const row=t.closest('tr'); const r=T.R.find(z=>z.key===key); if(row&&r) row.children[4].textContent=clp((r.q||0)*(r.pu||0));
+    clearTimeout(renderCot.tm); renderCot.tm=setTimeout(()=>{ const a=document.activeElement, id=a&&a.id, pos=a&&a.selectionStart; renderCot(); if(id&&$(id)){ $(id).focus(); try{ if(pos!=null) $(id).setSelectionRange(pos,pos); }catch(err){} } },700);
+    $('cot-tot').innerHTML=`<div><p class="eyebrow">Neto</p><p class="big" style="font-size:22px">${clp(T.neto)}</p></div><div><p class="eyebrow">IVA 19 %</p><p class="big" style="font-size:22px">${clp(T.iva)}</p></div><div><p class="eyebrow">Total</p><p class="big">${clp(T.total)}</p></div>`;
+  } else if(t.dataset.cc){ st.cot.custom[+t.dataset.ci][t.dataset.cc]=t.value; save(); }
+});
+$('cot-tbl').addEventListener('click',e=>{ const d=e.target.dataset; if(d.cdel!==undefined){ st.cot.custom.splice(+d.cdel,1); renderCot(); save(); } else if(d.crev!==undefined){ delete st.cot.q[d.crev]; renderCot(); save(); } });
+$('cot-add').onclick=()=>{ st.cot.custom.push({desc:'Nuevo ítem',un:'un',q:1,pu:0}); renderCot(); save(); const i=st.cot.custom.length-1; $('cotd-'+i)&&$('cotd-'+i).select(); };
+$('cot-reset').onclick=()=>{ st.cot.q={}; renderCot(); save(); notify('Cantidades recalculadas desde el diseño.'); };
+document.querySelectorAll('[data-cot]').forEach(el=>el.addEventListener('input',()=>{ const x=num(el.value); if(x>=0){ st.cot[el.dataset.cot]=x; renderCot(); save(); } }));
+$('cot-copy').onclick=()=>{
+  const T=cotTotals(); let t='Ítem\tUnidad\tCantidad\tPrecio unitario\tSubtotal\n';
+  T.R.forEach(r=>{ t+=`${r.desc}\t${r.un}\t${r.q}\t${Math.round(r.pu||0)}\t${Math.round((r.q||0)*(r.pu||0))}\n`; });
+  t+=`\t\t\tNeto\t${Math.round(T.neto)}\n`+(st.cot.gg?`\t\t\tGG y utilidades\t${Math.round(T.gg)}\n`:'')+`\t\t\tIVA 19 %\t${Math.round(T.iva)}\n\t\t\tTotal\t${Math.round(T.total)}\n`;
+  t=t.replace(/(\d)\.(\d)/g,'$1,$2'); const box=$('cot-copybox'); box.value=t;
+  try{ navigator.clipboard.writeText(t).then(()=>{ box.hidden=true; notify('Cotización copiada. Pégala en Excel.'); },()=>{ box.hidden=false; box.select(); }); }catch(err){ box.hidden=false; box.select(); }
+};
+
+/* ---------- caída de potencial ---------- */
+function sptDiag(){
+  const t=st.spt.tipo, p=st.spt, m=st.malla;
+  if(t==='malla'||t==='mallab') return Math.hypot(m.Lx,m.Ly);
+  if(t==='linea') return Math.max(p.Lr,(Math.max(1,Math.round(p.n))-1)*p.s);
+  if(t==='tri') return Math.max(p.Lr,p.sT);
+  if(t==='cond') return p.Lh;
+  if(t==='placa') return Math.hypot(p.pA,p.pB);
+  return p.Lr;
+}
+function cpGeo(){ const M=st.med, dg=M.dg>0?M.dg:sptDiag(), D=M.D>0?M.D:Math.ceil(6*dg); return {dg,D}; }
+function cpModel(x,D,re,rho){ const rc=0.25, xe=Math.min(Math.max(x,re),D-rc); return rho/(2*Math.PI)*(1/re-1/D-1/xe+1/(D-xe)); }
+function cpRe(){ const R=adOrDesignR(), rho=st.malla.rho; return {R,re:rho/(2*Math.PI*R),rho}; }
+function adOrDesignR(){ if(st.adt.use){ const r=adCalc(); if(r.Rt>0) return r.Rt; } return sptCalc(st.spt.tipo).R; }
+const CP_NOISE=[0.015,-0.01,0.008,-0.005,0.01,-0.004,0.006,-0.003,0.012,0.002,0.008,-0.01,0.005];
+function cpSim(){
+  const {D}=cpGeo(), {re,rho}=cpRe(), P=[10,20,30,40,50,52,60,62,70,72,80,90];
+  st.med.rows=P.map((pc,i)=>{ const x=+(D*pc/100).toFixed(2), b=cpModel(x,D,re,rho); return {x,r1:+(b*(1+CP_NOISE[i%13])).toFixed(3),r2:+(b*1.04*(1+CP_NOISE[(i+5)%13])).toFixed(3)}; });
+  st.med.ex=true;
+}
+function interpAt(rows,key,xq){ const s=rows.filter(r=>r.x>0&&num(r[key])>0).map(r=>[r.x,num(r[key])]).sort((a,b)=>a[0]-b[0]); if(s.length<2) return NaN;
+  if(xq<=s[0][0]) return s[0][0]===xq?s[0][1]:NaN; for(let i=1;i<s.length;i++){ if(xq<=s[i][0]){ const [x0,y0]=s[i-1],[x1,y1]=s[i]; return y0+(y1-y0)*(xq-x0)/(x1-x0); } } return NaN; }
+function cpAnalysis(){
+  const {D,dg}=cpGeo(), R=st.med.rows, out={D,dg,dirs:[]};
+  ['r1','r2'].forEach((k,j)=>{ const r62=interpAt(R,k,0.62*D), r52=interpAt(R,k,0.52*D), r72=interpAt(R,k,0.72*D);
+    if(Number.isFinite(r62)){ const dev=Math.max(Math.abs(r52-r62),Math.abs(r72-r62))/r62*100; out.dirs.push({k,j,r62,r52,r72,dev}); } });
+  const vals=out.dirs.map(d=>d.r62); out.Rm=vals.length?Math.max(...vals):NaN; return out;
+}
+function drawCp(){
+  const v=css(), ink=v('--ink'), W=640, H=200, g=70, {D}=cpGeo();
+  const xE=60, xC=580, xP=xE+(xC-xE)*0.62;
+  const FS='font-family="IBM Plex Sans,Arial,sans-serif" font-size="13"', F='font-family="IBM Plex Mono,monospace" font-size="12"';
+  let s=`<rect x="0" y="${g}" width="${W}" height="${H-g}" fill="${v('--soil')}"/><line x1="0" y1="${g}" x2="${W}" y2="${g}" stroke="${ink}" stroke-width="2"/>`;
+  s+=`<rect x="${xE-30}" y="${g}" width="60" height="10" fill="${v('--accent')}"/><rect x="${xE-3}" y="${g}" width="6" height="60" fill="${v('--accent')}"/>`;
+  [[xP,'--blue','P'],[xC,'--red','C']].forEach(([x,c,l])=>{ s+=`<rect x="${x-3}" y="${g-8}" width="6" height="48" fill="${v(c)}"/><text x="${x}" y="${g+60}" text-anchor="middle" ${FS} font-weight="700" fill="${v(c)}">${l}</text>`; });
+  s+=`<text x="${xE}" y="${g+80}" text-anchor="middle" ${FS} font-weight="700" fill="${v('--accent')}">E (SPT)</text>`;
+  s+=`<rect x="${(xE+xC)/2-46}" y="6" width="92" height="30" rx="5" fill="${v('--surface')}" stroke="${ink}" stroke-width="2"/><text x="${(xE+xC)/2}" y="26" text-anchor="middle" ${FS} font-weight="600" fill="${ink}">Telurómetro</text>`;
+  s+=`<polyline points="${xE},${g-2} ${xE},21 ${(xE+xC)/2-46},21" fill="none" stroke="${ink}" stroke-width="1.5"/><polyline points="${(xE+xC)/2+46},16 ${xC},16 ${xC},${g-8}" fill="none" stroke="${v('--red')}" stroke-width="1.5"/><polyline points="${(xE+xC)/2+46},28 ${xP},28 ${xP},${g-8}" fill="none" stroke="${v('--blue')}" stroke-width="1.5"/>`;
+  s+=`<line x1="${xE}" y1="${H-14}" x2="${xC}" y2="${H-14}" stroke="${ink}"/><text x="${(xE+xC)/2+80}" y="${H-20}" text-anchor="middle" ${F} fill="${ink}">D = ${nf(D,0)} m</text>`;
+  s+=`<line x1="${xE}" y1="${H-34}" x2="${xP}" y2="${H-34}" stroke="${v('--blue')}"/><text x="${(xE+xP)/2}" y="${H-40}" text-anchor="middle" ${F} fill="${v('--blue')}">0,62·D = ${nf(0.62*D,1)} m</text>`;
+  $('cp-svg').setAttribute('viewBox',`0 0 ${W} ${H}`); $('cp-svg').innerHTML=s;
+}
+function renderCp(){
+  const M=st.med, {D,dg}=cpGeo(), {R,re,rho}=cpRe();
+  if(document.activeElement!==$('cp-dg')) $('cp-dg').value=+dg.toFixed(2); if(document.activeElement!==$('cp-D')) $('cp-D').value=+D.toFixed(1);
+  ['inst','fecha','cond'].forEach(k=>{ const el=$('cp-'+k); if(el!==document.activeElement) el.value=M[k]||''; });
+  $('cp-theory').innerHTML=`Con E y C como semiesferas en suelo homogéneo:\nR(x) = R_E − (ρ/2π)·[1/x + 1/D − 1/(D − x)]\nEl corchete vale cero cuando x² + D·x − D² = 0\n<span class="hi">x = 0,618·D  →  R(x) = R_E</span>`;
+  $('cp-checks').innerHTML=checkList([[D>=6*dg,`Distancia a C: D = ${nf(D,1)} m ≥ 6 × ${nf(dg,1)} m = ${nf(6*dg,1)} m (RIC N°06, Anexo 6.3)`],[!!M.inst,`Instrumento identificado: ${M.inst?esc(M.inst):'falta anotar marca, modelo y serie'}`]]);
+  drawCp();
+  let h='<thead><tr><th>x de P (m)</th><th>% de D</th><th>R dirección 1 (Ω)</th><th>R dirección 2 (Ω)</th><th aria-label="Quitar"></th></tr></thead><tbody>';
+  M.rows.forEach((r,i)=>{ const pc=r.x/D*100; h+=`<tr${Math.abs(pc-62)<1?' class="hl"':''}><td><input type="number" id="cpx${i}" data-ci="${i}" data-k="x" step="0.5" value="${r.x}"></td><td class="dim">${Number.isFinite(pc)?nf(pc,0)+' %':'—'}</td><td><input type="number" id="cpa${i}" data-ci="${i}" data-k="r1" step="0.01" value="${r.r1??''}"></td><td><input type="number" id="cpb${i}" data-ci="${i}" data-k="r2" step="0.01" value="${r.r2??''}"></td><td><button class="x" data-cpdel="${i}" aria-label="Quitar fila ${i+1}">×</button></td></tr>`; });
+  $('cp-tbl').innerHTML=h+'</tbody>';
+  $('cp-exnote').textContent=M.ex?`Datos simulados a partir del SPT diseñado (R = ${nf(R,2)} Ω, semiesfera equivalente rₑ = ${nf(re,2)} m) con un pequeño error de lectura. Reemplázalos por tus mediciones.`:'';
+  $('cp-exnote').hidden=!M.ex;
+  cpChartAndResult();
+}
+function cpChartAndResult(){
+  const M=st.med, {D}=cpGeo(), {R,re,rho}=cpRe(), A=cpAnalysis();
+  const s1=M.rows.filter(r=>r.x>0&&num(r.r1)>0).map(r=>[r.x/D*100,num(r.r1)]).sort((a,b)=>a[0]-b[0]);
+  const s2=M.rows.filter(r=>r.x>0&&num(r.r2)>0).map(r=>[r.x/D*100,num(r.r2)]).sort((a,b)=>a[0]-b[0]);
+  const th=[]; for(let i=1;i<=99;i++){ th.push([i,cpModel(D*i/100,D,re,rho)]); }
+  const ys=s1.concat(s2).map(p=>p[1]); const ymax=Math.max(R*2,...ys)*1.1;
+  lineChart($('cp-chart'),{xmin:0,xmax:100,ymin:0,ymax,xlab:'Posición de P (% de la distancia D a C)',ylab:'R medida (Ω)',series:[{pts:th,color:'--soft',w:1.5,dash:'5 4'},{pts:s1,color:'--accent',w:2.5},{pts:s2,color:'--blue',w:2.5}],dots:s1.map(p=>({x:p[0],y:p[1],color:'--accent',r:4})).concat(s2.map(p=>({x:p[0],y:p[1],color:'--blue',r:4}))),bands:[{x1:52,x2:72,color:'--ok',op:.1,label:'52 % a 72 %'}],vlines:[{x:62,color:'--ink',label:'62 %'}]});
+  if(!A.dirs.length){ $('cp-res').innerHTML='<p class="note">Ingresa lecturas que cubran el 62 % de D.</p>'; $('cp-formula').textContent=''; $('cp-res-checks').innerHTML=''; return; }
+  $('cp-res').innerHTML=A.dirs.map(d=>`<div><p class="eyebrow">Dirección ${d.j+1} · R al 62 %</p><p class="big">${nf(d.r62,2)} <small>Ω</small></p></div>`).join('')+`<div><p class="eyebrow">Resistencia del SPT</p><p class="big">${nf(A.Rm,2)} <small>Ω</small></p></div>`;
+  $('cp-formula').innerHTML=A.dirs.map(d=>`Dirección ${d.j+1}: R(52 %) = ${nf(d.r52,2)}   R(62 %) = ${nf(d.r62,2)}   R(72 %) = ${nf(d.r72,2)} Ω\n  Variación máxima respecto del 62 %: ${nf(d.dev,1)} %`).join('\n')+`\n<span class="hi">Se informa el mayor valor: ${nf(A.Rm,2)} Ω</span>   (diseño: ${nf(R,2)} Ω)`;
+  const lim=rLim();
+  $('cp-res-checks').innerHTML=checkList(A.dirs.map(d=>[d.dev<=5,`Dirección ${d.j+1}: zona plana, las lecturas al 52 % y al 72 % difieren ${nf(d.dev,1)} % de la del 62 % (criterio práctico: ≤ 5 %; si no, alejar C)`]).concat([[A.dirs.length>=2,'Medición repetida en dirección perpendicular (RIC N°06, Anexo 6.3)'],[A.Rm<=lim,`Cumple el criterio de ${gLargo()}: ${nf(A.Rm,2)} Ω ≤ ${fmtL(lim)} Ω`],[A.Rm<=R*1.2,`Resultado coherente con el diseño (${nf(R,2)} Ω): diferencia ${nf((A.Rm/R-1)*100,0)} %`]]));
+}
+document.querySelectorAll('[data-cp]').forEach(el=>el.addEventListener('input',()=>{ const x=num(el.value); if(x>0){ st.med[el.dataset.cp]=x; renderCp(); save(); } }));
+document.querySelectorAll('[data-cpt]').forEach(el=>el.addEventListener('input',()=>{ st.med[el.dataset.cpt]=el.value; save(); if(el.dataset.cpt==='inst') $('cp-checks').innerHTML=checkList([[st.med.D>=6*cpGeo().dg||cpGeo().D>=6*cpGeo().dg,`Distancia a C: D = ${nf(cpGeo().D,1)} m ≥ 6 × ${nf(cpGeo().dg,1)} m = ${nf(6*cpGeo().dg,1)} m (RIC N°06, Anexo 6.3)`],[!!st.med.inst,`Instrumento identificado: ${st.med.inst?esc(st.med.inst):'falta anotar marca, modelo y serie'}`]]); }));
+$('cp-tbl').addEventListener('input',e=>{ const t=e.target; if(!t.dataset.k) return; st.med.rows[+t.dataset.ci][t.dataset.k]=t.value===''?'':num(t.value); st.med.ex=false; $('cp-exnote').hidden=true; cpChartAndResult(); save(); });
+$('cp-tbl').addEventListener('click',e=>{ const d=e.target.dataset.cpdel; if(d!==undefined){ st.med.rows.splice(+d,1); renderCp(); save(); } });
+$('cp-ej').onclick=()=>{ cpSim(); renderCp(); save(); };
+$('cp-std').onclick=()=>{ const {D}=cpGeo(); st.med.rows=[10,20,30,40,50,52,60,62,70,72,80,90].map(pc=>({x:+(D*pc/100).toFixed(2),r1:'',r2:''})); st.med.ex=false; renderCp(); save(); };
+$('cp-add').onclick=()=>{ st.med.rows.push({x:'',r1:'',r2:''}); renderCp(); save(); };
+$('cp-clear').onclick=()=>{ st.med.rows=[]; st.med.ex=false; renderCp(); save(); };
+
+/* ---------- dos pinzas ---------- */
+function pzCorrect(rows){
+  const L=rows.map(r=>num(r.R)).filter(x=>x>0); if(L.length<2) return null;
+  let Rr=L.slice(), ok=true;
+  for(let it=0;it<200;it++){ const nx=L.map((Ri,i)=>{ let g=0; Rr.forEach((Rj,j)=>{ if(j!==i&&Rj>0) g+=1/Rj; }); return Ri-1/g; });
+    if(nx.some(x=>!(x>0))){ ok=false; break; } const d=Math.max(...nx.map((x,i)=>Math.abs(x-Rr[i]))); Rr=nx; if(d<1e-6) break; }
+  return ok?Rr:null;
+}
+function drawPz(){
+  const v=css(), ink=v('--ink'), W=640, H=200, g=120, n=Math.min(6,Math.max(1,Math.round(st.pz.n)));
+  const FS='font-family="IBM Plex Sans,Arial,sans-serif" font-size="12"';
+  let s=`<rect x="0" y="${g}" width="${W}" height="${H-g}" fill="${v('--soil')}"/><line x1="0" y1="${g}" x2="${W}" y2="${g}" stroke="${ink}" stroke-width="2"/>`;
+  const xs=[80]; for(let i=0;i<n;i++) xs.push(220+i*(380/Math.max(1,n-1||1)));
+  s+=`<line x1="${xs[0]}" y1="30" x2="${xs[xs.length-1]}" y2="30" stroke="${ink}" stroke-width="3"/><text x="${(xs[0]+xs[xs.length-1])/2}" y="22" text-anchor="middle" ${FS} fill="${v('--muted')}">conductor común (neutro o red de tierras)</text>`;
+  xs.forEach((x,i)=>{ s+=`<line x1="${x}" y1="30" x2="${x}" y2="${g+50}" stroke="${i?v('--soft'):v('--accent')}" stroke-width="${i?3:4}"/><text x="${x}" y="${H-8}" text-anchor="middle" ${FS} font-weight="600" fill="${i?ink:v('--accent')}">${i?'R'+i:'Rx'}</text>`; });
+  s+=`<ellipse cx="${xs[0]}" cy="62" rx="16" ry="7" fill="none" stroke="${v('--red')}" stroke-width="3"/><text x="${xs[0]+22}" y="66" ${FS} fill="${v('--red')}">pinza que induce V</text>`;
+  s+=`<ellipse cx="${xs[0]}" cy="92" rx="16" ry="7" fill="none" stroke="${v('--blue')}" stroke-width="3"/><text x="${xs[0]+22}" y="96" ${FS} fill="${v('--blue')}">pinza que mide I</text>`;
+  s+=`<path d="M${xs[0]+6} ${g+40} Q ${(xs[0]+xs[1])/2} ${g+75} ${xs[1]-6} ${g+40}" fill="none" stroke="${v('--accent')}" stroke-width="2" stroke-dasharray="6 5"/>`;
+  $('pz-svg').setAttribute('viewBox',`0 0 ${W} ${H}`); $('pz-svg').innerHTML=s;
+}
+function renderPz(){
+  const P=st.pz, n=Math.max(1,Math.round(P.n)), Rp=P.ri/n, Rl=P.rx+Rp+P.rc, err=(Rl/P.rx-1)*100;
+  document.querySelectorAll('[data-pz]').forEach(el=>{ if(el!==document.activeElement) el.value=P[el.dataset.pz]; });
+  $('pz-theory').innerHTML=`R_lazo = V/I = Rx + R_paralelo + R_conductores\nR_paralelo = 1 / Σ(1/Rᵢ)   (los demás electrodos)\n<span class="hi">Si R_paralelo ≪ Rx  →  R_lazo ≈ Rx</span>`;
+  $('pz-formula').innerHTML=`R_paralelo = ${nf(P.ri,2)}/${n} = ${nf(Rp,3)} Ω\nR_lazo = ${nf(P.rx,2)} + ${nf(Rp,3)} + ${nf(P.rc,2)}\n<span class="hi">R_lazo = ${nf(Rl,2)} Ω</span>   (error respecto de Rx: +${nf(err,1)} %)`;
+  drawPz();
+  const pts=[]; for(let k=1;k<=40;k++) pts.push([k,P.rx+P.ri/k+P.rc]);
+  lineChart($('pz-chart'),{xmin:0,xmax:40,ymin:0,ymax:(P.rx+P.ri+P.rc)*1.1,xlab:'Otros electrodos en paralelo n',ylab:'Lectura de la pinza (Ω)',series:[{pts,color:'--accent',w:2.5}],hlines:[{y:P.rx,color:'--ok',label:'Rx = '+nf(P.rx,2)+' Ω'}],dots:[{x:Math.min(n,40),y:Rl,color:'--ink'}]});
+  const nn=[1,2,3,5,10,20,40].find(k=>P.ri/k<=0.1*P.rx);
+  $('pz-note').textContent=nn?`Con ${nn} o más electrodos en paralelo, el error queda bajo 10 %. Con uno solo, la lectura es la suma de dos tierras en serie y no sirve para conocer Rx.`:'Con estos valores, el paralelo nunca baja del 10 % de Rx: la lectura sobreestima mucho a Rx.';
+  // registro
+  const corr=pzCorrect(P.rows), lim=rLim();
+  let h='<thead><tr><th>Electrodo</th><th>Lectura R_lazo (Ω)</th><th>R propia estimada (Ω)</th><th>Diferencia</th><th>Criterio</th><th aria-label="Quitar"></th></tr></thead><tbody>';
+  let ci=0;
+  P.rows.forEach((r,i)=>{ const L=num(r.R), has=L>0, Rc=has&&corr?corr[ci]:NaN; if(has) ci++;
+    h+=`<tr><td><input type="text" id="pzn${i}" data-pi="${i}" data-k="name" value="${esc(r.name||'')}" style="min-width:140px"></td><td><input type="number" id="pzr${i}" data-pi="${i}" data-k="R" step="0.01" value="${r.R??''}"></td><td class="calc">${Number.isFinite(Rc)?nf(Rc,2):'—'}</td><td class="dim">${Number.isFinite(Rc)?'−'+nf((1-Rc/L)*100,0)+' %':'—'}</td><td>${Number.isFinite(Rc)?pill(Rc<=lim):(has?pill(L<=lim):'')}</td><td><button class="x" data-pzdel="${i}" aria-label="Quitar electrodo ${i+1}">×</button></td></tr>`; });
+  $('pz-tbl').innerHTML=h+'</tbody>';
+  const nv=P.rows.filter(r=>num(r.R)>0).length;
+  $('pz-checks').innerHTML=nv?checkList([[nv>=2,`Electrodos registrados: ${nv}${nv<2?' (se necesitan al menos 2 para estimar la R propia)':''}`],[!!corr||nv<2,corr?`Corrección por paralelo convergente: criterio ${gLargo()}, R ≤ ${fmtL(lim)} Ω`:'La corrección no converge: alguna lectura es menor que el paralelo de los demás. Revisa si hay lazos metálicos.'],[true,'Método válido para inspección y mantenimiento; la recepción inicial se mide por caída de potencial (RIC N°06, Anexo 6.3)','warn']]):'';
+}
+document.querySelectorAll('[data-pz]').forEach(el=>el.addEventListener('input',()=>{ const x=num(el.value); if(x>0||(el.dataset.pz==='rc'&&x===0)){ st.pz[el.dataset.pz]=x; renderPz(); save(); } }));
+$('pz-tbl').addEventListener('input',e=>{ const t=e.target; if(!t.dataset.k) return; const r=st.pz.rows[+t.dataset.pi]; r[t.dataset.k]=t.dataset.k==='R'?(t.value===''?'':num(t.value)):t.value; save(); clearTimeout(renderPz.tm); renderPz.tm=setTimeout(()=>{ const a=document.activeElement, id=a&&a.id; renderPz(); if(id&&$(id)) $(id).focus(); },700); });
+$('pz-tbl').addEventListener('click',e=>{ const d=e.target.dataset.pzdel; if(d!==undefined){ st.pz.rows.splice(+d,1); renderPz(); save(); } });
+$('pz-ej').onclick=()=>{ st.pz.rows=[{name:'Poste 1',R:18.6},{name:'Poste 2',R:24.1},{name:'Poste 3',R:16.3},{name:'Poste 4',R:31.0},{name:'Poste 5',R:20.2},{name:'Tablero general',R:12.8}]; renderPz(); save(); };
+$('pz-add').onclick=()=>{ st.pz.rows.push({name:'Electrodo '+(st.pz.rows.length+1),R:''}); renderPz(); save(); };
+$('pz-clear').onclick=()=>{ st.pz.rows=[]; renderPz(); save(); };
+
+function renderD(id){ if(id==='d1') renderAd(); else if(id==='d2') renderCot(); else if(id==='d3') renderCp(); else if(id==='d4') renderPz(); }
+
+/* ---------- informe del módulo D ---------- */
+function adHTML(){
+  const r=adCalc(), T=TIPOS.find(x=>x.id===st.spt.tipo), A=ADT.find(x=>x.k===st.adt.tipo);
+  return `<h3>Aditivo${st.adt.use?' (incluido en el SPT)':' (evaluado, no incluido)'}</h3>`+T2([R2('Aditivo',A?A.t:'—'),R2('ρ del aditivo (Ω·m) · radio del relleno r₁ (m)',nf(r.rb,2)+' · '+nf(r.r1,3)),R2('Barra '+nf(r.Lr,1)+' m sin / con aditivo (Ω)',nf(r.R0b,2)+' / '+nf(r.R1b,2)),R2('Conductor '+nf(r.Lc,1)+' m sin / con aditivo (Ω)',nf(r.R0c,2)+' / '+nf(r.R1c,2)),R2(T.t+' sin / con aditivo (Ω)',nf(r.R0t,2)+' / '+nf(r.Rt,2)),R2('Volumen de aditivo (m³)',nf(r.vol,3))]);
+}
+function cotHTML(){
+  const T=cotTotals();
+  return `<h3>Cotización de materiales</h3><table><thead><tr><th>Ítem</th><th>Unidad</th><th>Cantidad</th><th>P. unitario</th><th>Subtotal</th></tr></thead><tbody>`+T.R.map(r=>`<tr><td>${esc(r.desc)}</td><td>${esc(r.un)}</td><td class="n">${nf(r.q,r.q%1?2:0)}</td><td class="n">${r.pu?clp(r.pu):'—'}</td><td class="n">${clp((r.q||0)*(r.pu||0))}</td></tr>`).join('')+`</tbody></table>`+T2([R2('Neto',clp(T.neto))].concat(st.cot.gg?[R2('Gastos generales y utilidades '+nf(st.cot.gg,0)+' %',clp(T.gg))]:[]).concat([R2('IVA 19 %',clp(T.iva)),R2('<b>Total</b>','<b>'+clp(T.total)+'</b>')]),'Resumen','');
+}
+function medHTML(figs){
+  figs=figs||{}; const M=st.med, A=cpAnalysis(), {R}=cpRe(), lim=rLim(), P=st.pz, corr=pzCorrect(P.rows);
+  let h=`<h3>Caída de potencial (RIC N°06, punto 11 y Anexo 6.3)</h3>`+T2([R2('SPT medido',TIPOS.find(x=>x.id===st.spt.tipo).t+' · '+sptCalc(st.spt.tipo).cfg),R2('Telurómetro',esc(M.inst||'—')),R2('Fecha · terreno',esc(M.fecha||'—')+' · '+esc(M.cond||'—')),R2('Mayor diagonal (m) · D (m)',nf(A.dg,1)+' · '+nf(A.D,1),okc(A.D>=6*A.dg)),R2('R de diseño (Ω)',nf(R,2))]);
+  if(figs.cpsvg) h+=`<div class="fig">${figs.cpsvg}</div>`;
+  h+=`<table><thead><tr><th>x de P (m)</th><th>% de D</th><th>R dir. 1 (Ω)</th><th>R dir. 2 (Ω)</th></tr></thead><tbody>`+M.rows.map(r=>`<tr><td class="n">${nf(num(r.x),2)}</td><td class="n">${nf(num(r.x)/A.D*100,0)} %</td><td class="n">${num(r.r1)>0?nf(num(r.r1),2):'—'}</td><td class="n">${num(r.r2)>0?nf(num(r.r2),2):'—'}</td></tr>`).join('')+`</tbody></table>`;
+  if(figs.cpchart) h+=`<div class="fig">${figs.cpchart}</div>`;
+  if(A.dirs.length) h+=T2(A.dirs.map(d=>R2(`Dirección ${d.j+1}: R al 62 % (variación 52–72 %)`,nf(d.r62,2)+' Ω ('+nf(d.dev,1)+' %)',okc(d.dev<=5))).concat([R2('<b>Resistencia medida</b>','<b>'+nf(A.Rm,2)+' Ω</b>'),R2('Criterio '+gLargo()+' (R ≤ '+fmtL(lim)+' Ω)',okt(A.Rm<=lim),okc(A.Rm<=lim))]));
+  h+=`<h3>Método de dos pinzas (inspección)</h3>`;
+  const rows=P.rows.filter(r=>num(r.R)>0);
+  if(rows.length){ h+=`<table><thead><tr><th>Electrodo</th><th>Lectura R_lazo (Ω)</th><th>R propia estimada (Ω)</th></tr></thead><tbody>`+rows.map((r,i)=>`<tr><td>${esc(r.name||'')}</td><td class="n">${nf(num(r.R),2)}</td><td class="n">${corr?nf(corr[i],2):'—'}</td></tr>`).join('')+`</tbody></table>`; }
+  else h+=`<p class="meta">Sin lecturas registradas.</p>`;
+  return h;
+}
+
 /* =================== RECORRIDO POR PASOS =================== */
-const MODS={A:'Fundamentos',B:'Resistividad del terreno',C:'Diseño del SPT'};
+const MODS={A:'Fundamentos',B:'Resistividad del terreno',C:'Diseño del SPT',D:'Ejecución y medición'};
 const STEPS=[
   {id:'inicio',t:'Inicio'},
   {id:'a1',m:'A',t:'Por qué importa el SPT'},
@@ -1835,6 +2561,7 @@ const STEPS=[
   {id:'a3',m:'A',t:'Contacto, paso y transferida'},
   {id:'a4',m:'A',t:'Barra contra malla'},
   {id:'a5',m:'A',t:'Falla en esquema TT'},
+  {id:'a6',m:'A',t:'Falla en esquema TN-S'},
   {id:'b1',m:'B',t:'Arreglo de electrodos'},
   {id:'b2',m:'B',t:'Planilla de registro'},
   {id:'b3',m:'B',t:'Curva y modelo'},
@@ -1846,6 +2573,10 @@ const STEPS=[
   {id:'c4',m:'C',t:'Resistencia de la malla'},
   {id:'c5',m:'C',t:'Tensiones tolerables'},
   {id:'c6',m:'C',t:'Verificación'},
+  {id:'d1',m:'D',t:'Aditivos'},
+  {id:'d2',m:'D',t:'Cotización de materiales'},
+  {id:'d3',m:'D',t:'Caída de potencial'},
+  {id:'d4',m:'D',t:'Método de dos pinzas'},
   {id:'informe',t:'Informe y descarga'}
 ];
 STEPS.forEach(s=>{ if(s.m){ const list=STEPS.filter(x=>x.m===s.m); s.n=list.indexOf(s)+1; s.of=list.length; } });
@@ -1854,6 +2585,7 @@ const QS={
   a2:['¿Por qué el suelo, mucho más resistivo que el cobre, puede conducir una corriente de falla?','Si la mitad de R está entre r₀ y 2r₀, ¿qué medidas en esa zona bajan más la resistencia?','¿Qué pasa con el GPR si la corriente de falla se duplica? ¿Y con la forma del embudo?'],
   a3:['¿Por qué la tensión de contacto crece al alejarse de la estructura, mientras la de paso disminuye?','¿Por qué el contacto es el criterio más exigente si su valor tolerable es menor que el de paso?','Con la gravilla activada, ¿qué cambió: la tensión aplicada o la tolerable? Explica por qué.','¿Por qué la tensión transferida puede ser igual a todo el GPR?'],
   a4:['¿Por qué la tensión de contacto dentro de la malla es casi nula aunque el GPR sea alto?','¿Dónde aparece la mayor tensión de paso en una malla y cómo se controla?','Una barra de 5 Ω y una malla de 10 Ω: ¿cuál puede ser más segura? Justifica con el gráfico.'],
+  a6:['¿Por qué en TN-S el termomagnético sí puede despejar una falla a masa y en TT no? Compara Id de ambos pasos.','Alarga el circuito hasta que deje de cumplir. ¿Qué tres cosas puedes cambiar para recuperar el disparo?','Durante la falla, la carcasa queda a casi la mitad de U₀. ¿Por qué igual se considera segura?','¿Por qué en TN la tierra de servicio debe ser baja aunque no intervenga en la falla a masa?'],
   a5:['¿Por qué el termomagnético no despeja la falla a tierra en TT? Usa los valores calculados.','¿Qué exige el RIC N°06 en el punto 7.9 y cómo se relaciona con este resultado?'],
   b1:['¿Por qué se usan cuatro electrodos y no dos para medir resistividad?','¿Qué diferencia práctica hay entre Wenner y Schlumberger al hacer el sondeo en terreno?'],
   b2:['¿Qué tendencia muestra ρa al aumentar la separación? ¿Qué te dice sobre las capas del terreno?'],
@@ -1865,6 +2597,10 @@ const QS={
   c3:['¿Cómo cambió el largo total de conductor al modificar el espaciamiento o agregar barras?'],
   c4:['¿Cumple la resistencia con el RIC? ¿Basta eso para asegurar que la instalación es segura?'],
   c5:['¿Cuánto aumentan las tensiones tolerables con la capa de gravilla y por qué?'],
+  d1:['¿Por qué el aditivo baja la resistencia solo hasta cierto punto? Explica con el término ρ·(ln(4L/r₁) − 1) de la fórmula.','Compara la reducción que logra el aditivo con la de duplicar el largo de la barra. ¿Cuál conviene en tu terreno?','¿Por qué no se recomienda usar sal común?'],
+  d2:['¿Cuáles son los tres ítems de mayor costo en tu cotización y por qué?','Si tuvieras que bajar el costo un 20 %, ¿qué cambiarías del diseño sin dejar de cumplir el criterio de resistencia?'],
+  d3:['¿Por qué el electrodo de potencial se ubica al 62 % de la distancia a C?','¿Qué indica una curva sin zona plana y qué harías para corregir la medición?','¿Cumple tu SPT el criterio de resistencia? Compara el valor medido con el de diseño y explica la diferencia.'],
+  d4:['¿Por qué el método de dos pinzas no sirve para medir un electrodo aislado?','¿Por qué la lectura de la pinza siempre es mayor que la resistencia propia del electrodo?','¿Por qué el RIC N°06 no acepta este método para la recepción inicial de un SPT?'],
   c6:['Describe la evolución de tu diseño: qué cambiaste en cada intento y cómo se movieron Em y Es.','Conclusión final: diseño adoptado, valores de Rg, Em y Es, y justificación de que cumple.']
 };
 const idx=id=>STEPS.findIndex(s=>s.id===id);
@@ -1881,7 +2617,7 @@ function buildNav(){
     const mark=s.m?(s.m+s.n):(s.id==='inicio'?'·':'✓');
     h+=`<button class="nav-item" data-go="${s.id}"><span class="dot">${mark}</span><span>${s.t}</span></button>`;
   });
-  h+=`<div class="nav-mod">Imprimir</div><div class="nav-print"><button class="btn" data-print="res">Resistividad del terreno</button><button class="btn" data-print="spt">Diseño del SPT</button></div>`;
+  h+=`<div class="nav-mod">Imprimir</div><div class="nav-print"><button class="btn" data-print="res">Resistividad del terreno</button><button class="btn" data-print="spt">Diseño del SPT</button><button class="btn" data-print="med">Medición del SPT</button></div>`;
   $('sidenav').innerHTML=h;
 }
 function updateNav(){
@@ -1891,12 +2627,13 @@ function updateNav(){
   });
 }
 function renderStep(id){
-  if(id[0]==='a') renderFund();
+  if(id[0]==='a'){ renderFund(); if(id==='a6') renderTN(); }
   else if(id==='b1') renderCfg();
   else if(id==='b2') renderTable();
   else if(id==='b3') renderModel();
   else if(id==='b4') renderEq();
   else if(id[0]==='c'){ syncMallaInputs(); renderMalla(); }
+  else if(id[0]==='d') renderD(id);
   else if(id==='informe') renderReport();
 }
 function go(id,opts={}){
@@ -1975,7 +2712,7 @@ function reportData(){
   const rms=pts.length?Math.sqrt(cost([Math.log(m.r1),Math.log(m.r2),Math.log(m.h)],pts))*100:NaN;
   const eq=eqCalc(st.spt.tipo);
   const mc=calcMalla();
-  return {f,c,b,tt,U,Etol,pts,m,K,rms,eq,mc,sc:sptCalc(st.spt.tipo)};
+  return {f,c,b,tt,U,Etol,pts,m,K,rms,eq,mc,sc:sptCalc(st.spt.tipo),tn:tnCalc()};
 }
 function idTable(){
   const I=st.id, fecha=I.fecha||new Date().toISOString().slice(0,10);
@@ -1983,12 +2720,15 @@ function idTable(){
 }
 function fundHTML(d){
   const f=d.f, modeT={c:'Contacto',p:'Paso',t:'Transferida'}[f.mode], tt=d.tt;
-  let h=`<h3>Dispersión (electrodo semiesférico)</h3>`;
-  h+=T2([R2('ρ (Ω·m)',nf(f.rho,0)),R2('Corriente I (A)',nf(f.I,0)),R2('Radio r₀ (m)',nf(f.r0,2)),R2('R = ρ/(2πr₀) (Ω)',nf(d.c.R,2)),R2('GPR = I·R (V)',nf(d.c.GPR,0)),R2('V a 1 m / 2 m / 5 m (V)',[1,2,5].map(x=>nf(d.c.V(x),0)).join(' / '))]);
+  let h=`<h3>Dispersión (${EL_NAMES[f.el].toLowerCase()})</h3>`;
+  h+=T2([R2('Elemento enterrado',EL_NAMES[f.el]+(f.el!=='semi'?' · '+elCalc(f.el,f.rho,f.ep,f.r0).geo:'')),R2('ρ (Ω·m)',nf(f.rho,0)),R2('Corriente I (A)',nf(f.I,0)),R2('Radio equivalente r₀ (m)',nf(f.r0,2)),R2('R = ρ/(2πr₀) (Ω)',nf(d.c.R,2)),R2('GPR = I·R (V)',nf(d.c.GPR,0)),R2('V a 1 m / 2 m / 5 m (V)',[1,2,5].map(x=>nf(d.c.V(x),0)).join(' / '))]);
   h+=`<h3>Tensión aplicada a la persona</h3>`;
   h+=T2([R2('Caso',modeT),R2('Distancia x (m)',f.mode==='t'?'—':nf(f.x,1)),R2('ts (s) · peso',nf(f.ts,2)+' · '+f.peso+' kg'),R2('Capa de gravilla',f.grava?'Sí (3.000 Ω·m, 10 cm)':'No'),R2('Tensión aplicada (V)',nf(d.U,0)),R2('Tensión tolerable (V)',nf(d.Etol,0)),R2('Resultado',okt(d.U<=d.Etol),okc(d.U<=d.Etol))]);
   h+=`<h3>Falla fase–carcasa en TT</h3>`;
   h+=T2([R2('U₀ (V)',nf(tt.U0,0)),R2('R_B (Ω) · R_A (Ω)',nf(tt.RB,2)+' · '+nf(tt.RA,2)),R2('Id = U₀/(R_A+R_B) (A)',nf(tt.Id,2)),R2('Tensión en la carcasa (V)',nf(tt.Uc,0),okc(tt.Uc<=tt.UL)),R2('Neutro respecto de tierra (V)',nf(tt.Un,0)),R2('Termomagnético C'+nf(tt.In,0),tt.mcb,okc(tt.mcbOk)),R2('Diferencial '+nf(tt.Idn*1000,0)+' mA',tt.difOk?'Dispara':'No alcanza su umbral',okc(tt.difOk)),R2('R_A·IΔn ≤ U_L ('+nf(tt.UL,0)+' V)',nf(tt.RA*tt.Idn,2)+' V',okc(tt.raOk))]);
+  const n=d.tn;
+  h+=`<h3>Falla fase–masa en TN-S</h3>`;
+  h+=T2([R2('U₀ (V) · Z fuente (mΩ)',nf(n.U0,0)+' · '+nf(n.Zt*1000,0)),R2('Circuito','L = '+nf(n.L,0)+' m · fase '+nf(n.Sf,1)+' mm² · PE '+nf(n.Spe,1)+' mm²'),R2('Zs (Ω)',nf(n.Zs,3)),R2('Id = U₀/Zs (A)',nf(n.Id,0)),R2('Termomagnético '+n.cur+nf(n.In,0)+' · Ia (A)',nf(n.Ia,0)),R2('Zs·Ia ≤ U₀',nf(n.Zs*n.Ia,0)+' V',okc(n.ok)),R2('Largo máximo (m)',n.Lmax>0?nf(n.Lmax,0):'—'),R2('Carcasa durante la falla (V)',nf(n.Uf,0)),R2('Falla directa a tierra: U_PE (V)',nf(n.Upe,0),okc(n.Upe<=50))]);
   return h;
 }
 function resHTML(d,figs){
@@ -2015,18 +2755,18 @@ function resHTML(d,figs){
 function sptHTML(d,figs){
   figs=figs||{}; const m=st.malla, mc=d.mc, sc=d.sc, T=TIPOS.find(x=>x.id===st.spt.tipo);
   let h=`<h3>Datos de diseño</h3>`;
-  h+=T2([R2('ρ de diseño (Ω·m)',nf(m.rho,1)),R2('3I₀ (A) · Sf · Df',nf(m.I0,0)+' · '+nf(m.Sf,2)+' · '+nf(m.Df,3)),R2('IG = Df·Sf·3I₀ (A)',nf(mc.IG,0)),R2('tc · ts (s)',nf(m.tc,2)+' · '+nf(m.ts,2)),R2('Capa superficial',m.layer?nf(m.rhos,0)+' Ω·m, '+nf(m.hs*100,0)+' cm':'Sin capa'),R2('Criterio de peso',m.peso+' kg'),R2('E contacto · E paso tolerables (V)',nf(mc.Et,0)+' · '+nf(mc.Ep,0))]);
+  h+=T2([R2('Tierra calculada',gLargo()),R2('Criterio de resistencia','R ≤ '+fmtL(rLim())+' Ω'),R2('ρ de diseño (Ω·m)',nf(m.rho,1)),R2('3I₀ (A) · Sf · Df',nf(m.I0,0)+' · '+nf(m.Sf,2)+' · '+nf(m.Df,3)),R2('IG = Df·Sf·3I₀ (A)',nf(mc.IG,0)),R2('tc · ts (s)',nf(m.tc,2)+' · '+nf(m.ts,2)),R2('Capa superficial',m.layer?nf(m.rhos,0)+' Ω·m, '+nf(m.hs*100,0)+' cm':'Sin capa'),R2('Criterio de peso',m.peso+' kg'),R2('E contacto · E paso tolerables (V)',nf(mc.Et,0)+' · '+nf(mc.Ep,0))]);
   h+=`<h3>Conductor</h3>`+T2([R2('IEEE 80: A = I·Kf·√tc (Kf '+nf(mc.kf,2)+')',nf(mc.Amm,1)+' mm²'),R2('IEC 60364-5-54 (k '+mc.kiec+')',nf(mc.Siec,1)+' mm²'),R2('Sección mínima requerida (incluye RIC 25 mm²)',nf(mc.Areq,1)+' mm²'),R2('Conductor adoptado',mc.cond[0]+' · '+nf(mc.cond[1],1)+' mm²',okc(mc.cond[1]>=mc.Areq))]);
   h+=`<h3>SPT adoptado: ${T.t}</h3>`+T2([R2('Configuración',sc.cfg),R2('Material',sc.mat),R2('<b>Resistencia (Ω)</b>','<b>'+nf(sc.R,2)+'</b>'),R2('GPR = IG·R (V)',nf(sc.GPR,0))]);
   if(figs.spt) h+=`<div class="fig">${figs.spt}</div>`;
   h+=`<pre class="f">${sc.f}</pre>`;
   h+=`<table><thead><tr><th>Verificación</th><th>Resultado</th></tr></thead><tbody>`+sc.checks.map(([ok,t])=>`<tr><td>${t}</td><td class="${okc(ok)}">${okt(ok)}</td></tr>`).join('')+`</tbody></table>`;
-  h+=`<h3>Comparación de tipos de SPT</h3><table><thead><tr><th>Tipo</th><th>Configuración</th><th>R (Ω)</th><th>GPR (V)</th><th>R ≤ 20 Ω</th><th>GPR ≤ E contacto</th></tr></thead><tbody>`+TIPOS.map(T2_=>{ const r=sptCalc(T2_.id); return `<tr><td>${T2_.id===st.spt.tipo?'<b>'+T2_.t+'</b> (adoptado)':T2_.t}</td><td>${r.cfg}</td><td class="n">${nf(r.R,2)}</td><td class="n">${nf(r.GPR,0)}</td><td class="${okc(r.R<=20)}">${okt(r.R<=20)}</td><td class="${okc(r.GPR<=r.Et)}">${okt(r.GPR<=r.Et)}</td></tr>`; }).join('')+`</tbody></table>`;
+  h+=`<h3>Comparación de tipos de SPT</h3><table><thead><tr><th>Tipo</th><th>Configuración</th><th>R (Ω)</th><th>GPR (V)</th><th>R ≤ ${fmtL(rLim())} Ω</th><th>GPR ≤ E contacto</th></tr></thead><tbody>`+TIPOS.map(T2_=>{ const r=sptCalc(T2_.id); return `<tr><td>${T2_.id===st.spt.tipo?'<b>'+T2_.t+'</b> (adoptado)':T2_.t}</td><td>${r.cfg}</td><td class="n">${nf(r.R,2)}</td><td class="n">${nf(r.GPR,0)}</td><td class="${okc(r.R<=rLim())}">${okt(r.R<=rLim())}</td><td class="${okc(r.GPR<=r.Et)}">${okt(r.GPR<=r.Et)}</td></tr>`; }).join('')+`</tbody></table>`;
   if(isMallaTipo()){
-    const atajo=mc.GPR<=mc.Et, okEm=mc.Em<=mc.Et, okEs=mc.Es<=mc.Ep, okAll=atajo||(okEm&&okEs), Rbt=(+m.Vs)/m.I0bt;
+    const atajo=mc.GPR<=mc.Et, okEm=mc.Em<=mc.Et, okEs=mc.Es<=mc.Ep, okAll=atajo||(okEm&&okEs);
     h+=`<h3>Geometría de la malla</h3>`+T2([R2('Lx × Ly (m)',nf(m.Lx,1)+' × '+nf(m.Ly,1)),R2('Profundidad h (m)',nf(m.h,2)),R2('Conductores',mc.nx+' × '+nf(m.Lx,1)+' m + '+mc.ny+' × '+nf(m.Ly,1)+' m'),R2('Espaciamiento Dx · Dy (m)',nf(mc.Dx,2)+' · '+nf(mc.Dy,2)),R2('Barras',mc.nR?mc.nR+' × '+nf(m.Lr,1)+' m ('+(m.rodPos==='per'?'perímetro':'interior')+')':'Sin barras'),R2('LC · LR · LT (m)',nf(mc.LC,1)+' · '+nf(mc.LR,1)+' · '+nf(mc.LT,1))]);
     if(figs.plan) h+=`<div class="fig">${figs.plan}</div>`;
-    h+=`<h3>Resistencia</h3>`+T2([R2('Laurent-Niemann (Ω)',nf(mc.Rl,2)),R2('<b>Sverak · IEEE 80 (Ω)</b>','<b>'+nf(mc.Rg,2)+'</b>'),R2('RIC 6.1 tierra de servicio ≤ 20 Ω',okt(mc.Rg<=20),okc(mc.Rg<=20)),R2('RIC 8.11 profundidad ≥ 0,5 m',okt(m.h>=0.5),okc(m.h>=0.5)),R2('RIC 7.3 R ≤ Vs/I₀ = '+m.Vs+'/'+nf(m.I0bt,3)+' = '+nf(Rbt,Rbt<10?2:0)+' Ω',okt(mc.Rg<=Rbt),okc(mc.Rg<=Rbt))]);
+    h+=`<h3>Resistencia</h3>`+T2([R2('Laurent-Niemann (Ω)',nf(mc.Rl,2)),R2('<b>Sverak · IEEE 80 (Ω)</b>','<b>'+nf(mc.Rg,2)+'</b>'),R2('RIC 8.11 profundidad ≥ 0,5 m',okt(m.h>=0.5),okc(m.h>=0.5))].concat(critChecks(mc.Rg,mc.IG).map(([ok,t])=>R2(t,okt(ok),okc(ok)))));
     h+=`<h3>Tensiones tolerables y verificación (IEEE 80, instalaciones con MT)</h3>`+T2([R2('Cs',nf(mc.Cs,3)),R2('E contacto tolerable (V)',nf(mc.Et,0)),R2('E paso tolerable (V)',nf(mc.Ep,0)),R2('GPR = IG·Rg (V)',nf(mc.GPR,0)),R2('Km · Ki · Ks',nf(mc.Km,3)+' · '+nf(mc.Ki,3)+' · '+nf(mc.Ks,3)),R2('Em (V)',nf(mc.Em,0)+' / '+nf(mc.Et,0),okc(okEm||atajo)),R2('Es (V)',nf(mc.Es,0)+' / '+nf(mc.Ep,0),okc(okEs||atajo)),R2('<b>Resultado</b>',atajo?'Cumple por GPR ≤ E contacto':okt(okAll),okc(okAll))]);
   }else{
     h+=`<p class="meta">Para electrodos simples la verificación de contacto usa el atajo GPR ≤ E contacto tolerable. Las fórmulas de Em y Es de IEEE 80 solo valen para mallas.</p>`;
@@ -2040,6 +2780,7 @@ function reportHTML(){
   h+=`<h2>Módulo A · Fundamentos</h2>`+fundHTML(d);
   h+=`<h2>Módulo B · Resistividad del terreno</h2>`+resHTML(d);
   h+=`<h2>Módulo C · Diseño del SPT</h2>`+sptHTML(d);
+  h+=`<h2>Módulo D · Ejecución y medición</h2>`+adHTML()+cotHTML()+medHTML();
   h+=`<h2>Respuestas</h2>`+answersHTML(Object.keys(QS));
   return h;
 }
@@ -2071,12 +2812,16 @@ function csvData(){
   const add=(sec,k,v)=>L.push([sec,k,v].map(q).join(';'));
   add('Identificación','Integrantes',I.nombre); add('Identificación','Equipo',I.equipo); add('Identificación','Sección',I.seccion); add('Identificación','Fecha',I.fecha); add('Identificación','Caso',I.caso);
   add('A','R semiesfera (ohm)',nf(d.c.R,2)); add('A','GPR (V)',nf(d.c.GPR,0)); add('A','Tensión aplicada (V)',nf(d.U,0)); add('A','Tolerable (V)',nf(d.Etol,0));
-  add('A · TT','Id (A)',nf(d.tt.Id,2)); add('A · TT','Tensión carcasa (V)',nf(d.tt.Uc,0));
+  add('A · TT','Id (A)',nf(d.tt.Id,2)); add('A · TN-S','Zs (ohm)',nf(d.tn.Zs,3)); add('A · TN-S','Id (A)',nf(d.tn.Id,0)); add('A · TN-S','Zs·Ia <= U0',d.tn.ok?'Cumple':'No cumple'); add('A · TT','Tensión carcasa (V)',nf(d.tt.Uc,0));
   rows().forEach(r=>{ const w=st.method==='w'; add('B · registro',w?`a=${r.a} m`:`L=${r.L} m; l=${r.l} m`,`R=${r.R} ohm; rho_a=${nfa(rowRho(r))} ohm·m`); });
   add('B','rho1 (ohm·m)',nf(d.m.r1,1)); add('B','h1 (m)',nf(d.m.h,2)); add('B','rho2 (ohm·m)',nf(d.m.r2,1)); add('B','RMS (%)',nf(d.rms,1)); add('B','Tipo de SPT para rho_eq',TIPOS.find(x=>x.id===st.spt.tipo).t); add('B','rho_eq (ohm·m)',d.eq.err?'—':nf(d.eq.rho,1));
   { const T=TIPOS.find(x=>x.id===st.spt.tipo); add('C','Tipo de SPT',T.t); add('C','Configuración',d.sc.cfg); add('C','R tipo adoptado (ohm)',nf(d.sc.R,2)); add('C','GPR tipo adoptado (V)',nf(d.sc.GPR,0)); }
-  add('C','IG (A)',nf(mc.IG,0)); add('C','Conductor',mc.cond[0]); add('C','Lx x Ly (m)',`${m.Lx} x ${m.Ly}`); add('C','D (m)',nf(mc.D,2)); add('C','Barras',mc.nR?`${mc.nR} x ${m.Lr} m`:'0'); add('C','LT (m)',nf(mc.LT,1));
+  add('C','Tierra calculada',gLargo()); add('C','Criterio R max (ohm)',fmtL(rLim())); add('C','IG (A)',nf(mc.IG,0)); add('C','Conductor',mc.cond[0]); add('C','Lx x Ly (m)',`${m.Lx} x ${m.Ly}`); add('C','D (m)',nf(mc.D,2)); add('C','Barras',mc.nR?`${mc.nR} x ${m.Lr} m`:'0'); add('C','LT (m)',nf(mc.LT,1));
   add('C','Rg Laurent (ohm)',nf(mc.Rl,2)); add('C','Rg Sverak (ohm)',nf(mc.Rg,2)); add('C','E contacto (V)',nf(mc.Et,0)); add('C','E paso (V)',nf(mc.Ep,0)); add('C','GPR (V)',nf(mc.GPR,0)); add('C','Em (V)',nf(mc.Em,0)); add('C','Es (V)',nf(mc.Es,0));
+  { const r=adCalc(), T=cotTotals(), A=cpAnalysis(); add('D','Aditivo',(ADT.find(x=>x.k===st.adt.tipo)||{}).t+(st.adt.use?' (incluido)':' (no incluido)')); add('D','R SPT con aditivo (ohm)',nf(r.Rt,2)); add('D','Volumen aditivo (m3)',nf(r.vol,3));
+    T.R.forEach(x=>add('D · cotización',x.desc,`${x.q} ${x.un} x ${Math.round(x.pu||0)} = ${Math.round((x.q||0)*(x.pu||0))}`)); add('D','Total cotización con IVA',Math.round(T.total));
+    st.med.rows.forEach(x=>add('D · caída de potencial',`x=${x.x} m`,`R1=${x.r1}; R2=${x.r2}`)); add('D','R medida 62 % (ohm)',nf(A.Rm,2));
+    st.pz.rows.forEach(x=>add('D · dos pinzas',x.name||'',x.R)); }
   Object.keys(QS).forEach(k=>QS[k].forEach((qq,i)=>add('Respuestas',`${stepTag(k)}-${i+1} ${qq}`,(st.answers[k]||[])[i]||'')));
   return '﻿'+['"Sección";"Dato";"Valor"'].concat(L).join('\r\n');
 }
@@ -2108,7 +2853,7 @@ $('b-copy-rep').onclick=()=>{ const t=$('report').innerText; const done=()=>{$('
 function selectReport(){ const r=document.createRange(); r.selectNodeContents($('report')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); $('dl-msg').textContent='Texto seleccionado: cópialo con Ctrl+C (o Cmd+C).'; }
 
 /* ---------- inicio ---------- */
-buildNav(); showWho();
+buildNav(); showWho(); renderGTipo();
 ['spt-types','eq-types'].forEach(id=>{ $(id).innerHTML=TIPOS.map(T=>`<button data-tipo="${T.id}" aria-pressed="false"><svg viewBox="0 0 48 32" aria-hidden="true">${T.ico}</svg><span>${T.short}</span></button>`).join(''); $(id).addEventListener('click',e=>{ const b=e.target.closest('[data-tipo]'); if(b) setTipo(b.dataset.tipo); }); });
 $('b-spt-rhoeq').onclick=()=>{ const e=eqCalc(st.spt.tipo); if(!e.err){ st.malla.rho=+e.rho.toFixed(1); onMallaChange(); } };
 $('spt-cmp').addEventListener('click',e=>{ const b=e.target.closest('[data-tipo]'); if(b) setTipo(b.dataset.tipo); });
@@ -2124,7 +2869,7 @@ if(Object.keys(st.visited).length&&st.cur&&st.cur!=='inicio'){ st.last=st.cur; $
 const hid=location.hash.slice(1);
 go(idx(hid)>=0?hid:'inicio',{scroll:false});
 const redraw=()=>renderStep(st.cur);
-let rt; window.addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(()=>{ if(['a2','a3','a4','a5','b1','b3','c3','ctipo'].includes(st.cur)) redraw(); },120);});
+let rt; window.addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(()=>{ if(['a2','a3','a4','a5','a6','b1','b3','c3','ctipo','d1','d3','d4'].includes(st.cur)) redraw(); },120);});
 const mq=window.matchMedia('(prefers-color-scheme: dark)'); mq.addEventListener&&mq.addEventListener('change',redraw);
 new MutationObserver(redraw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
