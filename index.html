@@ -1,3 +1,10 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
 <title>Laboratorio de puesta a tierra</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
@@ -2074,12 +2081,24 @@ function csvData(){
   return '﻿'+['"Sección";"Dato";"Valor"'].concat(L).join('\r\n');
 }
 let dlApi=null, dlReady=false;
-(async()=>{ try{ dlApi=window.claude&&window.claude.use?await window.claude.use('downloads'):null; }catch(e){ dlApi=null; } dlReady=true; if(!dlApi) $('dl-msg').textContent='La descarga no está disponible en esta vista. Abre el laboratorio desde su enlace en claude.ai, o usa "Copiar informe como texto".'; })();
+(async()=>{ try{ dlApi=window.claude&&window.claude.use?await window.claude.use('downloads'):null; }catch(e){ dlApi=null; } dlReady=true; })();
+const MIME={pdf:'application/pdf',html:'text/html;charset=utf-8',csv:'text/csv;charset=utf-8'};
+function browserSave(filename,data){
+  const ext=filename.split('.').pop(), blob=data instanceof Blob?data:new Blob([data],{type:MIME[ext]||'application/octet-stream'});
+  const url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download=filename; a.rel='noopener'; a.style.display='none'; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ a.remove(); URL.revokeObjectURL(url); },60000);
+  notify(`Descarga iniciada: ${filename}. Revisa la carpeta de descargas del navegador.`);
+}
 async function doSave(filename,data){
-  if(!dlReady){ notify('Preparando la descarga, intenta de nuevo en unos segundos.'); return; }
-  if(!dlApi){ notify('La descarga no está disponible en esta vista. Abre el laboratorio desde su enlace en claude.ai.'); return; }
+  if(!dlReady){ for(let k=0;k<40&&!dlReady;k++) await new Promise(r=>setTimeout(r,250)); }
+  if(!dlApi){ browserSave(filename,data); return; }
+  const copy=data instanceof ArrayBuffer?data.slice(0):data;
   try{ await dlApi.save({filename,data}); notify(`Archivo guardado: ${filename}`); }
-  catch(err){ const c=err&&err.code; notify(c==='declined'?'Descarga cancelada.':c==='rate_limited'?'Ya hay una descarga pendiente; espera unos segundos.':'No se pudo descargar en esta vista.'); }
+  catch(err){ const c=err&&err.code;
+    if(c==='declined') notify('Descarga cancelada.');
+    else if(c==='rate_limited') notify('Ya hay una descarga pendiente; espera unos segundos.');
+    else browserSave(filename,copy); }
 }
 $('b-dl-html').onclick=()=>doSave(`informe_spt_${slug(st.id.equipo?'equipo_'+st.id.equipo:st.id.nombre)}.html`,reportDoc());
 $('b-dl-pdf').onclick=()=>makePDF('informe');
@@ -2115,3 +2134,6 @@ $('b-to-malla').onclick=()=>{ $('b-m-rhoeq').click(); go('c1'); };
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+</body>
+</html>
